@@ -1,0 +1,24 @@
+<mat-sidenav-container class="sidenav-container">
+
+  <mat-sidenav mode="side" [opened]="sidenavOpen()">
+    <div class="sidenav-header">
+      <mat-icon class="sidenav-logo">hub</mat-icon>
+      <span class="sidenav-brand">System</span>
+    </div>
+    <mat-divider />
+    <app-nav-menu />
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar class="toolbar">
+      <button mat-icon-button (click)="sidenavOpen.set(!sidenavOpen())" aria-label="Toggle menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span class="toolbar-title">Sistema de Inventario</span>
+    </mat-toolbar>
+    <main class="content">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

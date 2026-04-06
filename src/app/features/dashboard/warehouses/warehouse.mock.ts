@@ -1,0 +1,68 @@
+import { Warehouse } from '../../../core/models/warehouse.model';
+
+export const WAREHOUSE_MOCK: Warehouse[] = [
+  {
+    id: 'wh000001-0000-4000-8000-000000000001',
+    name: 'Almacén Principal',
+    description: 'Almacén central del taller donde se almacenan repuestos generales de alta rotación y productos de uso frecuente.',
+    state: 'ACTIVE',
+    createdAt: new Date('2024-01-05'),
+    updatedAt: new Date('2024-09-10'),
+  },
+  {
+    id: 'wh000002-0000-4000-8000-000000000002',
+    name: 'Almacén de Lubricantes',
+    description: 'Espacio exclusivo para aceites de motor, lubricantes de transmisión, grasas y fluidos hidráulicos. Cuenta con estantería especializada y temperatura controlada.',
+    state: 'ACTIVE',
+    createdAt: new Date('2024-01-10'),
+    updatedAt: new Date('2024-08-22'),
+  },
+  {
+    id: 'wh000003-0000-4000-8000-000000000003',
+    name: 'Almacén de Repuestos Eléctricos',
+    description: 'Área destinada a bujías, cables de borda, sensores, alternadores, relés y demás componentes eléctricos y electrónicos automotrices.',
+    state: 'ACTIVE',
+    createdAt: new Date('2024-02-01'),
+    updatedAt: new Date('2024-10-05'),
+  },
+  {
+    id: 'wh000004-0000-4000-8000-000000000004',
+    name: 'Almacén de Neumáticos',
+    description: 'Almacén vertical con capacidad para más de 200 neumáticos de distintas medidas, llantas de acero y accesorios de ruedas.',
+    state: 'ACTIVE',
+    createdAt: new Date('2024-02-15'),
+    updatedAt: new Date('2024-07-30'),
+  },
+  {
+    id: 'wh000005-0000-4000-8000-000000000005',
+    name: 'Almacén de Herramientas',
+    description: 'Gabinete y estantería para herramientas manuales, eléctricas y neumáticas de uso en taller. Incluye herramientas de diagnóstico y equipos de medición.',
+    state: 'ACTIVE',
+    createdAt: new Date('2024-03-01'),
+    updatedAt: new Date('2024-11-08'),
+  },
+  {
+    id: 'wh000006-0000-4000-8000-000000000006',
+    name: 'Almacén de Frenos y Suspensión',
+    description: 'Área de almacenamiento para pastillas de freno, discos, amortiguadores, muelles, rótulas y componentes de dirección.',
+    state: 'ACTIVE',
+    createdAt: new Date('2024-03-20'),
+    updatedAt: new Date('2024-09-25'),
+  },
+  {
+    id: 'wh000007-0000-4000-8000-000000000007',
+    name: 'Depósito Exterior',
+    description: 'Área techada exterior para piezas grandes como parachoques, puertas, escape, mofles y materiales de carrocería de baja rotación.',
+    state: 'INACTIVE',
+    createdAt: new Date('2024-04-10'),
+    updatedAt: new Date('2024-06-15'),
+  },
+  {
+    id: 'wh000008-0000-4000-8000-000000000008',
+    name: 'Almacén de Filtros y Consumibles',
+    description: 'Espacio dedicado a filtros de aire, aceite, combustible y habitáculo, así como cintas, adhesivos, limpiadores y productos de detailing.',
+    state: 'ACTIVE',
+    createdAt: new Date('2024-05-05'),
+    updatedAt: new Date('2024-10-18'),
+  },
+];

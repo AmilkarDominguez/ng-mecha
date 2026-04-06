@@ -1,0 +1,223 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'add_circle' }}</mat-icon>
+  {{ isEditMode ? 'Editar Canal' : 'Nueva Canal' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <!-- Sección: Identificación -->
+    <div class="section-header field-full">
+      <mat-icon>view_week</mat-icon>
+      <span>Identificación</span>
+    </div>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Código Canal</mat-label>
+      <input matInput formControlName="carcassCode" placeholder="Ej. CAN-2026-03-0001" />
+      <mat-icon matSuffix>tag</mat-icon>
+      @if (getFieldError('carcassCode')) {
+        <mat-error>{{ getFieldError('carcassCode') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>ID Registro de Faena</mat-label>
+      <input matInput formControlName="slaughterRecordId" placeholder="Ej. sr-0001-..." />
+      <mat-icon matSuffix>link</mat-icon>
+      @if (getFieldError('slaughterRecordId')) {
+        <mat-error>{{ getFieldError('slaughterRecordId') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Etiqueta del Animal</mat-label>
+      <input matInput formControlName="animalTag" placeholder="Ej. FR-26-03-001-MG-001" />
+      <mat-icon matSuffix>label</mat-icon>
+      @if (getFieldError('animalTag')) {
+        <mat-error>{{ getFieldError('animalTag') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>N° de Lote</mat-label>
+      <input matInput formControlName="lotNumber" placeholder="Ej. FR-26-03-001" />
+      <mat-icon matSuffix>inventory_2</mat-icon>
+      @if (getFieldError('lotNumber')) {
+        <mat-error>{{ getFieldError('lotNumber') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Ganadero</mat-label>
+      <input matInput formControlName="rancher" placeholder="Nombre del ganadero o empresa" />
+      <mat-icon matSuffix>person</mat-icon>
+      @if (getFieldError('rancher')) {
+        <mat-error>{{ getFieldError('rancher') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Raza</mat-label>
+      <mat-select formControlName="breed">
+        @for (b of breedOptions; track b) {
+          <mat-option [value]="b">{{ b }}</mat-option>
+        }
+      </mat-select>
+      @if (getFieldError('breed')) {
+        <mat-error>{{ getFieldError('breed') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Sexo</mat-label>
+      <mat-select formControlName="gender">
+        @for (g of genderOptions; track g) {
+          <mat-option [value]="g">{{ g }}</mat-option>
+        }
+      </mat-select>
+      @if (getFieldError('gender')) {
+        <mat-error>{{ getFieldError('gender') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Sección: Fechas -->
+    <div class="section-header field-full">
+      <mat-icon>calendar_today</mat-icon>
+      <span>Fechas</span>
+    </div>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Fecha de Faena</mat-label>
+      <input matInput [matDatepicker]="pickerSlaughter" formControlName="slaughterDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="pickerSlaughter" />
+      <mat-datepicker #pickerSlaughter />
+      @if (getFieldError('slaughterDate')) {
+        <mat-error>{{ getFieldError('slaughterDate') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Fecha Ingreso Cámara</mat-label>
+      <input matInput [matDatepicker]="pickerEntry" formControlName="entryDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="pickerEntry" />
+      <mat-datepicker #pickerEntry />
+      @if (getFieldError('entryDate')) {
+        <mat-error>{{ getFieldError('entryDate') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Fecha Salida</mat-label>
+      <input matInput [matDatepicker]="pickerExit" formControlName="exitDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="pickerExit" />
+      <mat-datepicker #pickerExit />
+    </mat-form-field>
+
+    <!-- Sección: Pesos y Maduración -->
+    <div class="section-header field-full">
+      <mat-icon>scale</mat-icon>
+      <span>Pesos y Maduración</span>
+    </div>
+
+    <mat-form-field appearance="outline" class="field-quarter">
+      <mat-label>Peso Caliente (kg)</mat-label>
+      <input matInput type="number" formControlName="hotWeight" placeholder="Ej. 248.5" />
+      <mat-icon matSuffix>monitor_weight</mat-icon>
+      @if (getFieldError('hotWeight')) {
+        <mat-error>{{ getFieldError('hotWeight') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-quarter">
+      <mat-label>Peso Frío (kg)</mat-label>
+      <input matInput type="number" formControlName="coldWeight" placeholder="Ej. 232.1" />
+      <mat-icon matSuffix>ac_unit</mat-icon>
+      @if (getFieldError('coldWeight')) {
+        <mat-error>{{ getFieldError('coldWeight') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-quarter">
+      <mat-label>Rendimiento (%)</mat-label>
+      <input matInput type="number" formControlName="yieldPercentage" placeholder="Ej. 56.4" />
+      <mat-icon matSuffix>percent</mat-icon>
+      @if (getFieldError('yieldPercentage')) {
+        <mat-error>{{ getFieldError('yieldPercentage') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-quarter">
+      <mat-label>Días Maduración</mat-label>
+      <input matInput type="number" formControlName="maturationDays" placeholder="Ej. 5" />
+      <mat-icon matSuffix>hourglass_empty</mat-icon>
+      @if (getFieldError('maturationDays')) {
+        <mat-error>{{ getFieldError('maturationDays') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Sección: Trazabilidad -->
+    <div class="section-header field-full">
+      <mat-icon>qr_code_2</mat-icon>
+      <span>Trazabilidad y Estado</span>
+    </div>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Código Etiqueta 2</mat-label>
+      <input matInput formControlName="label2Code" placeholder="Ej. QR-2026-03-0001" />
+      <mat-icon matSuffix>qr_code</mat-icon>
+      @if (getFieldError('label2Code')) {
+        <mat-error>{{ getFieldError('label2Code') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Código Etiqueta 3</mat-label>
+      <input matInput formControlName="label3Code" placeholder="Ej. DES-2026-03-0001" />
+      <mat-icon matSuffix>qr_code_scanner</mat-icon>
+      @if (getFieldError('label3Code')) {
+        <mat-error>{{ getFieldError('label3Code') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Cámara Asignada</mat-label>
+      <input matInput formControlName="coldRoomAssigned" placeholder="Ej. Cámara A-1" />
+      <mat-icon matSuffix>ac_unit</mat-icon>
+      @if (getFieldError('coldRoomAssigned')) {
+        <mat-error>{{ getFieldError('coldRoomAssigned') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="status">
+        @for (opt of statusOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+      @if (getFieldError('status')) {
+        <mat-error>{{ getFieldError('status') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Observaciones</mat-label>
+      <textarea matInput formControlName="observations" rows="2"
+        placeholder="Observaciones adicionales sobre la canal..."></textarea>
+      <mat-icon matSuffix>notes</mat-icon>
+      @if (getFieldError('observations')) {
+        <mat-error>{{ getFieldError('observations') }}</mat-error>
+      }
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

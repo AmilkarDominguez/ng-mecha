@@ -1,0 +1,85 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'local_shipping' }}</mat-icon>
+  {{ isEditMode ? 'Editar Transportista' : 'Nuevo Transportista' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Nombre / Razón Social</mat-label>
+      <input matInput formControlName="businessName" placeholder="Ej. Transportes El Ganadero S.R.L." />
+      <mat-icon matSuffix>business</mat-icon>
+      @if (getFieldError('businessName')) {
+        <mat-error>{{ getFieldError('businessName') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>NIT / CI</mat-label>
+      <input matInput formControlName="taxId" placeholder="Ej. 10234567" />
+      <mat-icon matSuffix>badge</mat-icon>
+      @if (getFieldError('taxId')) {
+        <mat-error>{{ getFieldError('taxId') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>N.° Licencia de Conducir</mat-label>
+      <input matInput formControlName="licenseNumber" placeholder="Ej. LP-A-123456" />
+      <mat-icon matSuffix>credit_card</mat-icon>
+      @if (getFieldError('licenseNumber')) {
+        <mat-error>{{ getFieldError('licenseNumber') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="phone" placeholder="Ej. +591 76543210" />
+      <mat-icon matSuffix>phone</mat-icon>
+      @if (getFieldError('phone')) {
+        <mat-error>{{ getFieldError('phone') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Correo Electrónico</mat-label>
+      <input matInput formControlName="email" type="email" placeholder="Ej. contacto@transporte.bo" />
+      <mat-icon matSuffix>email</mat-icon>
+      @if (getFieldError('email')) {
+        <mat-error>{{ getFieldError('email') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Placa del Vehículo</mat-label>
+      <input matInput formControlName="vehiclePlate" placeholder="Ej. 2345-SCZ" />
+      <mat-icon matSuffix>directions_car</mat-icon>
+      @if (getFieldError('vehiclePlate')) {
+        <mat-error>{{ getFieldError('vehiclePlate') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Tipo de Vehículo</mat-label>
+      <input matInput formControlName="vehicleType" placeholder="Ej. Camión jaula doble piso" />
+      <mat-icon matSuffix>local_shipping</mat-icon>
+      @if (getFieldError('vehicleType')) {
+        <mat-error>{{ getFieldError('vehicleType') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-full">
+      <mat-checkbox formControlName="isActive" color="primary">Transportista activo</mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

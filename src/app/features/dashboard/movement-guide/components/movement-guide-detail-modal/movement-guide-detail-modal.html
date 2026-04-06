@@ -1,0 +1,108 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">description</mat-icon>
+  Detalle de Guía de Movimiento
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-card printable">
+
+    <div class="detail-header">
+      <div class="guide-id-block">
+        <span class="guide-label">N.° de Guía SENASAG</span>
+        <span class="guide-number">{{ guide.guideNumber }}</span>
+      </div>
+      <span class="status-chip" [class]="statusClass(guide.status)">
+        {{ statusLabel(guide.status) }}
+      </span>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <div class="section-title">Fechas</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="item-label">Fecha de Emisión</span>
+          <span class="item-value">{{ guide.issueDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Fecha de Vencimiento</span>
+          <span class="item-value">{{ guide.expiryDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Registrado el</span>
+          <span class="item-value">{{ guide.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Última actualización</span>
+          <span class="item-value">{{ guide.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <div class="section-title">Partes Involucradas</div>
+      <div class="detail-grid">
+        <div class="detail-item detail-item-full">
+          <span class="item-label">Ganadero / Propietario</span>
+          <span class="item-value">{{ guide.rancher }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Transportista</span>
+          <span class="item-value">{{ guide.carrier }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Placa del Vehículo</span>
+          <span class="item-value plate-value">{{ guide.vehiclePlate }}</span>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <div class="section-title">Origen y Destino</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="item-label">Lugar de Origen</span>
+          <span class="item-value">{{ guide.originLocation }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Lugar de Destino</span>
+          <span class="item-value">{{ guide.destinationLocation }}</span>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <div class="section-title">Carga</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="item-label">Cantidad de Animales</span>
+          <span class="item-value animal-count">{{ guide.animalCount }} cabezas</span>
+        </div>
+      </div>
+    </div>
+
+    @if (guide.observations) {
+      <mat-divider />
+      <div class="detail-section">
+        <div class="section-title">Observaciones</div>
+        <p class="observations-text">{{ guide.observations }}</p>
+      </div>
+    }
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-flat-button color="primary" (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

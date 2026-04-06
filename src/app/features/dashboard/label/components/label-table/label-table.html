@@ -1,0 +1,105 @@
+<div class="table-wrapper">
+  <table mat-table [dataSource]="dataSource" matSort class="label-table">
+
+    <!-- Column: labelCode -->
+    <ng-container matColumnDef="labelCode">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Código Etiqueta</th>
+      <td mat-cell *matCellDef="let row" class="cell-code">{{ row.labelCode }}</td>
+    </ng-container>
+
+    <!-- Column: labelType -->
+    <ng-container matColumnDef="labelType">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="type-badge"
+          [class.type-label1]="row.labelType === 'etiqueta_1'"
+          [class.type-label2]="row.labelType === 'etiqueta_2'"
+          [class.type-label3]="row.labelType === 'etiqueta_3'">
+          {{ labelTypeDisplay(row.labelType) }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Column: printedAt -->
+    <ng-container matColumnDef="printedAt">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Impresión</th>
+      <td mat-cell *matCellDef="let row">{{ row.printedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+    </ng-container>
+
+    <!-- Column: animalTag -->
+    <ng-container matColumnDef="animalTag">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Etiqueta Animal</th>
+      <td mat-cell *matCellDef="let row" class="cell-tag">{{ row.animalTag }}</td>
+    </ng-container>
+
+    <!-- Column: rancher -->
+    <ng-container matColumnDef="rancher">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Ganadero</th>
+      <td mat-cell *matCellDef="let row">{{ row.rancher }}</td>
+    </ng-container>
+
+    <!-- Column: weight -->
+    <ng-container matColumnDef="weight">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Peso (kg)</th>
+      <td mat-cell *matCellDef="let row" class="cell-weight">
+        {{ row.weight !== null ? (row.weight | number: '1.1-1') : '—' }}
+      </td>
+    </ng-container>
+
+    <!-- Column: printedBy -->
+    <ng-container matColumnDef="printedBy">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Impreso por</th>
+      <td mat-cell *matCellDef="let row">{{ row.printedBy }}</td>
+    </ng-container>
+
+    <!-- Column: status -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="status-badge"
+          [class.status-printed]="row.status === 'impresa'"
+          [class.status-voided]="row.status === 'anulada'"
+          [class.status-reprinted]="row.status === 'reimpresa'">
+          {{ statusLabel(row.status) }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Column: actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="col-actions">Acciones</th>
+      <td mat-cell *matCellDef="let row" class="col-actions">
+        <button mat-icon-button color="primary" matTooltip="Ver detalle" (click)="view.emit(row)">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Editar" (click)="edit.emit(row)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Editar" (click)="print.emit(row)">
+          <mat-icon>print</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="delete.emit(row)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+    <tr class="mat-mdc-row" *matNoDataRow>
+      <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+        <mat-icon>search_off</mat-icon>
+        <span>No se encontraron etiquetas</span>
+      </td>
+    </tr>
+
+  </table>
+
+  <mat-paginator
+    [pageSizeOptions]="[5, 10, 25]"
+    [pageSize]="10"
+    showFirstLastButtons
+    aria-label="Paginación de etiquetas">
+  </mat-paginator>
+</div>

@@ -1,0 +1,56 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">wc</mat-icon>
+  Detalle de Sexo
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <div class="detail-header">
+      <div class="detail-header-left">
+        <span class="code-badge">{{ gender.code }}</span>
+        <div class="detail-name">{{ gender.name }}</div>
+      </div>
+      <mat-chip-set>
+        <mat-chip [class]="gender.isActive ? 'chip-active' : 'chip-inactive'">
+          <mat-icon matChipAvatar>{{ gender.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
+          {{ gender.isActive ? 'Activo' : 'Inactivo' }}
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <span class="detail-label">Descripción</span>
+      <span class="detail-value">{{ gender.description }}</span>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-dates">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ gender.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ gender.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ gender.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

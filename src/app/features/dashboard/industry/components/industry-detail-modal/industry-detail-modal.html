@@ -1,0 +1,60 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">factory</mat-icon>
+  Detalle de Industria
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <div class="detail-header">
+      <div class="detail-name">{{ industry.name }}</div>
+      <span class="state-badge"
+        [class.state-active]="industry.state === 'ACTIVE'"
+        [class.state-inactive]="industry.state === 'INACTIVE'">
+        <mat-icon class="state-icon">{{ industry.state === 'ACTIVE' ? 'check_circle' : 'cancel' }}</mat-icon>
+        {{ industry.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+      </span>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <span class="detail-label">Slug</span>
+      <span class="detail-value detail-slug">{{ industry.slug }}</span>
+    </div>
+
+    @if (industry.description) {
+      <div class="detail-section">
+        <span class="detail-label">Descripción</span>
+        <span class="detail-value">{{ industry.description }}</span>
+      </div>
+    }
+
+    <mat-divider />
+
+    <div class="detail-dates">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ industry.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ industry.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ industry.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

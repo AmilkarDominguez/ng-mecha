@@ -1,0 +1,56 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'branding_watermark' }}</mat-icon>
+  {{ isEditMode ? 'Editar Marca' : 'Nueva Marca' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Nombre de la Marca</mat-label>
+      <input matInput formControlName="name" placeholder="Ej. Bosch, NGK, Castrol" />
+      <mat-icon matSuffix>branding_watermark</mat-icon>
+      @if (getFieldError('name')) {
+        <mat-error>{{ getFieldError('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Calificación</mat-label>
+      <mat-select formControlName="score">
+        <mat-option [value]="null">Sin calificación</mat-option>
+        @for (s of scoreOptions; track s) {
+          <mat-option [value]="s">{{ s }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matSuffix>star</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Estado</mat-label>
+      <mat-select formControlName="state">
+        <mat-option value="ACTIVE">Activo</mat-option>
+        <mat-option value="INACTIVE">Inactivo</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="3"
+        placeholder="Ej. Marca alemana especializada en repuestos eléctricos y herramientas automotrices."></textarea>
+      <mat-icon matSuffix>description</mat-icon>
+      @if (getFieldError('description')) {
+        <mat-error>{{ getFieldError('description') }}</mat-error>
+      }
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

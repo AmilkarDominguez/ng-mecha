@@ -1,0 +1,30 @@
+<div class="presentation-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Presentaciones de Producto</h1>
+      <span class="page-subtitle">Unidades y formatos de presentación para los productos del taller</span>
+    </div>
+    <button mat-flat-button color="primary" class="add-button" (click)="openCreateModal()">
+      <mat-icon>add_circle</mat-icon>
+      Nueva Presentación
+    </button>
+  </div>
+
+  <div class="toolbar-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar presentación</mat-label>
+      <input matInput (input)="onSearch($event)" placeholder="Nombre, código, slug o descripción..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <span class="result-count">{{ filteredPresentations().length }} resultado(s)</span>
+  </div>
+
+  <app-product-presentation-table
+    [data]="filteredPresentations()"
+    (edit)="onEdit($event)"
+    (view)="onView($event)"
+    (delete)="onDelete($event)"
+  />
+
+</div>

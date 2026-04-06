@@ -1,0 +1,20 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">warning</mat-icon>
+  Confirmar Eliminación
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <p class="confirm-message">
+    ¿Está seguro de que desea eliminar el registro de faena <strong>{{ record.recordNumber }}</strong>?
+  </p>
+  <p class="confirm-detail">Animal: {{ record.animalTag }} — Ganadero: {{ record.rancher }}</p>
+  <p class="confirm-warning">Esta acción no se puede deshacer.</p>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="warn" (click)="onConfirm()">
+    <mat-icon>delete</mat-icon>
+    Eliminar
+  </button>
+</mat-dialog-actions>

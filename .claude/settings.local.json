@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"D:\\\\angular\\\\21\\\\trace_sys\" -name \"entities.md\" -o -name \"*.md\" 2>/dev/null | head -10)",
+      "Bash(npx ng:*)",
+      "Bash(cmd /c \"npx ng build --configuration development 2>&1\" | tail -50)",
+      "Bash(node_modules/.bin/ng build:*)",
+      "Bash(\"/c/Users/Amilk/AppData/Local/nvs/node\" --version 2>/dev/null || ls \"/c/Users/Amilk/AppData/Local/nvs/node\" 2>/dev/null | head -5)",
+      "Bash(NODE=\"/c/Users/Amilk/AppData/Local/nvs/node/22.22.0/x64/node.exe\" && \"$NODE\" --version && \"$NODE\" node_modules/@angular/cli/bin/ng.js build --configuration development 2>&1 | tail -60)",
+      "Bash(cmd /c \"C:\\\\Users\\\\Amilk\\\\AppData\\\\Local\\\\nvs\\\\node\\\\22.22.0\\\\x64\\\\node.exe node_modules\\\\@angular\\\\cli\\\\bin\\\\ng.js build --configuration development 2>&1\" | tail -60)",
+      "Bash(cmd /c \"set PATH=C:\\\\Users\\\\Amilk\\\\AppData\\\\Local\\\\nvs\\\\node\\\\22.22.0\\\\x64;%PATH% && node --version && ng build --configuration development\" 2>&1 | tail -60)",
+      "Bash(cmd /c \"set PATH=C:\\\\Users\\\\Amilk\\\\AppData\\\\Local\\\\nvs\\\\node\\\\22.22.0\\\\x64;%PATH% && node --version && ng build --configuration development 2>&1 && echo BUILD_OK || echo BUILD_FAIL\" 2>&1)",
+      "Bash(find src:*)"
+    ]
+  }
+}

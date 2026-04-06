@@ -1,0 +1,55 @@
+.warehouse-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--mat-sys-primary);
+}
+
+.page-subtitle {
+  font-size: 0.875rem;
+  color: #757575;
+}
+
+.add-button {
+  white-space: nowrap;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 16rem;
+  max-width: 28rem;
+}
+
+.result-count {
+  font-size: 0.875rem;
+  color: #757575;
+  white-space: nowrap;
+}

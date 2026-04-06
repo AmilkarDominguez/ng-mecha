@@ -1,0 +1,30 @@
+<div class="gender-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Sexo</h1>
+      <span class="page-subtitle">Catálogo de tipos de sexo del ganado registrados en el sistema</span>
+    </div>
+    <button mat-flat-button color="primary" class="add-button" (click)="openCreateModal()">
+      <mat-icon>add</mat-icon>
+      Nuevo Sexo
+    </button>
+  </div>
+
+  <div class="toolbar-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar sexo</mat-label>
+      <input matInput (input)="onSearch($event)" placeholder="Nombre, código o descripción..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <span class="result-count">{{ filteredGenders().length }} resultado(s)</span>
+  </div>
+
+  <app-gender-table
+    [data]="filteredGenders()"
+    (edit)="onEdit($event)"
+    (view)="onView($event)"
+    (delete)="onDelete($event)"
+  />
+
+</div>

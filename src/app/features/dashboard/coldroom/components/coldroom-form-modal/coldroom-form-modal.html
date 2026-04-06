@@ -1,0 +1,85 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'ac_unit' }}</mat-icon>
+  {{ isEditMode ? 'Editar Cámara' : 'Nueva Cámara de Frío' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-two-thirds">
+      <mat-label>Nombre de la Cámara</mat-label>
+      <input matInput formControlName="name" placeholder="Ej. Cámara Principal A" />
+      <mat-icon matSuffix>ac_unit</mat-icon>
+      @if (getFieldError('name')) {
+        <mat-error>{{ getFieldError('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-one-third">
+      <mat-label>Código</mat-label>
+      <input matInput formControlName="code" placeholder="Ej. CAM-A" style="text-transform: uppercase" />
+      <mat-icon matSuffix>tag</mat-icon>
+      @if (getFieldError('code')) {
+        <mat-error>{{ getFieldError('code') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Ubicación</mat-label>
+      <input matInput formControlName="location" placeholder="Ej. Planta Baja - Sector Norte" />
+      <mat-icon matSuffix>location_on</mat-icon>
+      @if (getFieldError('location')) {
+        <mat-error>{{ getFieldError('location') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Capacidad (canales)</mat-label>
+      <input matInput type="number" formControlName="capacity" placeholder="Ej. 120" min="1" />
+      <mat-icon matSuffix>straighten</mat-icon>
+      @if (getFieldError('capacity')) {
+        <mat-error>{{ getFieldError('capacity') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Ocupación actual (canales)</mat-label>
+      <input matInput type="number" formControlName="currentOccupancy" placeholder="Ej. 0" min="0" />
+      <mat-icon matSuffix>inventory</mat-icon>
+      @if (getFieldError('currentOccupancy')) {
+        <mat-error>{{ getFieldError('currentOccupancy') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Temperatura mínima (°C)</mat-label>
+      <input matInput type="number" formControlName="minTemperature" placeholder="Ej. -2" />
+      <mat-icon matSuffix>thermostat</mat-icon>
+      @if (getFieldError('minTemperature')) {
+        <mat-error>{{ getFieldError('minTemperature') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Temperatura máxima (°C)</mat-label>
+      <input matInput type="number" formControlName="maxTemperature" placeholder="Ej. 2" />
+      <mat-icon matSuffix>thermostat</mat-icon>
+      @if (getFieldError('maxTemperature')) {
+        <mat-error>{{ getFieldError('maxTemperature') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-full">
+      <mat-checkbox formControlName="isActive" color="primary">Cámara activa</mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

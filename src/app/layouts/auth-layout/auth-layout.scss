@@ -1,0 +1,36 @@
+.login-layout::after {
+  content: "";
+  width: 30%;
+  height: 100%;
+  filter: blur(12rem);
+  opacity: 0.6;
+  background-image: linear-gradient(to bottom, #69FFC0, #357CFE);
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 0 60% 60% 0;
+}
+
+.login-layout::before {
+  content: "";
+  width: 30%;
+  height: 100%;
+  bottom: 0;
+  right: 0;
+  filter: blur(12rem);
+  opacity: 0.6;
+  background-image: linear-gradient(to top, #69FFC0, #357CFE);
+  position: absolute;
+  border-radius: 60% 0 0 60%;
+}
+
+.login-layout {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #080114;
+}

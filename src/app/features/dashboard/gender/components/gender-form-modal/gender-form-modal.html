@@ -1,0 +1,51 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'wc' }}</mat-icon>
+  {{ isEditMode ? 'Editar Sexo' : 'Nuevo Sexo' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" placeholder="Ej. Macho" />
+      <mat-icon matSuffix>wc</mat-icon>
+      @if (getFieldError('name')) {
+        <mat-error>{{ getFieldError('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Código</mat-label>
+      <input matInput formControlName="code" placeholder="Ej. M" style="text-transform: uppercase" maxlength="5" />
+      <mat-icon matSuffix>tag</mat-icon>
+      <mat-hint>Solo mayúsculas, máx. 5 caracteres</mat-hint>
+      @if (getFieldError('code')) {
+        <mat-error>{{ getFieldError('code') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="3"
+        placeholder="Ej. Animal de sexo masculino entero, no castrado..."></textarea>
+      <mat-icon matSuffix>description</mat-icon>
+      @if (getFieldError('description')) {
+        <mat-error>{{ getFieldError('description') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-full">
+      <mat-checkbox formControlName="isActive" color="primary">Registro activo</mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

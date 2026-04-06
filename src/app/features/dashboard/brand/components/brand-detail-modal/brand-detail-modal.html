@@ -1,0 +1,62 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">branding_watermark</mat-icon>
+  Detalle de Marca
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <div class="detail-header">
+      <div class="detail-name">{{ brand.name ?? '—' }}</div>
+      <span class="state-badge"
+        [class.state-active]="brand.state === 'ACTIVE'"
+        [class.state-inactive]="brand.state === 'INACTIVE'">
+        <mat-icon class="state-icon">{{ brand.state === 'ACTIVE' ? 'check_circle' : 'cancel' }}</mat-icon>
+        {{ brand.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+      </span>
+    </div>
+
+    <mat-divider />
+
+    @if (brand.score) {
+      <div class="detail-section">
+        <span class="detail-label">Calificación</span>
+        <span class="detail-value detail-score">{{ brand.score }}</span>
+      </div>
+    }
+
+    @if (brand.description) {
+      <div class="detail-section detail-section-full">
+        <span class="detail-label">Descripción</span>
+        <span class="detail-value">{{ brand.description }}</span>
+      </div>
+    }
+
+    <mat-divider />
+
+    <div class="detail-dates">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ brand.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ brand.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ brand.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,30 @@
+<div class="supplier-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Proveedores</h1>
+      <span class="page-subtitle">Empresas y distribuidores que abastecen al taller</span>
+    </div>
+    <button mat-flat-button color="primary" class="add-button" (click)="openCreateModal()">
+      <mat-icon>add_business</mat-icon>
+      Nuevo Proveedor
+    </button>
+  </div>
+
+  <div class="toolbar-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar proveedor</mat-label>
+      <input matInput (input)="onSearch($event)" placeholder="Nombre, correo, dirección o descripción..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <span class="result-count">{{ filteredSuppliers().length }} resultado(s)</span>
+  </div>
+
+  <app-supplier-table
+    [data]="filteredSuppliers()"
+    (edit)="onEdit($event)"
+    (view)="onView($event)"
+    (delete)="onDelete($event)"
+  />
+
+</div>

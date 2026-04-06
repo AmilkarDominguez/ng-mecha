@@ -1,0 +1,80 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'fence' }}</mat-icon>
+  {{ isEditMode ? 'Editar Corral' : 'Nuevo Corral' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-two-thirds">
+      <mat-label>Nombre del Corral</mat-label>
+      <input matInput formControlName="name" placeholder="Ej. Corral de Espera A" />
+      <mat-icon matSuffix>fence</mat-icon>
+      @if (getFieldError('name')) {
+        <mat-error>{{ getFieldError('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-one-third">
+      <mat-label>Código</mat-label>
+      <input matInput formControlName="code" placeholder="Ej. ESP-A" style="text-transform: uppercase" />
+      <mat-icon matSuffix>tag</mat-icon>
+      @if (getFieldError('code')) {
+        <mat-error>{{ getFieldError('code') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Ubicación</mat-label>
+      <input matInput formControlName="location" placeholder="Ej. Sector Norte - Entrada Principal" />
+      <mat-icon matSuffix>location_on</mat-icon>
+      @if (getFieldError('location')) {
+        <mat-error>{{ getFieldError('location') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Tipo de Corral</mat-label>
+      <mat-select formControlName="type">
+        @for (t of penTypes; track t.value) {
+          <mat-option [value]="t.value">{{ t.label }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matSuffix>category</mat-icon>
+      @if (getFieldError('type')) {
+        <mat-error>{{ getFieldError('type') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Capacidad (animales)</mat-label>
+      <input matInput type="number" formControlName="capacity" placeholder="Ej. 80" min="1" />
+      <mat-icon matSuffix>straighten</mat-icon>
+      @if (getFieldError('capacity')) {
+        <mat-error>{{ getFieldError('capacity') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Ocupación actual (animales)</mat-label>
+      <input matInput type="number" formControlName="currentOccupancy" placeholder="Ej. 0" min="0" />
+      <mat-icon matSuffix>cruelty_free</mat-icon>
+      @if (getFieldError('currentOccupancy')) {
+        <mat-error>{{ getFieldError('currentOccupancy') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-full">
+      <mat-checkbox formControlName="isActive" color="primary">Corral activo</mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

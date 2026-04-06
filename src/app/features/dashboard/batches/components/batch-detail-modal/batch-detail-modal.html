@@ -1,0 +1,132 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">add_box</mat-icon>
+  Detalle de Lote
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <div class="detail-header">
+      <div class="detail-name">
+        @if (batch.code) {
+          <span class="detail-code">{{ batch.code }}</span>
+        }
+        {{ getProductName(batch.productId) }}
+      </div>
+      <span class="state-badge"
+        [class.state-active]="batch.state === 'ACTIVE'"
+        [class.state-inactive]="batch.state === 'INACTIVE'">
+        <mat-icon class="state-icon">{{ batch.state === 'ACTIVE' ? 'check_circle' : 'cancel' }}</mat-icon>
+        {{ batch.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+      </span>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section-group">
+      <div class="detail-section">
+        <span class="detail-label">Almacén</span>
+        <span class="detail-value">{{ getWarehouseName(batch.warehouseId) }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Proveedor</span>
+        <span class="detail-value">{{ getSupplierName(batch.supplierId) }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Industria / Procedencia</span>
+        <span class="detail-value">{{ getIndustryName(batch.industryId) }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Marca (Catálogo)</span>
+        <span class="detail-value">{{ getBrandName(batch.brandId) }}</span>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section-group">
+      @if (batch.brand) {
+        <div class="detail-section">
+          <span class="detail-label">Marca (Descripción)</span>
+          <span class="detail-value">{{ batch.brand }}</span>
+        </div>
+      }
+      @if (batch.model) {
+        <div class="detail-section">
+          <span class="detail-label">Modelo / Referencia</span>
+          <span class="detail-value">{{ batch.model }}</span>
+        </div>
+      }
+      <div class="detail-section">
+        <span class="detail-label">Stock</span>
+        <span class="detail-value" [class.stock-low]="(batch.stock ?? 0) < 10">
+          {{ batch.stock !== null ? (batch.stock | number) : '—' }}
+        </span>
+      </div>
+      @if (batch.expirationDate) {
+        <div class="detail-section">
+          <span class="detail-label">Fecha de Vencimiento</span>
+          <span class="detail-value">{{ batch.expirationDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+      }
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-prices">
+      <div class="detail-section">
+        <span class="detail-label">Precio Mayorista</span>
+        <span class="detail-value price-value">
+          {{ batch.wholesalePrice !== null ? 'Bs. ' + (batch.wholesalePrice | number:'1.2-2') : '—' }}
+        </span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Precio Minorista</span>
+        <span class="detail-value price-value">
+          {{ batch.retailPrice !== null ? 'Bs. ' + (batch.retailPrice | number:'1.2-2') : '—' }}
+        </span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Precio Final</span>
+        <span class="detail-value price-final">
+          {{ batch.finalPrice !== null ? 'Bs. ' + (batch.finalPrice | number:'1.2-2') : '—' }}
+        </span>
+      </div>
+    </div>
+
+    @if (batch.description) {
+      <mat-divider />
+      <div class="detail-section">
+        <span class="detail-label">Descripción</span>
+        <span class="detail-value">{{ batch.description }}</span>
+      </div>
+    }
+
+    <mat-divider />
+
+    <div class="detail-dates">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ batch.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ batch.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ batch.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

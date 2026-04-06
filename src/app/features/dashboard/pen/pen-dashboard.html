@@ -1,0 +1,30 @@
+<div class="pen-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Corrales</h1>
+      <span class="page-subtitle">Gestión de corrales para el alojamiento y manejo del ganado</span>
+    </div>
+    <button mat-flat-button color="primary" class="add-button" (click)="openCreateModal()">
+      <mat-icon>add</mat-icon>
+      Nuevo Corral
+    </button>
+  </div>
+
+  <div class="toolbar-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar corral</mat-label>
+      <input matInput (input)="onSearch($event)" placeholder="Nombre, código, ubicación o tipo..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <span class="result-count">{{ filteredPens().length }} resultado(s)</span>
+  </div>
+
+  <app-pen-table
+    [data]="filteredPens()"
+    (edit)="onEdit($event)"
+    (view)="onView($event)"
+    (delete)="onDelete($event)"
+  />
+
+</div>

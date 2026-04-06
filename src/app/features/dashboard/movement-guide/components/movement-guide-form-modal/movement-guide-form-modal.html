@@ -1,0 +1,116 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEdit ? 'edit' : 'add_circle' }}</mat-icon>
+  {{ isEdit ? 'Editar Guía de Movimiento' : 'Nueva Guía de Movimiento' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="guide-form">
+
+    <div class="form-section-title">Identificación</div>
+    <mat-divider />
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>N.° de Guía SENASAG</mat-label>
+        <input matInput formControlName="guideNumber" placeholder="Ej. GS-2026-001234" />
+        <mat-error>Requerido (máx. 30 caracteres)</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row form-row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de Emisión</mat-label>
+        <input matInput type="date" formControlName="issueDate" />
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha de Vencimiento</mat-label>
+        <input matInput type="date" formControlName="expiryDate" />
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-section-title" style="margin-top:1rem">Partes</div>
+    <mat-divider />
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Ganadero</mat-label>
+        <input matInput formControlName="rancher" placeholder="Nombre del ganadero o empresa" />
+        <mat-icon matSuffix>person</mat-icon>
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row form-row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Transportista</mat-label>
+        <input matInput formControlName="carrier" placeholder="Nombre del transportista" />
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Placa del Vehículo</mat-label>
+        <input matInput formControlName="vehiclePlate" placeholder="Ej. 2345-ABC" style="text-transform:uppercase" />
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-section-title" style="margin-top:1rem">Origen y Destino</div>
+    <mat-divider />
+
+    <div class="form-row form-row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Lugar de Origen</mat-label>
+        <input matInput formControlName="originLocation" placeholder="Municipio, departamento" />
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Lugar de Destino</mat-label>
+        <input matInput formControlName="destinationLocation" placeholder="Municipio, departamento" />
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-section-title" style="margin-top:1rem">Carga y Estado</div>
+    <mat-divider />
+
+    <div class="form-row form-row-2">
+      <mat-form-field appearance="outline">
+        <mat-label>Cantidad de Animales</mat-label>
+        <input matInput type="number" formControlName="animalCount" min="1" max="9999" />
+        <mat-icon matSuffix>pets</mat-icon>
+        <mat-error>Ingrese un número entre 1 y 9999</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="status">
+          @for (opt of statusOptions; track opt.value) {
+            <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-error>Requerido</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Observaciones</mat-label>
+        <textarea matInput formControlName="observations" rows="3" placeholder="Observaciones adicionales de la guía..."></textarea>
+        <mat-error>Máx. 500 caracteres</mat-error>
+      </mat-form-field>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEdit ? 'Actualizar' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

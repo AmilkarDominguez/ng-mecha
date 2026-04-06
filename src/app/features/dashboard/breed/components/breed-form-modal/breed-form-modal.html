@@ -1,0 +1,50 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'pets' }}</mat-icon>
+  {{ isEditMode ? 'Editar Raza' : 'Nueva Raza' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Nombre de la Raza</mat-label>
+      <input matInput formControlName="name" placeholder="Ej. Nelore" />
+      <mat-icon matSuffix>pets</mat-icon>
+      @if (getFieldError('name')) {
+        <mat-error>{{ getFieldError('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>País / Región de Origen</mat-label>
+      <input matInput formControlName="origin" placeholder="Ej. India / Brasil" />
+      <mat-icon matSuffix>public</mat-icon>
+      @if (getFieldError('origin')) {
+        <mat-error>{{ getFieldError('origin') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="4"
+        placeholder="Ej. Raza cebú de origen indio, ampliamente difundida en Bolivia..."></textarea>
+      <mat-icon matSuffix>description</mat-icon>
+      @if (getFieldError('description')) {
+        <mat-error>{{ getFieldError('description') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-full">
+      <mat-checkbox formControlName="isActive" color="primary">Raza activa</mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

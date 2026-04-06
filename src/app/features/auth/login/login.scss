@@ -1,0 +1,63 @@
+.form-login {
+  background-color: var(--mat-sys-surface);
+  border: solid 1px black;
+  padding: 4rem 5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  border-radius: 0.5rem;
+  gap: 1.25rem;
+  width: min(36rem, 92vw);
+  box-sizing: border-box;
+}
+
+.logo {
+  margin-bottom: 1rem;
+  width: clamp(8rem, 40vw, 12.1875rem);
+  height: auto;
+}
+
+.logo-banner {
+  font-size: clamp(1.25rem, 4vw, 1.8rem);
+  margin-bottom: 3rem;
+  font-weight: bold;
+  text-align: center;
+
+  span {
+    color: #147676;
+  }
+}
+
+.text {
+  text-align: left;
+  width: 100%;
+  margin-left: 0.4rem;
+}
+
+.input-container {
+  width: 100%;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.login-button {
+  width: 100%;
+  padding: 1.5rem;
+}
+
+@media (max-width: 30rem) {
+  .form-login {
+    padding: 2.5rem 1.5rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    width: 100vw;
+  }
+
+  .logo-banner {
+    margin-bottom: 1.5rem;
+  }
+}

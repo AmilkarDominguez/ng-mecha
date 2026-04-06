@@ -1,0 +1,34 @@
+<nav class="nav-menu">
+
+  <mat-nav-list class="nav-top-list">
+    <a mat-list-item routerLink="/dashboard" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }">
+      <mat-icon matListItemIcon>dashboard</mat-icon>
+      <span matListItemTitle>Dashboard</span>
+    </a>
+  </mat-nav-list>
+
+  <mat-divider />
+
+  <mat-accordion class="nav-accordion" multi>
+    @for (module of modules; track module.title) {
+      <mat-expansion-panel class="nav-panel">
+        <mat-expansion-panel-header class="nav-panel-header">
+          <mat-panel-title class="nav-panel-title">
+            <mat-icon class="nav-panel-icon">{{ module.icon }}</mat-icon>
+            <span>{{ module.title }}</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <mat-nav-list class="nav-sublist">
+          @for (item of module.items; track item.route) {
+            <a mat-list-item [routerLink]="item.route" routerLinkActive="active-link">
+              <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+              <span matListItemTitle>{{ item.label }}</span>
+            </a>
+          }
+        </mat-nav-list>
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+
+</nav>

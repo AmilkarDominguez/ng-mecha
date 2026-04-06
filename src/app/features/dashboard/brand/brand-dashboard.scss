@@ -1,0 +1,57 @@
+.brand-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.page-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+}
+
+.page-subtitle {
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #757575;
+}
+
+.add-button {
+  height: 2.75rem;
+  padding: 0 1.25rem;
+  white-space: nowrap;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 18rem;
+  max-width: 30rem;
+}
+
+.result-count {
+  font-size: 0.875rem;
+  color: #757575;
+  white-space: nowrap;
+}

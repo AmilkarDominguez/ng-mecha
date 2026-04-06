@@ -1,0 +1,78 @@
+<div class="table-wrapper">
+  <table mat-table [dataSource]="dataSource" matSort class="user-table">
+
+    <!-- Column: fullName -->
+    <ng-container matColumnDef="fullName">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre completo</th>
+      <td mat-cell *matCellDef="let row" class="cell-name">{{ fullName(row) }}</td>
+    </ng-container>
+
+    <!-- Column: username -->
+    <ng-container matColumnDef="username">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Usuario</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="username-badge">{{ row.username }}</span>
+      </td>
+    </ng-container>
+
+    <!-- Column: role -->
+    <ng-container matColumnDef="role">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Rol</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="role-badge" [class]="'role-' + row.role">
+          {{ roleLabel(row.role) }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Column: email -->
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Correo</th>
+      <td mat-cell *matCellDef="let row" class="cell-email">{{ row.email }}</td>
+    </ng-container>
+
+    <!-- Column: isActive -->
+    <ng-container matColumnDef="isActive">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="status-badge" [class.status-active]="row.isActive" [class.status-inactive]="!row.isActive">
+          {{ row.isActive ? 'Activo' : 'Inactivo' }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Column: actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="col-actions">Acciones</th>
+      <td mat-cell *matCellDef="let row" class="col-actions">
+        <button mat-icon-button color="primary" matTooltip="Ver detalle" (click)="view.emit(row)">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Editar" (click)="edit.emit(row)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="delete.emit(row)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+    <tr class="mat-mdc-row" *matNoDataRow>
+      <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+        <mat-icon>search_off</mat-icon>
+        <span>No se encontraron usuarios</span>
+      </td>
+    </tr>
+
+  </table>
+
+  <mat-paginator
+    [pageSizeOptions]="[5, 10, 25]"
+    [pageSize]="10"
+    showFirstLastButtons
+    aria-label="Paginación de usuarios">
+  </mat-paginator>
+</div>

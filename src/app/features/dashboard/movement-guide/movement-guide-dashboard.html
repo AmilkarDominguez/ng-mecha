@@ -1,0 +1,30 @@
+<div class="guide-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Guías de Movimiento</h1>
+      <span class="page-subtitle">Registro de guías SENASAG para el ingreso de ganado a planta</span>
+    </div>
+    <button mat-flat-button color="primary" class="add-button" (click)="openCreateModal()">
+      <mat-icon>add</mat-icon>
+      Nueva Guía
+    </button>
+  </div>
+
+  <div class="toolbar-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar guía</mat-label>
+      <input matInput (input)="onSearch($event)" placeholder="N.° guía, ganadero, transportista, placa o estado..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <span class="result-count">{{ filteredGuides().length }} resultado(s)</span>
+  </div>
+
+  <app-movement-guide-table
+    [data]="filteredGuides()"
+    (edit)="onEdit($event)"
+    (view)="onView($event)"
+    (delete)="onDelete($event)"
+  />
+
+</div>

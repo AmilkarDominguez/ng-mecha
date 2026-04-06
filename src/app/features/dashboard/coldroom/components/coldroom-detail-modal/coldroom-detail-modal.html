@@ -1,0 +1,93 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">ac_unit</mat-icon>
+  Detalle de Cámara de Frío
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <div class="detail-header">
+      <div class="detail-header-left">
+        <span class="code-badge">{{ coldRoom.code }}</span>
+        <div class="detail-name">{{ coldRoom.name }}</div>
+      </div>
+      <mat-chip-set>
+        <mat-chip [class]="coldRoom.isActive ? 'chip-active' : 'chip-inactive'">
+          <mat-icon matChipAvatar>{{ coldRoom.isActive ? 'check_circle' : 'cancel' }}</mat-icon>
+          {{ coldRoom.isActive ? 'Activa' : 'Inactiva' }}
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <span class="detail-label">Ubicación</span>
+      <span class="detail-value">{{ coldRoom.location }}</span>
+    </div>
+
+    <mat-divider />
+
+    <div class="occupancy-block">
+      <div class="occupancy-header">
+        <span class="detail-label">Ocupación actual</span>
+        <span class="occupancy-numbers">
+          {{ coldRoom.currentOccupancy }} / {{ coldRoom.capacity }} canales
+          <span class="occupancy-pct">({{ occupancyPercent }}%)</span>
+        </span>
+      </div>
+      <mat-progress-bar
+        [color]="occupancyColor"
+        [value]="occupancyPercent"
+        mode="determinate"
+        class="occupancy-bar">
+      </mat-progress-bar>
+    </div>
+
+    <mat-divider />
+
+    <div class="temp-row">
+      <div class="temp-card">
+        <mat-icon class="temp-icon">thermostat</mat-icon>
+        <div class="temp-info">
+          <span class="detail-label">Temperatura mínima</span>
+          <span class="temp-value">{{ coldRoom.minTemperature }}°C</span>
+        </div>
+      </div>
+      <div class="temp-card">
+        <mat-icon class="temp-icon temp-icon-max">thermostat</mat-icon>
+        <div class="temp-info">
+          <span class="detail-label">Temperatura máxima</span>
+          <span class="temp-value">{{ coldRoom.maxTemperature }}°C</span>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-dates">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ coldRoom.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ coldRoom.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ coldRoom.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

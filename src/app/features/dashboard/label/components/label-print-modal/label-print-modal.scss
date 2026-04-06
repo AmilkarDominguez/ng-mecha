@@ -1,0 +1,174 @@
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-title-icon {
+  color: var(--mat-sys-primary);
+}
+
+.modal-content {
+  min-width: 38rem;
+}
+
+.detail-grid {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.25rem 0;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label-code {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: monospace;
+  color: var(--mat-sys-primary);
+}
+
+.detail-type-text {
+  font-size: 0.875rem;
+  color: #616161;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #616161;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+.detail-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.detail-full {
+  grid-column: 1 / -1;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #757575;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: 0.9375rem;
+  color: #212121;
+}
+
+.detail-mono {
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+.detail-weight {
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+}
+
+.detail-observations {
+  font-style: italic;
+  color: #616161;
+}
+
+.detail-id {
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: #9e9e9e;
+}
+
+.chip-type-etiqueta_1 {
+  --mdc-chip-label-text-color: #880e4f;
+  background-color: #fce4ec;
+}
+
+.chip-type-etiqueta_2 {
+  --mdc-chip-label-text-color: #0d47a1;
+  background-color: var(--mat-sys-primary-container);
+}
+
+.chip-type-etiqueta_3 {
+  --mdc-chip-label-text-color: #4a148c;
+  background-color: #f3e5f5;
+}
+
+.chip-status-impresa {
+  --mdc-chip-label-text-color: #2e7d32;
+  background-color: #e8f5e9;
+}
+
+.chip-status-anulada {
+  --mdc-chip-label-text-color: #c62828;
+  background-color: #ffebee;
+}
+
+.chip-status-reimpresa {
+  --mdc-chip-label-text-color: #f57f17;
+  background-color: #fff8e1;
+}
+
+.modal-actions {
+  padding: 1rem 1.5rem;
+  gap: 0.5rem;
+}
+
+@media print {
+  .modal-actions {
+    display: none;
+  }
+
+  .print-area {
+    padding: 1rem;
+  }
+
+  .modal-title{
+    display: none;
+  }
+}
+
+@media (max-width: 42rem) {
+  .modal-content {
+    min-width: unset;
+  }
+
+  .detail-two-col {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,139 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">qr_code_2</mat-icon>
+  Detalle de Etiqueta
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <!-- Header -->
+    <div class="detail-header">
+      <div class="header-left">
+        <div class="detail-label-code">{{ label.labelCode }}</div>
+        <div class="detail-type-text">{{ labelTypeDisplay(label.labelType) }}</div>
+      </div>
+      <mat-chip-set>
+        <mat-chip [class]="'chip-type-' + label.labelType">
+          <mat-icon matChipAvatar>qr_code</mat-icon>
+          {{ labelTypeDisplay(label.labelType) }}
+        </mat-chip>
+        <mat-chip [class]="'chip-status-' + label.status">
+          <mat-icon matChipAvatar>info</mat-icon>
+          {{ statusLabel(label.status) }}
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <mat-divider />
+
+    <!-- Impresión -->
+    <div class="section-title">
+      <mat-icon>print</mat-icon>
+      <span>Datos de Impresión</span>
+    </div>
+
+    <div class="detail-two-col">
+      <div class="detail-section">
+        <span class="detail-label">Fecha y Hora de Impresión</span>
+        <span class="detail-value">{{ label.printedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Impreso por</span>
+        <span class="detail-value">{{ label.printedBy }}</span>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <!-- Trazabilidad -->
+    <div class="section-title">
+      <mat-icon>link</mat-icon>
+      <span>Trazabilidad</span>
+    </div>
+
+    <div class="detail-two-col">
+      <div class="detail-section">
+        <span class="detail-label">Código Canal</span>
+        <span class="detail-value detail-mono">{{ label.carcassCode }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Etiqueta Animal</span>
+        <span class="detail-value detail-mono">{{ label.animalTag }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">N° de Lote</span>
+        <span class="detail-value detail-mono">{{ label.lotNumber }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Faena</span>
+        <span class="detail-value">{{ label.slaughterDate | date: 'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="detail-section detail-full">
+        <span class="detail-label">Ganadero</span>
+        <span class="detail-value">{{ label.rancher }}</span>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <!-- Peso y Destino -->
+    <div class="section-title">
+      <mat-icon>scale</mat-icon>
+      <span>Peso y Destino</span>
+    </div>
+
+    <div class="detail-two-col">
+      <div class="detail-section">
+        <span class="detail-label">Peso</span>
+        <span class="detail-value detail-weight">
+          {{ label.weight !== null ? (label.weight | number: '1.1-1') + ' kg' : '—' }}
+        </span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Tipo de Peso</span>
+        <span class="detail-value">{{ weightTypeLabel(label.weightType) }}</span>
+      </div>
+      @if (label.destination) {
+        <div class="detail-section detail-full">
+          <span class="detail-label">Destino</span>
+          <span class="detail-value">{{ label.destination }}</span>
+        </div>
+      }
+    </div>
+
+    @if (label.observations) {
+      <mat-divider />
+      <div class="detail-section">
+        <span class="detail-label">Observaciones</span>
+        <span class="detail-value detail-observations">{{ label.observations }}</span>
+      </div>
+    }
+
+    <mat-divider />
+
+    <div class="detail-two-col">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ label.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ label.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ label.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

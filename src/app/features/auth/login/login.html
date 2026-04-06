@@ -1,0 +1,46 @@
+<section class="form-login">
+
+  <section class="logo-banner">
+    SISTEMA
+  </section>
+
+  <section class="text">
+    Ingresar
+  </section>
+
+
+  <div class="input-container">
+    <mat-form-field>
+      <mat-label>Correo</mat-label>
+      <input
+        matInput
+        placeholder="user@email.com"
+        [formControl]="email"
+        (blur)="updateErrorMessage()"
+        required
+      />
+      @if (email.invalid) {
+        <mat-error>{{ errorMessage() }}</mat-error>
+      }
+    </mat-form-field>
+  </div>
+
+  <div class="input-container">
+    <mat-form-field>
+      <mat-label>Contraseña</mat-label>
+      <input matInput [type]="hide() ? 'password' : 'text'" />
+      <button
+        matIconButton
+        matSuffix
+        (click)="clickEvent($event)"
+        [attr.aria-label]="'Hide password'"
+        [attr.aria-pressed]="hide()"
+      >
+        <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <button matButton="filled" class="login-button" (click)="login()">Ingresar</button>
+</section>
+

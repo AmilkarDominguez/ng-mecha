@@ -1,0 +1,68 @@
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid #e0e0e0;
+}
+
+.carcass-table {
+  width: 100%;
+}
+
+.cell-code {
+  font-family: monospace;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.cell-tag {
+  font-family: monospace;
+  font-size: 0.8125rem;
+  color: #424242;
+}
+
+.cell-weight {
+  font-weight: 500;
+  text-align: right;
+}
+
+.col-actions {
+  width: 12rem;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-coldroom {
+  background-color: #e8eaf6;
+  color: #283593;
+}
+
+.status-dispatched {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-condemned {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.table-row:hover {
+  background-color: #f5f5f5;
+}
+
+.no-data-cell {
+  padding: 2rem;
+  text-align: center;
+  color: #9e9e9e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}

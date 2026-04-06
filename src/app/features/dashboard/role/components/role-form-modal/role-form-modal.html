@@ -1,0 +1,62 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'admin_panel_settings' }}</mat-icon>
+  {{ isEditMode ? 'Editar Rol' : 'Nuevo Rol' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-two-thirds">
+      <mat-label>Nombre del Rol</mat-label>
+      <input matInput formControlName="name" placeholder="Ej. Supervisor de Planta" />
+      <mat-icon matSuffix>admin_panel_settings</mat-icon>
+      @if (getFieldError('name')) {
+        <mat-error>{{ getFieldError('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-one-third">
+      <mat-label>Código</mat-label>
+      <input matInput formControlName="code" placeholder="Ej. supervisor" />
+      <mat-icon matSuffix>tag</mat-icon>
+      <mat-hint>Minúsculas y guión bajo</mat-hint>
+      @if (getFieldError('code')) {
+        <mat-error>{{ getFieldError('code') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="2"
+        placeholder="Ej. Acceso completo a operaciones de planta..."></textarea>
+      <mat-icon matSuffix>description</mat-icon>
+      @if (getFieldError('description')) {
+        <mat-error>{{ getFieldError('description') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Permisos</mat-label>
+      <textarea matInput formControlName="permissionsRaw" rows="6"
+        placeholder="Un permiso por línea o separados por coma:&#10;recepcion.ver&#10;corrales.crear&#10;produccion.editar"></textarea>
+      <mat-icon matSuffix>shield</mat-icon>
+      <mat-hint>Un permiso por línea o separados por coma. Ej: modulo.accion</mat-hint>
+      @if (getFieldError('permissionsRaw')) {
+        <mat-error>{{ getFieldError('permissionsRaw') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-full">
+      <mat-checkbox formControlName="isActive" color="primary">Rol activo</mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

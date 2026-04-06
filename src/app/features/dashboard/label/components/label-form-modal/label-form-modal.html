@@ -1,0 +1,177 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'qr_code_2' }}</mat-icon>
+  {{ isEditMode ? 'Editar Etiqueta' : 'Nueva Etiqueta' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <!-- Sección: Identificación de Etiqueta -->
+    <div class="section-header field-full">
+      <mat-icon>qr_code_2</mat-icon>
+      <span>Identificación de Etiqueta</span>
+    </div>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Código Etiqueta</mat-label>
+      <input matInput formControlName="labelCode" placeholder="Ej. ETQ2-2026-03-0001" />
+      <mat-icon matSuffix>tag</mat-icon>
+      @if (getFieldError('labelCode')) {
+        <mat-error>{{ getFieldError('labelCode') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Tipo de Etiqueta</mat-label>
+      <mat-select formControlName="labelType">
+        @for (opt of labelTypeOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+      @if (getFieldError('labelType')) {
+        <mat-error>{{ getFieldError('labelType') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Fecha y Hora de Impresión</mat-label>
+      <input matInput [matDatepicker]="pickerPrinted" formControlName="printedAt" />
+      <mat-datepicker-toggle matIconSuffix [for]="pickerPrinted" />
+      <mat-datepicker #pickerPrinted />
+      @if (getFieldError('printedAt')) {
+        <mat-error>{{ getFieldError('printedAt') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Impreso por</mat-label>
+      <input matInput formControlName="printedBy" placeholder="Nombre del operario" />
+      <mat-icon matSuffix>person</mat-icon>
+      @if (getFieldError('printedBy')) {
+        <mat-error>{{ getFieldError('printedBy') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Sección: Trazabilidad -->
+    <div class="section-header field-full">
+      <mat-icon>link</mat-icon>
+      <span>Trazabilidad del Animal</span>
+    </div>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Código Canal</mat-label>
+      <input matInput formControlName="carcassCode" placeholder="Ej. CAN-2026-03-0001" />
+      <mat-icon matSuffix>view_week</mat-icon>
+      @if (getFieldError('carcassCode')) {
+        <mat-error>{{ getFieldError('carcassCode') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Etiqueta Animal</mat-label>
+      <input matInput formControlName="animalTag" placeholder="Ej. FR-26-03-001-MG-001" />
+      <mat-icon matSuffix>label</mat-icon>
+      @if (getFieldError('animalTag')) {
+        <mat-error>{{ getFieldError('animalTag') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>N° de Lote</mat-label>
+      <input matInput formControlName="lotNumber" placeholder="Ej. FR-26-03-001" />
+      <mat-icon matSuffix>inventory_2</mat-icon>
+      @if (getFieldError('lotNumber')) {
+        <mat-error>{{ getFieldError('lotNumber') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Fecha de Faena</mat-label>
+      <input matInput [matDatepicker]="pickerSlaughter" formControlName="slaughterDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="pickerSlaughter" />
+      <mat-datepicker #pickerSlaughter />
+      @if (getFieldError('slaughterDate')) {
+        <mat-error>{{ getFieldError('slaughterDate') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Ganadero</mat-label>
+      <input matInput formControlName="rancher" placeholder="Nombre del ganadero o empresa" />
+      <mat-icon matSuffix>person</mat-icon>
+      @if (getFieldError('rancher')) {
+        <mat-error>{{ getFieldError('rancher') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Sección: Peso y Destino -->
+    <div class="section-header field-full">
+      <mat-icon>scale</mat-icon>
+      <span>Peso y Destino</span>
+    </div>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Peso (kg)</mat-label>
+      <input matInput type="number" formControlName="weight" placeholder="Ej. 248.5" />
+      <mat-icon matSuffix>monitor_weight</mat-icon>
+      @if (getFieldError('weight')) {
+        <mat-error>{{ getFieldError('weight') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Tipo de Peso</mat-label>
+      <mat-select formControlName="weightType">
+        @for (opt of weightTypeOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Destino (Etiqueta 3)</mat-label>
+      <input matInput formControlName="destination" placeholder="Ej. Supermercado Norte S.R.L." />
+      <mat-icon matSuffix>send</mat-icon>
+      @if (getFieldError('destination')) {
+        <mat-error>{{ getFieldError('destination') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <!-- Sección: Estado -->
+    <div class="section-header field-full">
+      <mat-icon>info</mat-icon>
+      <span>Estado</span>
+    </div>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Estado de la Etiqueta</mat-label>
+      <mat-select formControlName="status">
+        @for (opt of statusOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+      @if (getFieldError('status')) {
+        <mat-error>{{ getFieldError('status') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Observaciones</mat-label>
+      <textarea matInput formControlName="observations" rows="2"
+        placeholder="Observaciones adicionales sobre la etiqueta..."></textarea>
+      <mat-icon matSuffix>notes</mat-icon>
+      @if (getFieldError('observations')) {
+        <mat-error>{{ getFieldError('observations') }}</mat-error>
+      }
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

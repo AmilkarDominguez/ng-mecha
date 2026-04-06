@@ -1,0 +1,96 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">cruelty_free</mat-icon>
+  Detalle del Animal
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-card printable">
+
+    <div class="detail-header">
+      <div class="tag-block">
+        <span class="tag-label">Arete / Tag</span>
+        <span class="tag-value">{{ animal.tag }}</span>
+      </div>
+      <span class="status-chip" [class]="statusClass(animal.status)">
+        {{ statusLabel(animal.status) }}
+      </span>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <div class="section-title">Trazabilidad</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="item-label">N.° de Lote</span>
+          <span class="item-value mono">{{ animal.lotNumber }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Guía SENASAG</span>
+          <span class="item-value mono">{{ animal.guideNumber }}</span>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <div class="section-title">Propietario y Características</div>
+      <div class="detail-grid">
+        <div class="detail-item detail-item-full">
+          <span class="item-label">Ganadero / Propietario</span>
+          <span class="item-value">{{ animal.rancher }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Raza</span>
+          <span class="item-value">{{ animal.breed }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Sexo</span>
+          <span class="item-value">{{ animal.gender }}</span>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section">
+      <div class="section-title">Ingreso y Ubicación</div>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="item-label">Corral Asignado</span>
+          <span class="item-value">{{ animal.pen }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Fecha de Ingreso</span>
+          <span class="item-value">{{ animal.entryDate | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Peso de Entrada</span>
+          <span class="item-value weight-value">{{ animal.entryWeight }} kg</span>
+        </div>
+        <div class="detail-item">
+          <span class="item-label">Registrado el</span>
+          <span class="item-value">{{ animal.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+    </div>
+
+    @if (animal.observations) {
+      <mat-divider />
+      <div class="detail-section">
+        <div class="section-title">Observaciones</div>
+        <p class="observations-text">{{ animal.observations }}</p>
+      </div>
+    }
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-flat-button color="primary" (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

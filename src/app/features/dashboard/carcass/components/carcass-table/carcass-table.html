@@ -1,0 +1,95 @@
+<div class="table-wrapper">
+  <table mat-table [dataSource]="dataSource" matSort class="carcass-table">
+
+    <!-- Column: carcassCode -->
+    <ng-container matColumnDef="carcassCode">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Código Canal</th>
+      <td mat-cell *matCellDef="let row" class="cell-code">{{ row.carcassCode }}</td>
+    </ng-container>
+
+    <!-- Column: slaughterDate -->
+    <ng-container matColumnDef="slaughterDate">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha Faena</th>
+      <td mat-cell *matCellDef="let row">{{ row.slaughterDate | date: 'dd/MM/yyyy' }}</td>
+    </ng-container>
+
+    <!-- Column: animalTag -->
+    <ng-container matColumnDef="animalTag">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Etiqueta Animal</th>
+      <td mat-cell *matCellDef="let row" class="cell-tag">{{ row.animalTag }}</td>
+    </ng-container>
+
+    <!-- Column: rancher -->
+    <ng-container matColumnDef="rancher">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Ganadero</th>
+      <td mat-cell *matCellDef="let row">{{ row.rancher }}</td>
+    </ng-container>
+
+    <!-- Column: hotWeight -->
+    <ng-container matColumnDef="hotWeight">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>P. Caliente (kg)</th>
+      <td mat-cell *matCellDef="let row" class="cell-weight">{{ row.hotWeight | number: '1.1-1' }}</td>
+    </ng-container>
+
+    <!-- Column: coldWeight -->
+    <ng-container matColumnDef="coldWeight">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>P. Frío (kg)</th>
+      <td mat-cell *matCellDef="let row" class="cell-weight">
+        {{ row.coldWeight !== null ? (row.coldWeight | number: '1.1-1') : '—' }}
+      </td>
+    </ng-container>
+
+    <!-- Column: coldRoomAssigned -->
+    <ng-container matColumnDef="coldRoomAssigned">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cámara</th>
+      <td mat-cell *matCellDef="let row">{{ row.coldRoomAssigned || '—' }}</td>
+    </ng-container>
+
+    <!-- Column: status -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
+      <td mat-cell *matCellDef="let row">
+        <span class="status-badge"
+          [class.status-coldroom]="row.status === 'en_camara'"
+          [class.status-dispatched]="row.status === 'despachado'"
+          [class.status-condemned]="row.status === 'decomisada'">
+          {{ statusLabel(row.status) }}
+        </span>
+      </td>
+    </ng-container>
+
+    <!-- Column: actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="col-actions">Acciones</th>
+      <td mat-cell *matCellDef="let row" class="col-actions">
+        <button mat-icon-button color="primary" matTooltip="Ver detalle" (click)="view.emit(row)">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Editar" (click)="edit.emit(row)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="delete.emit(row)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+    <tr class="mat-mdc-row" *matNoDataRow>
+      <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+        <mat-icon>search_off</mat-icon>
+        <span>No se encontraron canales</span>
+      </td>
+    </tr>
+
+  </table>
+
+  <mat-paginator
+    [pageSizeOptions]="[5, 10, 25]"
+    [pageSize]="10"
+    showFirstLastButtons
+    aria-label="Paginación de canales">
+  </mat-paginator>
+</div>

@@ -1,0 +1,81 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'person_add' }}</mat-icon>
+  {{ isEditMode ? 'Editar Usuario' : 'Nuevo Usuario' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Nombre(s)</mat-label>
+      <input matInput formControlName="firstName" placeholder="Ej. Carlos" />
+      <mat-icon matSuffix>person</mat-icon>
+      @if (getFieldError('firstName')) {
+        <mat-error>{{ getFieldError('firstName') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Apellidos</mat-label>
+      <input matInput formControlName="lastName" placeholder="Ej. Mendoza Vargas" />
+      <mat-icon matSuffix>person</mat-icon>
+      @if (getFieldError('lastName')) {
+        <mat-error>{{ getFieldError('lastName') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Nombre de usuario</mat-label>
+      <input matInput formControlName="username" placeholder="Ej. cmendoza" />
+      <mat-icon matSuffix>alternate_email</mat-icon>
+      <mat-hint>Minúsculas, números y guión bajo</mat-hint>
+      @if (getFieldError('username')) {
+        <mat-error>{{ getFieldError('username') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Rol</mat-label>
+      <mat-select formControlName="role">
+        @for (r of roles; track r.value) {
+          <mat-option [value]="r.value">{{ r.label }}</mat-option>
+        }
+      </mat-select>
+      <mat-icon matSuffix>admin_panel_settings</mat-icon>
+      @if (getFieldError('role')) {
+        <mat-error>{{ getFieldError('role') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Correo Electrónico</mat-label>
+      <input matInput formControlName="email" type="email" placeholder="Ej. usuario@trazasys.bo" />
+      <mat-icon matSuffix>email</mat-icon>
+      @if (getFieldError('email')) {
+        <mat-error>{{ getFieldError('email') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="phone" placeholder="Ej. +591 76543210" />
+      <mat-icon matSuffix>phone</mat-icon>
+      @if (getFieldError('phone')) {
+        <mat-error>{{ getFieldError('phone') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-full">
+      <mat-checkbox formControlName="isActive" color="primary">Usuario activo</mat-checkbox>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

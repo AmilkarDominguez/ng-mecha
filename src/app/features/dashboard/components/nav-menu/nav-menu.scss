@@ -1,0 +1,62 @@
+.nav-menu {
+  width: 100%;
+  height: calc(100vh - 4rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.nav-top-list {
+  padding: 0.5rem 0;
+}
+
+/* Accordion: sin elevación ni bordes propios de Material */
+/* ::ng-deep necesario para sobreescribir encapsulación de mat-expansion-panel */
+.nav-accordion ::ng-deep .mat-expansion-panel {
+  box-shadow: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.nav-accordion ::ng-deep .mat-expansion-panel-body {
+  padding: 0;
+}
+
+.nav-accordion ::ng-deep .mat-expansion-panel-header {
+  padding: 0 1rem;
+  height: 3rem;
+  min-height: 3rem;
+}
+
+.nav-accordion ::ng-deep .mat-expansion-panel-header:hover {
+  background: var(--mat-sys-surface-variant);
+}
+
+.nav-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface);
+}
+
+.nav-panel-icon {
+  font-size: 1.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.nav-sublist {
+  padding: 0.25rem 0 0.25rem 0.5rem;
+}
+
+.active-link {
+  background-color: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  border-radius: 0 50px 50px 0;
+}
+
+.active-link mat-icon {
+  color: var(--mat-sys-on-secondary-container);
+}
