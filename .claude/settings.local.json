@@ -10,7 +10,8 @@
       "Bash(cmd /c \"C:\\\\Users\\\\Amilk\\\\AppData\\\\Local\\\\nvs\\\\node\\\\22.22.0\\\\x64\\\\node.exe node_modules\\\\@angular\\\\cli\\\\bin\\\\ng.js build --configuration development 2>&1\" | tail -60)",
       "Bash(cmd /c \"set PATH=C:\\\\Users\\\\Amilk\\\\AppData\\\\Local\\\\nvs\\\\node\\\\22.22.0\\\\x64;%PATH% && node --version && ng build --configuration development\" 2>&1 | tail -60)",
       "Bash(cmd /c \"set PATH=C:\\\\Users\\\\Amilk\\\\AppData\\\\Local\\\\nvs\\\\node\\\\22.22.0\\\\x64;%PATH% && node --version && ng build --configuration development 2>&1 && echo BUILD_OK || echo BUILD_FAIL\" 2>&1)",
-      "Bash(find src:*)"
+      "Bash(find src:*)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); styles=d.get\\('projects',{}\\).get\\('frontend',{}\\).get\\('architect',{}\\).get\\('build',{}\\).get\\('options',{}\\).get\\('styles',[]\\); print\\(styles\\)\")"
     ]
   }
 }

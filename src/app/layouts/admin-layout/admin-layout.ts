@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { RouterOutlet } from '@angular/router';
-import { NavMenu } from '../../features/dashboard/components/nav-menu/nav-menu';
+import { NavMenu } from '../../shared/components/nav-menu/nav-menu';
 
 @Component({
   selector: 'app-admin-layout',

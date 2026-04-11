@@ -1,0 +1,77 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">category</mat-icon>
+  Detalle de Categoría
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <div class="detail-header">
+      <div class="detail-name">
+        @if (category.icon) {
+          <mat-icon class="detail-icon">{{ category.icon }}</mat-icon>
+        }
+        {{ category.name ?? '—' }}
+      </div>
+      <mat-chip-set>
+        <mat-chip [class]="category.state === 'ACTIVE' ? 'chip-active' : 'chip-inactive'">
+          <mat-icon matChipAvatar>{{ category.state === 'ACTIVE' ? 'check_circle' : 'cancel' }}</mat-icon>
+          {{ category.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <mat-divider />
+
+    @if (category.title) {
+      <div class="detail-section">
+        <span class="detail-label">Título</span>
+        <span class="detail-value">{{ category.title }}</span>
+      </div>
+    }
+
+    @if (category.icon) {
+      <div class="detail-section">
+        <span class="detail-label">Ícono</span>
+        <span class="detail-value detail-icon-row">
+          <mat-icon>{{ category.icon }}</mat-icon>
+          {{ category.icon }}
+        </span>
+      </div>
+    }
+
+    @if (category.description) {
+      <div class="detail-section detail-section-full">
+        <span class="detail-label">Descripción</span>
+        <span class="detail-value">{{ category.description }}</span>
+      </div>
+    }
+
+    <mat-divider />
+
+    <div class="detail-dates">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ category.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ category.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ category.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

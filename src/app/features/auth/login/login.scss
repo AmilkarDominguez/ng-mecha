@@ -1,6 +1,6 @@
 .form-login {
   background-color: var(--mat-sys-surface);
-  border: solid 1px black;
+  border: solid 1px var(--color-border);
   padding: 4rem 5rem;
   display: flex;
   justify-content: center;
@@ -25,7 +25,7 @@
   text-align: center;
 
   span {
-    color: #147676;
+    color: var(--color-login-accent);
   }
 }
 

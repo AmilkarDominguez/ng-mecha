@@ -1,0 +1,56 @@
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.industry-table {
+  width: 100%;
+}
+
+.cell-name {
+  font-weight: 500;
+}
+
+.cell-slug {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-family: monospace;
+}
+
+.col-actions {
+  width: 12rem;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-active {
+  background-color: var(--color-status-active-bg);
+  color: var(--color-status-active-text);
+}
+
+.status-inactive {
+  background-color: var(--color-status-inactive-bg);
+  color: var(--color-status-inactive-text);
+}
+
+.table-row:hover {
+  background-color: var(--color-row-hover-bg);
+}
+
+.no-data-cell {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}

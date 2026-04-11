@@ -1,6 +1,8 @@
+@use './styles/variables';
+
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  scrollbar-color: var(--color-scrollbar-thumb) transparent;
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -12,11 +14,11 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--color-scrollbar-thumb);
     border-radius: 3px;
 
     &:hover {
-      background: rgba(0, 0, 0, 0.35);
+      background: var(--color-scrollbar-thumb-hover);
     }
   }
 }

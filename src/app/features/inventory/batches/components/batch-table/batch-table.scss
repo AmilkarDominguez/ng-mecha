@@ -1,0 +1,84 @@
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.batch-table {
+  width: 100%;
+}
+
+.cell-product {
+  font-weight: 500;
+  max-width: 16rem;
+}
+
+.cell-warehouse {
+  color: var(--color-text-secondary);
+}
+
+.cell-number {
+  text-align: right;
+}
+
+.cell-empty {
+  color: var(--color-text-faint);
+}
+
+.code-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-family: monospace;
+  font-weight: 600;
+  background-color: var(--color-badge-bg);
+  color: var(--color-badge-text);
+}
+
+.stock-low {
+  color: var(--color-stock-low);
+  font-weight: 600;
+}
+
+.price-value {
+  font-weight: 500;
+  color: var(--color-price-final);
+}
+
+.col-actions {
+  width: 12rem;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-active {
+  background-color: var(--color-status-active-bg);
+  color: var(--color-status-active-text);
+}
+
+.status-inactive {
+  background-color: var(--color-status-inactive-bg);
+  color: var(--color-status-inactive-text);
+}
+
+.table-row:hover {
+  background-color: var(--color-row-hover-bg);
+}
+
+.no-data-cell {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}

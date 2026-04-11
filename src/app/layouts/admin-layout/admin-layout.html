@@ -2,11 +2,11 @@
 
   <mat-sidenav mode="side" [opened]="sidenavOpen()">
     <div class="sidenav-header">
-      <mat-icon class="sidenav-logo">hub</mat-icon>
-      <span class="sidenav-brand">System</span>
+        <mat-icon class="sidenav-logo" aria-hidden="false" aria-label="home" fontIcon="home"></mat-icon>
+      <span class="sidenav-brand">Mecatronica</span>
     </div>
     <mat-divider />
-    <app-nav-menu />
+    <app-nav-menu (onClick)="sidenavOpen.set(!sidenavOpen())" />
   </mat-sidenav>
 
   <mat-sidenav-content>

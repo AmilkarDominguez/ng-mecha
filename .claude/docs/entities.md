@@ -15,9 +15,7 @@
 | name        | String        | nullable         |
 | title       | String        | nullable         |
 | description | String        | nullable         |
-| photo       | String        | nullable         |
 | icon        | String        | nullable         |
-| view        | String        | nullable         |
 | state       | State (enum)  | default: ACTIVE  |
 | createdAt   | LocalDateTime | auto             |
 | updatedAt   | LocalDateTime | auto             |
