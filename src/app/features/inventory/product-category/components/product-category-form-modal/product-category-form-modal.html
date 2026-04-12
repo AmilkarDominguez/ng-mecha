@@ -9,27 +9,33 @@
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Nombre *</mat-label>
       <input matInput formControlName="name" placeholder="Ej. Lubricantes y Aceites" />
-      <mat-icon matSuffix>label</mat-icon>
       @if (getFieldError('name')) {
-        <mat-error>{{ getFieldError('name') }}</mat-error>
+      <mat-error>{{ getFieldError('name') }}</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Título</mat-label>
       <input matInput formControlName="title" placeholder="Ej. Lubricantes, Aceites y Fluidos" />
-      <mat-icon matSuffix>title</mat-icon>
       @if (getFieldError('title')) {
-        <mat-error>{{ getFieldError('title') }}</mat-error>
+      <mat-error>{{ getFieldError('title') }}</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Ícono (Material Icon)</mat-label>
       <input matInput formControlName="icon" placeholder="Ej. oil_barrel, build, tire_repair" />
-      <mat-icon matSuffix>emoji_symbols</mat-icon>
       @if (getFieldError('icon')) {
-        <mat-error>{{ getFieldError('icon') }}</mat-error>
+      <mat-error>{{ getFieldError('icon') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="2"
+        placeholder="Ej. Aceites de motor, transmisión e hidráulicos para todo tipo de vehículos."></textarea>
+      @if (getFieldError('description')) {
+      <mat-error>{{ getFieldError('description') }}</mat-error>
       }
     </mat-form-field>
 
@@ -39,16 +45,6 @@
         {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
       </mat-slide-toggle>
     </div>
-
-    <mat-form-field appearance="outline" class="field-full">
-      <mat-label>Descripción</mat-label>
-      <textarea matInput formControlName="description" rows="2"
-        placeholder="Ej. Aceites de motor, transmisión e hidráulicos para todo tipo de vehículos."></textarea>
-      <mat-icon matSuffix>description</mat-icon>
-      @if (getFieldError('description')) {
-        <mat-error>{{ getFieldError('description') }}</mat-error>
-      }
-    </mat-form-field>
 
   </form>
 </mat-dialog-content>

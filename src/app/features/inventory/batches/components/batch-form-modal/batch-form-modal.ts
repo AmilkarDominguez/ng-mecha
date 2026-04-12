@@ -12,6 +12,7 @@ import { Warehouse } from '../../../../../core/models/warehouse.model';
 import { Supplier } from '../../../../../core/models/supplier.model';
 import { Industry } from '../../../../../core/models/industry.model';
 import { Brand } from '../../../../../core/models/brand.model';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface BatchFormData {
   batch?: Batch;
@@ -31,6 +32,7 @@ export interface BatchFormData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatIconModule,
   ],
   templateUrl: './batch-form-modal.html',
@@ -60,30 +62,30 @@ export class BatchFormModal implements OnInit {
     brand: [null as string | null, [Validators.maxLength(100)]],
     model: [null as string | null, [Validators.maxLength(100)]],
     expirationDate: [null as string | null],
-    state: ['ACTIVE' as 'ACTIVE' | 'INACTIVE'],
+    active: [true],
   });
 
   ngOnInit(): void {
     if (this.data?.batch) {
-      const b = this.data.batch;
+      const batch = this.data.batch;
       this.form.patchValue({
-        productId: b.productId,
-        warehouseId: b.warehouseId,
-        supplierId: b.supplierId,
-        industryId: b.industryId,
-        brandId: b.brandId,
-        code: b.code,
-        stock: b.stock,
-        wholesalePrice: b.wholesalePrice,
-        retailPrice: b.retailPrice,
-        finalPrice: b.finalPrice,
-        description: b.description,
-        brand: b.brand,
-        model: b.model,
-        expirationDate: b.expirationDate
-          ? b.expirationDate.toISOString().substring(0, 10)
+        productId: batch.productId,
+        warehouseId: batch.warehouseId,
+        supplierId: batch.supplierId,
+        industryId: batch.industryId,
+        brandId: batch.brandId,
+        code: batch.code,
+        stock: batch.stock,
+        wholesalePrice: batch.wholesalePrice,
+        retailPrice: batch.retailPrice,
+        finalPrice: batch.finalPrice,
+        description: batch.description,
+        brand: batch.brand,
+        model: batch.model,
+        expirationDate: batch.expirationDate
+          ? batch.expirationDate.toISOString().substring(0, 10)
           : null,
-        state: b.state,
+        active: batch.state === 'ACTIVE',
       });
     }
   }
@@ -109,7 +111,7 @@ export class BatchFormModal implements OnInit {
       brand: raw.brand || null,
       model: raw.model || null,
       expirationDate: raw.expirationDate ? new Date(raw.expirationDate) : null,
-      state: raw.state ?? 'ACTIVE',
+      state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }
 

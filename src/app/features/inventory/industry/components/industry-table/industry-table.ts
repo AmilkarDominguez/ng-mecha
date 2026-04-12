@@ -27,7 +27,7 @@ export class IndustryTable implements AfterViewInit {
   view = output<Industry>();
   delete = output<Industry>();
 
-  readonly displayedColumns = ['name', 'slug', 'state', 'actions'];
+  readonly displayedColumns = ['name', 'state', 'actions'];
 
   dataSource = new MatTableDataSource<Industry>([]);
 
@@ -47,7 +47,6 @@ export class IndustryTable implements AfterViewInit {
     this.dataSource.sortingDataAccessor = (item, property) => {
       switch (property) {
         case 'name': return item.name.toLowerCase();
-        case 'slug': return item.slug.toLowerCase();
         case 'state': return item.state;
         default: return '';
       }

@@ -31,4 +31,25 @@
     }
   </mat-accordion>
 
+  <div class="theme-toggle-section">
+    <mat-divider />
+    <div class="theme-toggle-row">
+      <mat-icon class="theme-toggle-icon">
+        {{ themeService.isDark() ? 'dark_mode' : 'light_mode' }}
+      </mat-icon>
+      <span class="theme-toggle-label">
+        {{ themeService.isDark() ? 'Modo oscuro' : 'Modo claro' }}
+      </span>
+      <button
+        mat-icon-button
+        class="theme-toggle-button"
+        [matTooltip]="themeService.isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+        (click)="themeService.toggle()"
+        aria-label="Cambiar tema"
+      >
+        <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+
 </nav>

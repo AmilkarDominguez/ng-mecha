@@ -7,7 +7,7 @@
   <div class="detail-grid print-area">
 
     <div class="detail-header">
-      <div class="detail-name">{{ product.name ?? product.slug }}</div>
+      <div class="detail-name">{{ product.name }}</div>
       <span class="state-badge"
         [class.state-active]="product.state === 'ACTIVE'"
         [class.state-inactive]="product.state === 'INACTIVE'">
@@ -27,11 +27,6 @@
         <span class="detail-label">Presentación</span>
         <span class="detail-value">{{ getPresentationName() }}</span>
       </div>
-    </div>
-
-    <div class="detail-section">
-      <span class="detail-label">Slug</span>
-      <span class="detail-value detail-slug">{{ product.slug }}</span>
     </div>
 
     @if (product.description) {

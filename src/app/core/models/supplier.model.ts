@@ -6,7 +6,6 @@ export interface Supplier {
   description: string | null;
   email: string | null;
   address: string | null;
-  slug: string;
   state: EntityState;
   createdAt: Date;
   updatedAt: Date;

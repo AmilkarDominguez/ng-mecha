@@ -9,7 +9,6 @@
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Nombre del Producto</mat-label>
       <input matInput formControlName="name" placeholder="Ej. Aceite de Motor 20W-50 Mineral" />
-      <mat-icon matSuffix>inventory</mat-icon>
       @if (getFieldError('name')) {
         <mat-error>{{ getFieldError('name') }}</mat-error>
       }
@@ -23,7 +22,6 @@
           <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
         }
       </mat-select>
-      <mat-icon matSuffix>category</mat-icon>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-half">
@@ -36,32 +34,12 @@
           </mat-option>
         }
       </mat-select>
-      <mat-icon matSuffix>inventory_2</mat-icon>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Slug *</mat-label>
-      <input matInput formControlName="slug" placeholder="Ej. aceite-motor-20w50" />
-      <mat-icon matSuffix>link</mat-icon>
-      @if (getFieldError('slug')) {
-        <mat-error>{{ getFieldError('slug') }}</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Estado</mat-label>
-      <mat-select formControlName="state">
-        <mat-option value="ACTIVE">Activo</mat-option>
-        <mat-option value="INACTIVE">Inactivo</mat-option>
-      </mat-select>
-      <mat-icon matSuffix>toggle_on</mat-icon>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Descripción</mat-label>
       <textarea matInput formControlName="description" rows="3"
         placeholder="Descripción técnica del producto, compatibilidad, características..."></textarea>
-      <mat-icon matSuffix>description</mat-icon>
       @if (getFieldError('description')) {
         <mat-error>{{ getFieldError('description') }}</mat-error>
       }
@@ -70,11 +48,17 @@
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>URL de Foto</mat-label>
       <input matInput formControlName="photo" placeholder="Ej. https://example.com/producto.jpg" />
-      <mat-icon matSuffix>image</mat-icon>
       @if (getFieldError('photo')) {
         <mat-error>{{ getFieldError('photo') }}</mat-error>
       }
     </mat-form-field>
+
+    <div class="field-half field-toggle">
+      <span class="toggle-label">Estado</span>
+      <mat-slide-toggle formControlName="active" color="primary">
+        {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </div>
 
   </form>
 </mat-dialog-content>

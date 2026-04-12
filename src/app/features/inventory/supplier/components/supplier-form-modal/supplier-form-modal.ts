@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Supplier } from '../../../../../core/models/supplier.model';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface SupplierFormData {
   supplier?: Supplier;
@@ -21,6 +22,7 @@ export interface SupplierFormData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatIconModule,
   ],
   templateUrl: './supplier-form-modal.html',
@@ -37,22 +39,20 @@ export class SupplierFormModal implements OnInit {
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(200)]],
-    slug: ['', [Validators.required, Validators.maxLength(200), Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)]],
     email: ['', [Validators.email, Validators.maxLength(150)]],
     address: ['', [Validators.maxLength(300)]],
-    description: ['', [Validators.maxLength(1000)]],
-    state: ['ACTIVE' as 'ACTIVE' | 'INACTIVE'],
+    description: ['', [Validators.maxLength(100)]],
+    active: [true],
   });
 
   ngOnInit(): void {
     if (this.data?.supplier) {
       this.form.patchValue({
         name: this.data.supplier.name,
-        slug: this.data.supplier.slug,
         email: this.data.supplier.email ?? '',
         address: this.data.supplier.address ?? '',
         description: this.data.supplier.description ?? '',
-        state: this.data.supplier.state,
+        active: this.data.supplier.state === 'ACTIVE',
       });
     }
   }
@@ -65,11 +65,10 @@ export class SupplierFormModal implements OnInit {
     const raw = this.form.value;
     this.dialogRef.close({
       name: raw.name!,
-      slug: raw.slug!,
       email: raw.email || null,
       address: raw.address || null,
       description: raw.description || null,
-      state: raw.state ?? 'ACTIVE',
+      state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }
 
@@ -84,7 +83,6 @@ export class SupplierFormModal implements OnInit {
     if (control.errors['email']) return 'Ingrese un correo electrónico válido';
     if (control.errors['minlength']) return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
     if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
-    if (control.errors['pattern']) return 'Solo letras minúsculas, números y guiones (ej. mi-proveedor)';
     return 'Campo inválido';
   }
 }

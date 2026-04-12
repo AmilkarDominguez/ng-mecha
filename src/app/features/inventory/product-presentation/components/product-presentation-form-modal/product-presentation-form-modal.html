@@ -9,40 +9,35 @@
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Nombre *</mat-label>
       <input matInput formControlName="name" placeholder="Ej. Litro, Unidad, Kit" />
-      <mat-icon matSuffix>label</mat-icon>
       @if (getFieldError('name')) {
-        <mat-error>{{ getFieldError('name') }}</mat-error>
+      <mat-error>{{ getFieldError('name') }}</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Código</mat-label>
       <input matInput formControlName="code" placeholder="Ej. LT, UND, KIT" />
-      <mat-icon matSuffix>tag</mat-icon>
       <mat-hint>Mayúsculas y números únicamente</mat-hint>
       @if (getFieldError('code')) {
-        <mat-error>{{ getFieldError('code') }}</mat-error>
+      <mat-error>{{ getFieldError('code') }}</mat-error>
       }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Estado</mat-label>
-      <mat-select formControlName="state">
-        <mat-option value="ACTIVE">Activo</mat-option>
-        <mat-option value="INACTIVE">Inactivo</mat-option>
-      </mat-select>
-      <mat-icon matSuffix>toggle_on</mat-icon>
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Descripción</mat-label>
       <textarea matInput formControlName="description" rows="3"
         placeholder="Ej. Presentación en litros para lubricantes y aceites de motor."></textarea>
-      <mat-icon matSuffix>description</mat-icon>
       @if (getFieldError('description')) {
-        <mat-error>{{ getFieldError('description') }}</mat-error>
+      <mat-error>{{ getFieldError('description') }}</mat-error>
       }
     </mat-form-field>
+
+    <div class="field-half field-toggle">
+      <span class="toggle-label">Estado</span>
+      <mat-slide-toggle formControlName="active" color="primary">
+        {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </div>
 
   </form>
 </mat-dialog-content>

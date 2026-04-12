@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Warehouse } from '../../../../../core/models/warehouse.model';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface WarehouseFormData {
   warehouse?: Warehouse;
@@ -21,6 +22,7 @@ export interface WarehouseFormData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatIconModule,
   ],
   templateUrl: './warehouse-form-modal.html',
@@ -38,7 +40,7 @@ export class WarehouseFormModal implements OnInit {
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
     description: [null as string | null, [Validators.maxLength(500)]],
-    state: ['ACTIVE' as 'ACTIVE' | 'INACTIVE'],
+    active: [true],
   });
 
   ngOnInit(): void {
@@ -46,7 +48,7 @@ export class WarehouseFormModal implements OnInit {
       this.form.patchValue({
         name: this.data.warehouse.name,
         description: this.data.warehouse.description,
-        state: this.data.warehouse.state,
+        active: this.data.warehouse.state === 'ACTIVE',
       });
     }
   }
@@ -60,7 +62,7 @@ export class WarehouseFormModal implements OnInit {
     this.dialogRef.close({
       name: raw.name!,
       description: raw.description || null,
-      state: raw.state ?? 'ACTIVE',
+      state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }
 

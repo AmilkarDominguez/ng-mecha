@@ -36,7 +36,6 @@ export class IndustryDashboard {
     if (!term) return this.industries();
     return this.industries().filter(i =>
       i.name.toLowerCase().includes(term) ||
-      i.slug.toLowerCase().includes(term) ||
       (i.description ?? '').toLowerCase().includes(term)
     );
   });

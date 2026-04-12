@@ -9,6 +9,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { Product } from '../../../../../core/models/product.model';
 import { ProductCategory } from '../../../../../core/models/product-category.model';
 import { ProductPresentation } from '../../../../../core/models/product-presentation.model';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface ProductFormData {
   product?: Product;
@@ -25,6 +26,7 @@ export interface ProductFormData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatIconModule,
   ],
   templateUrl: './product-form-modal.html',
@@ -51,10 +53,9 @@ export class ProductFormModal implements OnInit {
     name: ['', [Validators.maxLength(200)]],
     categoryId: [null as string | null],
     presentationId: [null as string | null],
-    slug: ['', [Validators.required, Validators.maxLength(200), Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)]],
     description: ['', [Validators.maxLength(1000)]],
     photo: ['', [Validators.maxLength(500)]],
-    state: ['ACTIVE' as 'ACTIVE' | 'INACTIVE'],
+    active: [true],
   });
 
   ngOnInit(): void {
@@ -63,10 +64,9 @@ export class ProductFormModal implements OnInit {
         name: this.data.product.name ?? '',
         categoryId: this.data.product.categoryId,
         presentationId: this.data.product.presentationId,
-        slug: this.data.product.slug,
         description: this.data.product.description ?? '',
         photo: this.data.product.photo ?? '',
-        state: this.data.product.state,
+        active: this.data.product.state === 'ACTIVE',
       });
     }
   }
@@ -81,10 +81,9 @@ export class ProductFormModal implements OnInit {
       name: raw.name || null,
       categoryId: raw.categoryId ?? null,
       presentationId: raw.presentationId ?? null,
-      slug: raw.slug,
       description: raw.description || null,
       photo: raw.photo || null,
-      state: raw.state ?? 'ACTIVE',
+      state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }
 
@@ -97,7 +96,6 @@ export class ProductFormModal implements OnInit {
     if (!control?.errors || !control.touched) return '';
     if (control.errors['required']) return 'Este campo es obligatorio';
     if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
-    if (control.errors['pattern']) return 'Solo letras minúsculas, números y guiones (ej. aceite-motor)';
     return 'Campo inválido';
   }
 }

@@ -9,9 +9,8 @@
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Nombre de la Marca</mat-label>
       <input matInput formControlName="name" placeholder="Ej. Bosch, NGK, Castrol" />
-      <mat-icon matSuffix>branding_watermark</mat-icon>
       @if (getFieldError('name')) {
-        <mat-error>{{ getFieldError('name') }}</mat-error>
+      <mat-error>{{ getFieldError('name') }}</mat-error>
       }
     </mat-form-field>
 
@@ -20,17 +19,8 @@
       <mat-select formControlName="score">
         <mat-option [value]="null">Sin calificación</mat-option>
         @for (s of scoreOptions; track s) {
-          <mat-option [value]="s">{{ s }}</mat-option>
+        <mat-option [value]="s">{{ s }}</mat-option>
         }
-      </mat-select>
-      <mat-icon matSuffix>star</mat-icon>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Estado</mat-label>
-      <mat-select formControlName="state">
-        <mat-option value="ACTIVE">Activo</mat-option>
-        <mat-option value="INACTIVE">Inactivo</mat-option>
       </mat-select>
     </mat-form-field>
 
@@ -38,11 +28,17 @@
       <mat-label>Descripción</mat-label>
       <textarea matInput formControlName="description" rows="3"
         placeholder="Ej. Marca alemana especializada en repuestos eléctricos y herramientas automotrices."></textarea>
-      <mat-icon matSuffix>description</mat-icon>
       @if (getFieldError('description')) {
-        <mat-error>{{ getFieldError('description') }}</mat-error>
+      <mat-error>{{ getFieldError('description') }}</mat-error>
       }
     </mat-form-field>
+
+    <div class="field-half field-toggle">
+      <span class="toggle-label">Estado</span>
+      <mat-slide-toggle formControlName="active" color="primary">
+        {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </div>
 
   </form>
 </mat-dialog-content>

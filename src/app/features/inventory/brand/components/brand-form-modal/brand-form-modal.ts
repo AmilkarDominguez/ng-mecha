@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Brand } from '../../../../../core/models/brand.model';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface BrandFormData {
   brand?: Brand;
@@ -21,6 +22,7 @@ export interface BrandFormData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatIconModule,
   ],
   templateUrl: './brand-form-modal.html',
@@ -41,7 +43,7 @@ export class BrandFormModal implements OnInit {
     name: [null as string | null, [Validators.maxLength(100)]],
     description: [null as string | null, [Validators.maxLength(500)]],
     score: [null as string | null],
-    state: ['ACTIVE' as 'ACTIVE' | 'INACTIVE'],
+    active: [true],
   });
 
   ngOnInit(): void {
@@ -50,7 +52,7 @@ export class BrandFormModal implements OnInit {
         name: this.data.brand.name,
         description: this.data.brand.description,
         score: this.data.brand.score,
-        state: this.data.brand.state,
+        active: this.data.brand.state === 'ACTIVE',
       });
     }
   }
@@ -60,7 +62,13 @@ export class BrandFormModal implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    this.dialogRef.close(this.form.value);
+    const raw = this.form.value;
+    this.dialogRef.close({
+      name: raw.name || null,
+      description: raw.description || null,
+      score: raw.score || null,
+      state: raw.active ? 'ACTIVE' : 'INACTIVE',
+    });
   }
 
   onCancel(): void {

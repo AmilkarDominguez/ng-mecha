@@ -43,7 +43,6 @@ export class ProductDashboard {
     if (!term) return this.products();
     return this.products().filter(p =>
       (p.name ?? '').toLowerCase().includes(term) ||
-      p.slug.toLowerCase().includes(term) ||
       (p.description ?? '').toLowerCase().includes(term)
     );
   });

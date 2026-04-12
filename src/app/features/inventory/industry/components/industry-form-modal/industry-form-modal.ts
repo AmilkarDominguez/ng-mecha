@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Industry } from '../../../../../core/models/industry.model';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface IndustryFormData {
   industry?: Industry;
@@ -21,6 +22,7 @@ export interface IndustryFormData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatIconModule,
   ],
   templateUrl: './industry-form-modal.html',
@@ -37,18 +39,16 @@ export class IndustryFormModal implements OnInit {
 
   form = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(150)]],
-    slug: ['', [Validators.required, Validators.maxLength(150), Validators.pattern(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)]],
     description: ['', [Validators.maxLength(500)]],
-    state: ['ACTIVE' as 'ACTIVE' | 'INACTIVE'],
+    active: [true],
   });
 
   ngOnInit(): void {
     if (this.data?.industry) {
       this.form.patchValue({
         name: this.data.industry.name,
-        slug: this.data.industry.slug,
         description: this.data.industry.description ?? '',
-        state: this.data.industry.state,
+        active: this.data.industry.state === 'ACTIVE',
       });
     }
   }
@@ -61,9 +61,8 @@ export class IndustryFormModal implements OnInit {
     const raw = this.form.value;
     this.dialogRef.close({
       name: raw.name!,
-      slug: raw.slug!,
       description: raw.description || null,
-      state: raw.state ?? 'ACTIVE',
+      state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }
 

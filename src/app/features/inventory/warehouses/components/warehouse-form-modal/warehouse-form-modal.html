@@ -9,29 +9,26 @@
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Nombre del Almacén</mat-label>
       <input matInput formControlName="name" placeholder="Ej. Almacén de Lubricantes" />
-      <mat-icon matSuffix>warehouse</mat-icon>
       @if (getFieldError('name')) {
         <mat-error>{{ getFieldError('name') }}</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-full">
-      <mat-label>Estado</mat-label>
-      <mat-select formControlName="state">
-        <mat-option value="ACTIVE">Activo</mat-option>
-        <mat-option value="INACTIVE">Inactivo</mat-option>
-      </mat-select>
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="field-full">
       <mat-label>Descripción</mat-label>
       <textarea matInput formControlName="description" rows="3"
         placeholder="Ej. Área destinada al almacenamiento de aceites y lubricantes automotrices."></textarea>
-      <mat-icon matSuffix>description</mat-icon>
       @if (getFieldError('description')) {
         <mat-error>{{ getFieldError('description') }}</mat-error>
       }
     </mat-form-field>
+
+    <div class="field-toggle">
+      <span class="toggle-label">Estado</span>
+      <mat-slide-toggle formControlName="active" color="primary">
+        {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </div>
 
   </form>
 </mat-dialog-content>

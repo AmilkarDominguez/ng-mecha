@@ -14,7 +14,7 @@
   <div class="toolbar-row">
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Buscar producto</mat-label>
-      <input matInput (input)="onSearch($event)" placeholder="Nombre, slug o descripción..." />
+      <input matInput (input)="onSearch($event)" placeholder="Nombre o descripción..." />
       <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
     <span class="result-count">{{ filteredProducts().length }} resultado(s)</span>

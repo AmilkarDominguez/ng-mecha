@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ProductPresentation } from '../../../../../core/models/product-presentation.model';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface ProductPresentationFormData {
   presentation?: ProductPresentation;
@@ -21,6 +22,7 @@ export interface ProductPresentationFormData {
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
+    MatSlideToggleModule,
     MatIconModule,
   ],
   templateUrl: './product-presentation-form-modal.html',
@@ -39,7 +41,7 @@ export class ProductPresentationFormModal implements OnInit {
     name: ['', [Validators.required, Validators.maxLength(100)]],
     code: ['', [Validators.maxLength(20), Validators.pattern(/^[A-Z0-9]+$/)]],
     description: ['', [Validators.maxLength(500)]],
-    state: ['ACTIVE' as 'ACTIVE' | 'INACTIVE'],
+    active: [true],
   });
 
   ngOnInit(): void {
@@ -48,7 +50,7 @@ export class ProductPresentationFormModal implements OnInit {
         name: this.data.presentation.name ?? '',
         code: this.data.presentation.code ?? '',
         description: this.data.presentation.description ?? '',
-        state: this.data.presentation.state,
+        active: this.data.presentation.state === 'ACTIVE',
       });
     }
   }
@@ -63,7 +65,7 @@ export class ProductPresentationFormModal implements OnInit {
       name: raw.name || null,
       code: raw.code || null,
       description: raw.description || null,
-      state: raw.state ?? 'ACTIVE',
+      state: raw.active ? 'ACTIVE' : 'INACTIVE'
     });
   }
 

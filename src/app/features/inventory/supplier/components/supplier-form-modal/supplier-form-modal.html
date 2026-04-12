@@ -9,25 +9,14 @@
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Nombre / Razón Social *</mat-label>
       <input matInput formControlName="name" placeholder="Ej. Importadora Automotriz del Oriente S.R.L." />
-      <mat-icon matSuffix>business</mat-icon>
       @if (getFieldError('name')) {
         <mat-error>{{ getFieldError('name') }}</mat-error>
       }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Slug *</mat-label>
-      <input matInput formControlName="slug" placeholder="Ej. importadora-automotriz" />
-      <mat-icon matSuffix>link</mat-icon>
-      @if (getFieldError('slug')) {
-        <mat-error>{{ getFieldError('slug') }}</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="field-half">
       <mat-label>Correo Electrónico</mat-label>
       <input matInput formControlName="email" type="email" placeholder="Ej. ventas@proveedor.com" />
-      <mat-icon matSuffix>email</mat-icon>
       @if (getFieldError('email')) {
         <mat-error>{{ getFieldError('email') }}</mat-error>
       }
@@ -36,7 +25,6 @@
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Dirección</mat-label>
       <input matInput formControlName="address" placeholder="Ej. Av. Banzer Km 7.5, Santa Cruz" />
-      <mat-icon matSuffix>location_on</mat-icon>
       @if (getFieldError('address')) {
         <mat-error>{{ getFieldError('address') }}</mat-error>
       }
@@ -46,20 +34,17 @@
       <mat-label>Descripción</mat-label>
       <textarea matInput formControlName="description" rows="3"
         placeholder="Descripción del proveedor, especialidad, productos que ofrece..."></textarea>
-      <mat-icon matSuffix>description</mat-icon>
       @if (getFieldError('description')) {
         <mat-error>{{ getFieldError('description') }}</mat-error>
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Estado</mat-label>
-      <mat-select formControlName="state">
-        <mat-option value="ACTIVE">Activo</mat-option>
-        <mat-option value="INACTIVE">Inactivo</mat-option>
-      </mat-select>
-      <mat-icon matSuffix>toggle_on</mat-icon>
-    </mat-form-field>
+    <div class="field-half field-toggle">
+      <span class="toggle-label">Estado</span>
+      <mat-slide-toggle formControlName="active" color="primary">
+        {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </div>
 
   </form>
 </mat-dialog-content>
