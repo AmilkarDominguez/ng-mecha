@@ -34,17 +34,33 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Reemplaza los placeholders con los secrets reales
-      - name: Inject environment variables
+      # Genera ambos archivos de environment.
+      # environment.ts no existe en el repo (está en .gitignore)
+      # pero Angular necesita que exista para que fileReplacements funcione.
+      # environment.prod.ts se genera con los secrets reales.
+      - name: Create environment files
         run: |
-          sed -i "s|__SUPABASE_URL__|${{ secrets.SUPABASE_URL }}|g" src/environments/environment.prod.ts
-          sed -i "s|__SUPABASE_KEY__|${{ secrets.SUPABASE_KEY }}|g" src/environments/environment.prod.ts
+          mkdir -p src/environments
 
-      # Ajusta --base-href al nombre de tu repositorio
+          cat > src/environments/environment.ts << 'EOF'
+          export const environment = {
+            production: false,
+            supabaseUrl: '',
+            supabaseKey: '',
+          };
+          EOF
+
+          cat > src/environments/environment.prod.ts << EOF
+          export const environment = {
+            production: true,
+            supabaseUrl: '${{ secrets.SUPABASE_URL }}',
+            supabaseKey: '${{ secrets.SUPABASE_KEY }}',
+          };
+          EOF
+
       - name: Build
         run: npx ng build --configuration production --base-href /${{ github.event.repository.name }}/
 
-      # Copia index.html como 404.html para que el router de Angular funcione
       - name: Fix SPA routing
         run: cp dist/*/browser/index.html dist/*/browser/404.html
 
