@@ -5,6 +5,6 @@ export interface Warehouse {
   name: string;
   description: string | null;
   state: EntityState;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at?: string | Date;
+  updated_at?: string | Date;
 }

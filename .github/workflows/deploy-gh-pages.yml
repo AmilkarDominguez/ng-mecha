@@ -1,0 +1,61 @@
+name: Deploy Angular to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Reemplaza los placeholders con los secrets reales
+      - name: Inject environment variables
+        run: |
+          sed -i "s|__SUPABASE_URL__|${{ secrets.SUPABASE_URL }}|g" src/environments/environment.prod.ts
+          sed -i "s|__SUPABASE_KEY__|${{ secrets.SUPABASE_KEY }}|g" src/environments/environment.prod.ts
+
+      # Ajusta --base-href al nombre de tu repositorio
+      - name: Build
+        run: npx ng build --configuration production --base-href /${{ github.event.repository.name }}/
+
+      # Copia index.html como 404.html para que el router de Angular funcione
+      - name: Fix SPA routing
+        run: cp dist/*/browser/index.html dist/*/browser/404.html
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/*/browser
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

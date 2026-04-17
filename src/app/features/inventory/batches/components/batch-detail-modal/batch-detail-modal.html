@@ -11,7 +11,7 @@
         @if (batch.code) {
           <span class="detail-code">{{ batch.code }}</span>
         }
-        {{ getProductName(batch.productId) }}
+        {{ getProductName(batch.product_id) }}
       </div>
       <span class="state-badge"
         [class.state-active]="batch.state === 'ACTIVE'"
@@ -26,19 +26,19 @@
     <div class="detail-section-group">
       <div class="detail-section">
         <span class="detail-label">Almacén</span>
-        <span class="detail-value">{{ getWarehouseName(batch.warehouseId) }}</span>
+        <span class="detail-value">{{ getWarehouseName(batch.warehouse_id) }}</span>
       </div>
       <div class="detail-section">
         <span class="detail-label">Proveedor</span>
-        <span class="detail-value">{{ getSupplierName(batch.supplierId) }}</span>
+        <span class="detail-value">{{ getSupplierName(batch.supplier_id) }}</span>
       </div>
       <div class="detail-section">
         <span class="detail-label">Industria / Procedencia</span>
-        <span class="detail-value">{{ getIndustryName(batch.industryId) }}</span>
+        <span class="detail-value">{{ getIndustryName(batch.industry_id) }}</span>
       </div>
       <div class="detail-section">
         <span class="detail-label">Marca (Catálogo)</span>
-        <span class="detail-value">{{ getBrandName(batch.brandId) }}</span>
+        <span class="detail-value">{{ getBrandName(batch.brand_id) }}</span>
       </div>
     </div>
 
@@ -63,10 +63,10 @@
           {{ batch.stock !== null ? (batch.stock | number) : '—' }}
         </span>
       </div>
-      @if (batch.expirationDate) {
+      @if (batch.expiration_date) {
         <div class="detail-section">
           <span class="detail-label">Fecha de Vencimiento</span>
-          <span class="detail-value">{{ batch.expirationDate | date:'dd/MM/yyyy' }}</span>
+          <span class="detail-value">{{ batch.expiration_date | date:'dd/MM/yyyy' }}</span>
         </div>
       }
     </div>
@@ -77,19 +77,19 @@
       <div class="detail-section">
         <span class="detail-label">Precio Mayorista</span>
         <span class="detail-value price-value">
-          {{ batch.wholesalePrice !== null ? 'Bs. ' + (batch.wholesalePrice | number:'1.2-2') : '—' }}
+          {{ batch.wholesale_price !== null ? 'Bs. ' + (batch.wholesale_price | number:'1.2-2') : '—' }}
         </span>
       </div>
       <div class="detail-section">
         <span class="detail-label">Precio Minorista</span>
         <span class="detail-value price-value">
-          {{ batch.retailPrice !== null ? 'Bs. ' + (batch.retailPrice | number:'1.2-2') : '—' }}
+          {{ batch.retail_price !== null ? 'Bs. ' + (batch.retail_price | number:'1.2-2') : '—' }}
         </span>
       </div>
       <div class="detail-section">
         <span class="detail-label">Precio Final</span>
         <span class="detail-value price-final">
-          {{ batch.finalPrice !== null ? 'Bs. ' + (batch.finalPrice | number:'1.2-2') : '—' }}
+          {{ batch.final_price !== null ? 'Bs. ' + (batch.final_price | number:'1.2-2') : '—' }}
         </span>
       </div>
     </div>
@@ -107,11 +107,11 @@
     <div class="detail-dates">
       <div class="detail-section">
         <span class="detail-label">Fecha de Registro</span>
-        <span class="detail-value">{{ batch.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span class="detail-value">{{ batch.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
       </div>
       <div class="detail-section">
         <span class="detail-label">Última Actualización</span>
-        <span class="detail-value">{{ batch.updatedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span class="detail-value">{{ batch.updated_at | date:'dd/MM/yyyy HH:mm' }}</span>
       </div>
     </div>
 

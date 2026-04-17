@@ -6,13 +6,13 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Batch } from '../../../../../core/models/batch.model';
 import { Product } from '../../../../../core/models/product.model';
 import { Warehouse } from '../../../../../core/models/warehouse.model';
 import { Supplier } from '../../../../../core/models/supplier.model';
 import { Industry } from '../../../../../core/models/industry.model';
 import { Brand } from '../../../../../core/models/brand.model';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface BatchFormData {
   batch?: Batch;
@@ -48,20 +48,20 @@ export class BatchFormModal implements OnInit {
   }
 
   form = this.fb.group({
-    productId: ['', [Validators.required]],
-    warehouseId: ['', [Validators.required]],
-    supplierId: ['', [Validators.required]],
-    industryId: ['', [Validators.required]],
-    brandId: [null as string | null],
+    product_id: ['', [Validators.required]],
+    warehouse_id: ['', [Validators.required]],
+    supplier_id: ['', [Validators.required]],
+    industry_id: ['', [Validators.required]],
+    brand_id: [null as string | null],
     code: [null as string | null, [Validators.maxLength(80)]],
     stock: [null as number | null, [Validators.min(0)]],
-    wholesalePrice: [null as number | null, [Validators.min(0)]],
-    retailPrice: [null as number | null, [Validators.min(0)]],
-    finalPrice: [null as number | null, [Validators.min(0)]],
+    wholesale_price: [null as number | null, [Validators.min(0)]],
+    retail_price: [null as number | null, [Validators.min(0)]],
+    final_price: [null as number | null, [Validators.min(0)]],
     description: [null as string | null, [Validators.maxLength(500)]],
     brand: [null as string | null, [Validators.maxLength(100)]],
     model: [null as string | null, [Validators.maxLength(100)]],
-    expirationDate: [null as string | null],
+    expiration_date: [null as string | Date | null],
     active: [true],
   });
 
@@ -69,22 +69,20 @@ export class BatchFormModal implements OnInit {
     if (this.data?.batch) {
       const batch = this.data.batch;
       this.form.patchValue({
-        productId: batch.productId,
-        warehouseId: batch.warehouseId,
-        supplierId: batch.supplierId,
-        industryId: batch.industryId,
-        brandId: batch.brandId,
+        product_id: batch.product_id,
+        warehouse_id: batch.warehouse_id,
+        supplier_id: batch.supplier_id,
+        industry_id: batch.industry_id,
+        brand_id: batch.brand_id,
         code: batch.code,
         stock: batch.stock,
-        wholesalePrice: batch.wholesalePrice,
-        retailPrice: batch.retailPrice,
-        finalPrice: batch.finalPrice,
+        wholesale_price: batch.wholesale_price,
+        retail_price: batch.retail_price,
+        final_price: batch.final_price,
         description: batch.description,
         brand: batch.brand,
         model: batch.model,
-        expirationDate: batch.expirationDate
-          ? batch.expirationDate.toISOString().substring(0, 10)
-          : null,
+        expiration_date: batch.expiration_date ?? null,
         active: batch.state === 'ACTIVE',
       });
     }
@@ -97,20 +95,20 @@ export class BatchFormModal implements OnInit {
     }
     const raw = this.form.value;
     this.dialogRef.close({
-      productId: raw.productId!,
-      warehouseId: raw.warehouseId!,
-      supplierId: raw.supplierId!,
-      industryId: raw.industryId!,
-      brandId: raw.brandId || null,
+      product_id: raw.product_id!,
+      warehouse_id: raw.warehouse_id!,
+      supplier_id: raw.supplier_id!,
+      industry_id: raw.industry_id!,
+      brand_id: raw.brand_id || null,
       code: raw.code || null,
       stock: raw.stock !== null && raw.stock !== undefined ? Number(raw.stock) : null,
-      wholesalePrice: raw.wholesalePrice !== null && raw.wholesalePrice !== undefined ? Number(raw.wholesalePrice) : null,
-      retailPrice: raw.retailPrice !== null && raw.retailPrice !== undefined ? Number(raw.retailPrice) : null,
-      finalPrice: raw.finalPrice !== null && raw.finalPrice !== undefined ? Number(raw.finalPrice) : null,
+      wholesale_price: raw.wholesale_price !== null && raw.wholesale_price !== undefined ? Number(raw.wholesale_price) : null,
+      retail_price: raw.retail_price !== null && raw.retail_price !== undefined ? Number(raw.retail_price) : null,
+      final_price: raw.final_price !== null && raw.final_price !== undefined ? Number(raw.final_price) : null,
       description: raw.description || null,
       brand: raw.brand || null,
       model: raw.model || null,
-      expirationDate: raw.expirationDate ? new Date(raw.expirationDate) : null,
+      expiration_date: raw.expiration_date || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }
@@ -124,7 +122,8 @@ export class BatchFormModal implements OnInit {
     if (!control?.errors || !control.touched) return '';
     if (control.errors['required']) return 'Este campo es obligatorio';
     if (control.errors['min']) return `El valor mínimo es ${control.errors['min'].min}`;
-    if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+    if (control.errors['maxlength'])
+      return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
     return 'Campo inválido';
   }
 }

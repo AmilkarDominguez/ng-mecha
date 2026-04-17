@@ -5,8 +5,7 @@ export interface ProductCategory {
   name: string | null;
   title: string | null;
   description: string | null;
-  icon: string | null;
   state: EntityState;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at?: string | Date;
+  updated_at?: string | Date;
 }

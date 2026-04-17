@@ -5,8 +5,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Industry } from '../../../core/models/industry.model';
-import { INDUSTRY_MOCK } from './industry.mock';
+import { SPIndustry } from '../../../core/services/supabase/sb-industry';
 import { IndustryTable } from './components/industry-table/industry-table';
 import { IndustryFormModal, IndustryFormData } from './components/industry-form-modal/industry-form-modal';
 import { IndustryDetailModal } from './components/industry-detail-modal/industry-detail-modal';
@@ -27,16 +28,18 @@ import { IndustryDeleteConfirmModal } from './components/industry-delete-confirm
 export class IndustryDashboard {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private service = inject(SPIndustry);
 
-  private industries = signal<Industry[]>(INDUSTRY_MOCK);
-  searchTerm = signal('');
+  readonly industries = toSignal(this.service.listen(), { initialValue: [] });
+  readonly searchTerm = signal('');
 
-  filteredIndustries = computed(() => {
+  readonly filteredIndustries = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.industries();
-    return this.industries().filter(i =>
-      i.name.toLowerCase().includes(term) ||
-      (i.description ?? '').toLowerCase().includes(term)
+    return this.industries().filter(
+      (i) =>
+        i.name.toLowerCase().includes(term) ||
+        (i.description ?? '').toLowerCase().includes(term),
     );
   });
 
@@ -52,17 +55,17 @@ export class IndustryDashboard {
       data: {} satisfies IndustryFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const newIndustry: Industry = {
         ...result,
         id: crypto.randomUUID(),
         state: result.state ?? 'ACTIVE',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-      this.industries.update(list => [newIndustry, ...list]);
-      this.snackBar.open('Industria registrada correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.add(newIndustry).subscribe(() => {
+        this.snackBar.open('Industria registrada correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -73,15 +76,12 @@ export class IndustryDashboard {
       data: { industry } satisfies IndustryFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.industries.update(list =>
-        list.map(i => i.id === industry.id
-          ? { ...i, ...result, updatedAt: new Date() }
-          : i
-        )
-      );
-      this.snackBar.open('Industria actualizada correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.update({ ...result, id: industry.id }).subscribe(() => {
+        this.snackBar.open('Industria actualizada correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -100,10 +100,12 @@ export class IndustryDashboard {
       data: industry,
     });
 
-    ref.afterClosed().subscribe(confirmed => {
+    ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
-      this.industries.update(list => list.filter(i => i.id !== industry.id));
-      this.snackBar.open('Industria eliminada', 'Cerrar', { duration: 3000 });
+
+      this.service.delete(industry.id).subscribe(() => {
+        this.snackBar.open('Industria eliminada', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 }

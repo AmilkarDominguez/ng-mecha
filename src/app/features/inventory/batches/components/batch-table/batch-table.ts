@@ -53,10 +53,10 @@ export class BatchTable implements AfterViewInit {
     this.dataSource.sortingDataAccessor = (item, property) => {
       switch (property) {
         case 'code': return item.code ?? '';
-        case 'product': return this.getProductName(item.productId).toLowerCase();
-        case 'warehouse': return this.getWarehouseName(item.warehouseId).toLowerCase();
+        case 'product': return this.getProductName(item.product_id).toLowerCase();
+        case 'warehouse': return this.getWarehouseName(item.warehouse_id).toLowerCase();
         case 'stock': return item.stock ?? 0;
-        case 'finalPrice': return item.finalPrice ?? 0;
+        case 'finalPrice': return item.final_price ?? 0;
         case 'state': return item.state;
         default: return '';
       }

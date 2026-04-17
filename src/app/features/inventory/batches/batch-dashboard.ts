@@ -5,18 +5,14 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Batch } from '../../../core/models/batch.model';
-import { Product } from '../../../core/models/product.model';
-import { Warehouse } from '../../../core/models/warehouse.model';
-import { Supplier } from '../../../core/models/supplier.model';
-import { Industry } from '../../../core/models/industry.model';
-import { Brand } from '../../../core/models/brand.model';
-import { BATCH_MOCK } from './batch.mock';
-import { PRODUCT_MOCK } from '../product/product.mock';
-import { WAREHOUSE_MOCK } from '../warehouses/warehouse.mock';
-import { SUPPLIER_MOCK } from '../supplier/supplier.mock';
-import { INDUSTRY_MOCK } from '../industry/industry.mock';
-import { BRAND_MOCK } from '../brand/brand.mock';
+import { SPBatch } from '../../../core/services/supabase/sb-batch';
+import { SPProduct } from '../../../core/services/supabase/sb-product';
+import { SPWarehouse } from '../../../core/services/supabase/sb-warehouse';
+import { SPSupplier } from '../../../core/services/supabase/sb-supplier';
+import { SPIndustry } from '../../../core/services/supabase/sb-industry';
+import { SPBrand } from '../../../core/services/supabase/sb-brand';
 import { BatchTable } from './components/batch-table/batch-table';
 import {
   BatchFormModal,
@@ -40,22 +36,23 @@ import { BatchDeleteConfirmModal } from './components/batch-delete-confirm-modal
 export class BatchDashboard {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private service = inject(SPBatch);
 
-  private batches = signal<Batch[]>(BATCH_MOCK);
-  readonly products: Product[] = PRODUCT_MOCK;
-  readonly warehouses: Warehouse[] = WAREHOUSE_MOCK;
-  readonly suppliers: Supplier[] = SUPPLIER_MOCK;
-  readonly industries: Industry[] = INDUSTRY_MOCK;
-  readonly brands: Brand[] = BRAND_MOCK;
+  readonly batches = toSignal(this.service.listen(), { initialValue: [] });
+  readonly products = toSignal(inject(SPProduct).listen(), { initialValue: [] });
+  readonly warehouses = toSignal(inject(SPWarehouse).listen(), { initialValue: [] });
+  readonly suppliers = toSignal(inject(SPSupplier).listen(), { initialValue: [] });
+  readonly industries = toSignal(inject(SPIndustry).listen(), { initialValue: [] });
+  readonly brands = toSignal(inject(SPBrand).listen(), { initialValue: [] });
 
-  searchTerm = signal('');
+  readonly searchTerm = signal('');
 
-  filteredBatches = computed(() => {
+  readonly filteredBatches = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.batches();
-    return this.batches().filter(b => {
-      const product = this.products.find(p => p.id === b.productId);
-      const warehouse = this.warehouses.find(w => w.id === b.warehouseId);
+    return this.batches().filter((b) => {
+      const product = this.products().find((p) => p.id === b.product_id);
+      const warehouse = this.warehouses().find((w) => w.id === b.warehouse_id);
       return (
         (b.code ?? '').toLowerCase().includes(term) ||
         (b.brand ?? '').toLowerCase().includes(term) ||
@@ -77,25 +74,25 @@ export class BatchDashboard {
       width: '52rem',
       maxWidth: '95vw',
       data: {
-        products: this.products,
-        warehouses: this.warehouses,
-        suppliers: this.suppliers,
-        industries: this.industries,
-        brands: this.brands,
+        products: this.products(),
+        warehouses: this.warehouses(),
+        suppliers: this.suppliers(),
+        industries: this.industries(),
+        brands: this.brands(),
       } satisfies BatchFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const newBatch: Batch = {
         ...result,
         id: crypto.randomUUID(),
         state: result.state ?? 'ACTIVE',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-      this.batches.update(list => [newBatch, ...list]);
-      this.snackBar.open('Lote registrado correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.add(newBatch).subscribe(() => {
+        this.snackBar.open('Lote registrado correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -105,23 +102,20 @@ export class BatchDashboard {
       maxWidth: '95vw',
       data: {
         batch,
-        products: this.products,
-        warehouses: this.warehouses,
-        suppliers: this.suppliers,
-        industries: this.industries,
-        brands: this.brands,
+        products: this.products(),
+        warehouses: this.warehouses(),
+        suppliers: this.suppliers(),
+        industries: this.industries(),
+        brands: this.brands(),
       } satisfies BatchFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.batches.update(list =>
-        list.map(b => b.id === batch.id
-          ? { ...b, ...result, updatedAt: new Date() }
-          : b
-        )
-      );
-      this.snackBar.open('Lote actualizado correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.update({ ...result, id: batch.id }).subscribe(() => {
+        this.snackBar.open('Lote actualizado correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -131,11 +125,11 @@ export class BatchDashboard {
       maxWidth: '95vw',
       data: {
         batch,
-        products: this.products,
-        warehouses: this.warehouses,
-        suppliers: this.suppliers,
-        industries: this.industries,
-        brands: this.brands,
+        products: this.products(),
+        warehouses: this.warehouses(),
+        suppliers: this.suppliers(),
+        industries: this.industries(),
+        brands: this.brands(),
       } satisfies BatchDetailData,
     });
   }
@@ -147,10 +141,12 @@ export class BatchDashboard {
       data: batch,
     });
 
-    ref.afterClosed().subscribe(confirmed => {
+    ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
-      this.batches.update(list => list.filter(b => b.id !== batch.id));
-      this.snackBar.open('Lote eliminado', 'Cerrar', { duration: 3000 });
+
+      this.service.delete(batch.id).subscribe(() => {
+        this.snackBar.open('Lote eliminado', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 }

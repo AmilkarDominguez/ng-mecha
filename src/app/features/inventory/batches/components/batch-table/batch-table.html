@@ -16,13 +16,13 @@
     <!-- Column: product -->
     <ng-container matColumnDef="product">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Producto</th>
-      <td mat-cell *matCellDef="let row" class="cell-product">{{ getProductName(row.productId) }}</td>
+      <td mat-cell *matCellDef="let row" class="cell-product">{{ getProductName(row.product_id) }}</td>
     </ng-container>
 
     <!-- Column: warehouse -->
     <ng-container matColumnDef="warehouse">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Almacén</th>
-      <td mat-cell *matCellDef="let row" class="cell-warehouse">{{ getWarehouseName(row.warehouseId) }}</td>
+      <td mat-cell *matCellDef="let row" class="cell-warehouse">{{ getWarehouseName(row.warehouse_id) }}</td>
     </ng-container>
 
     <!-- Column: stock -->
@@ -41,8 +41,8 @@
     <ng-container matColumnDef="finalPrice">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Precio Final</th>
       <td mat-cell *matCellDef="let row" class="cell-number">
-        @if (row.finalPrice !== null) {
-          <span class="price-value">Bs. {{ row.finalPrice | number:'1.2-2' }}</span>
+        @if (row.final_price !== null) {
+          <span class="price-value">Bs. {{ row.final_price | number:'1.2-2' }}</span>
         } @else {
           <span class="cell-empty">—</span>
         }

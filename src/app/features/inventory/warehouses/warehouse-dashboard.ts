@@ -5,8 +5,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Warehouse } from '../../../core/models/warehouse.model';
-import { WAREHOUSE_MOCK } from './warehouse.mock';
+import { SPWarehouse } from '../../../core/services/supabase/sb-warehouse';
 import { WarehouseTable } from './components/warehouse-table/warehouse-table';
 import {
   WarehouseFormModal,
@@ -30,16 +31,18 @@ import { WarehouseDeleteConfirmModal } from './components/warehouse-delete-confi
 export class WarehouseDashboard {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private service = inject(SPWarehouse);
 
-  private warehouses = signal<Warehouse[]>(WAREHOUSE_MOCK);
-  searchTerm = signal('');
+  readonly warehouses = toSignal(this.service.listen(), { initialValue: [] });
+  readonly searchTerm = signal('');
 
-  filteredWarehouses = computed(() => {
+  readonly filteredWarehouses = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.warehouses();
-    return this.warehouses().filter(w =>
-      w.name.toLowerCase().includes(term) ||
-      (w.description ?? '').toLowerCase().includes(term)
+    return this.warehouses().filter(
+      (w) =>
+        w.name.toLowerCase().includes(term) ||
+        (w.description ?? '').toLowerCase().includes(term),
     );
   });
 
@@ -55,17 +58,17 @@ export class WarehouseDashboard {
       data: {} satisfies WarehouseFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const newWarehouse: Warehouse = {
         ...result,
         id: crypto.randomUUID(),
         state: result.state ?? 'ACTIVE',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-      this.warehouses.update(list => [newWarehouse, ...list]);
-      this.snackBar.open('Almacén registrado correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.add(newWarehouse).subscribe(() => {
+        this.snackBar.open('Almacén registrado correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -76,15 +79,12 @@ export class WarehouseDashboard {
       data: { warehouse } satisfies WarehouseFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.warehouses.update(list =>
-        list.map(w => w.id === warehouse.id
-          ? { ...w, ...result, updatedAt: new Date() }
-          : w
-        )
-      );
-      this.snackBar.open('Almacén actualizado correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.update({ ...result, id: warehouse.id }).subscribe(() => {
+        this.snackBar.open('Almacén actualizado correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -103,10 +103,12 @@ export class WarehouseDashboard {
       data: warehouse,
     });
 
-    ref.afterClosed().subscribe(confirmed => {
+    ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
-      this.warehouses.update(list => list.filter(w => w.id !== warehouse.id));
-      this.snackBar.open('Almacén eliminado', 'Cerrar', { duration: 3000 });
+
+      this.service.delete(warehouse.id).subscribe(() => {
+        this.snackBar.open('Almacén eliminado', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 }

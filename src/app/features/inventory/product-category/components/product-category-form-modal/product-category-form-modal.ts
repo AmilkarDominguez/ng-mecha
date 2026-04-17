@@ -39,7 +39,6 @@ export class ProductCategoryFormModal implements OnInit {
     name: ['', [Validators.required, Validators.maxLength(150)]],
     title: ['', [Validators.maxLength(200)]],
     description: ['', [Validators.maxLength(500)]],
-    icon: ['', [Validators.maxLength(100)]],
     active: [true],
   });
 
@@ -49,7 +48,6 @@ export class ProductCategoryFormModal implements OnInit {
         name: this.data.category.name ?? '',
         title: this.data.category.title ?? '',
         description: this.data.category.description ?? '',
-        icon: this.data.category.icon ?? '',
         active: this.data.category.state === 'ACTIVE',
       });
     }
@@ -62,10 +60,10 @@ export class ProductCategoryFormModal implements OnInit {
     }
     const raw = this.form.value;
     this.dialogRef.close({
+      id: this.data.category?.id || null,
       name: raw.name || null,
       title: raw.title || null,
       description: raw.description || null,
-      icon: raw.icon || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }

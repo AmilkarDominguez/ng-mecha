@@ -5,8 +5,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Brand } from '../../../core/models/brand.model';
-import { BRAND_MOCK } from './brand.mock';
+import { SPBrand } from '../../../core/services/supabase/sb-brand';
 import { BrandTable } from './components/brand-table/brand-table';
 import { BrandFormModal, BrandFormData } from './components/brand-form-modal/brand-form-modal';
 import { BrandDetailModal } from './components/brand-detail-modal/brand-detail-modal';
@@ -27,17 +28,19 @@ import { BrandDeleteConfirmModal } from './components/brand-delete-confirm-modal
 export class BrandDashboard {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private service = inject(SPBrand);
 
-  private brands = signal<Brand[]>(BRAND_MOCK);
-  searchTerm = signal('');
+  readonly brands = toSignal(this.service.listen(), { initialValue: [] });
+  readonly searchTerm = signal('');
 
-  filteredBrands = computed(() => {
+  readonly filteredBrands = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.brands();
-    return this.brands().filter(b =>
-      (b.name ?? '').toLowerCase().includes(term) ||
-      (b.description ?? '').toLowerCase().includes(term) ||
-      (b.score ?? '').toLowerCase().includes(term)
+    return this.brands().filter(
+      (b) =>
+        (b.name ?? '').toLowerCase().includes(term) ||
+        (b.description ?? '').toLowerCase().includes(term) ||
+        (b.score ?? '').toLowerCase().includes(term),
     );
   });
 
@@ -53,17 +56,17 @@ export class BrandDashboard {
       data: {} satisfies BrandFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const newBrand: Brand = {
         ...result,
         id: crypto.randomUUID(),
         state: result.state ?? 'ACTIVE',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-      this.brands.update(list => [newBrand, ...list]);
-      this.snackBar.open('Marca registrada correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.add(newBrand).subscribe(() => {
+        this.snackBar.open('Marca registrada correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -74,15 +77,12 @@ export class BrandDashboard {
       data: { brand } satisfies BrandFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.brands.update(list =>
-        list.map(b => b.id === brand.id
-          ? { ...b, ...result, updatedAt: new Date() }
-          : b
-        )
-      );
-      this.snackBar.open('Marca actualizada correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.update({ ...result, id: brand.id }).subscribe(() => {
+        this.snackBar.open('Marca actualizada correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -101,10 +101,12 @@ export class BrandDashboard {
       data: brand,
     });
 
-    ref.afterClosed().subscribe(confirmed => {
+    ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
-      this.brands.update(list => list.filter(b => b.id !== brand.id));
-      this.snackBar.open('Marca eliminada', 'Cerrar', { duration: 3000 });
+
+      this.service.delete(brand.id).subscribe(() => {
+        this.snackBar.open('Marca eliminada', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 }

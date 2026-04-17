@@ -5,8 +5,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Supplier } from '../../../core/models/supplier.model';
-import { SUPPLIER_MOCK } from './supplier.mock';
+import { SPSupplier } from '../../../core/services/supabase/sb-supplier';
 import { SupplierTable } from './components/supplier-table/supplier-table';
 import { SupplierFormModal, SupplierFormData } from './components/supplier-form-modal/supplier-form-modal';
 import { SupplierDetailModal } from './components/supplier-detail-modal/supplier-detail-modal';
@@ -27,18 +28,20 @@ import { SupplierDeleteConfirmModal } from './components/supplier-delete-confirm
 export class SupplierDashboard {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private service = inject(SPSupplier);
 
-  private suppliers = signal<Supplier[]>(SUPPLIER_MOCK);
-  searchTerm = signal('');
+  readonly suppliers = toSignal(this.service.listen(), { initialValue: [] });
+  readonly searchTerm = signal('');
 
-  filteredSuppliers = computed(() => {
+  readonly filteredSuppliers = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.suppliers();
-    return this.suppliers().filter(s =>
-      s.name.toLowerCase().includes(term) ||
-      (s.email ?? '').toLowerCase().includes(term) ||
-      (s.address ?? '').toLowerCase().includes(term) ||
-      (s.description ?? '').toLowerCase().includes(term)
+    return this.suppliers().filter(
+      (s) =>
+        s.name.toLowerCase().includes(term) ||
+        (s.email ?? '').toLowerCase().includes(term) ||
+        (s.address ?? '').toLowerCase().includes(term) ||
+        (s.description ?? '').toLowerCase().includes(term),
     );
   });
 
@@ -54,17 +57,17 @@ export class SupplierDashboard {
       data: {} satisfies SupplierFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const newSupplier: Supplier = {
         ...result,
         id: crypto.randomUUID(),
         state: result.state ?? 'ACTIVE',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-      this.suppliers.update(list => [newSupplier, ...list]);
-      this.snackBar.open('Proveedor registrado correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.add(newSupplier).subscribe(() => {
+        this.snackBar.open('Proveedor registrado correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -75,15 +78,12 @@ export class SupplierDashboard {
       data: { supplier } satisfies SupplierFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.suppliers.update(list =>
-        list.map(s => s.id === supplier.id
-          ? { ...s, ...result, updatedAt: new Date() }
-          : s
-        )
-      );
-      this.snackBar.open('Proveedor actualizado correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.update({ ...result, id: supplier.id }).subscribe(() => {
+        this.snackBar.open('Proveedor actualizado correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -102,10 +102,12 @@ export class SupplierDashboard {
       data: supplier,
     });
 
-    ref.afterClosed().subscribe(confirmed => {
+    ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
-      this.suppliers.update(list => list.filter(s => s.id !== supplier.id));
-      this.snackBar.open('Proveedor eliminado', 'Cerrar', { duration: 3000 });
+
+      this.service.delete(supplier.id).subscribe(() => {
+        this.snackBar.open('Proveedor eliminado', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 }

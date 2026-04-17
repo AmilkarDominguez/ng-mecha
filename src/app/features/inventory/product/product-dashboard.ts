@@ -5,12 +5,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Product } from '../../../core/models/product.model';
-import { ProductCategory } from '../../../core/models/product-category.model';
-import { ProductPresentation } from '../../../core/models/product-presentation.model';
-import { PRODUCT_MOCK } from './product.mock';
-import { PRODUCT_CATEGORY_MOCK } from '../product-category/product-category.mock';
-import { PRODUCT_PRESENTATION_MOCK } from '../product-presentation/product-presentation.mock';
+import { SPProduct } from '../../../core/services/supabase/sb-product';
+import { SPProductCategory } from '../../../core/services/supabase/sb-product-cateogory';
+import { SPProductPresentation } from '../../../core/services/supabase/sb-product-presentation';
 import { ProductTable } from './components/product-table/product-table';
 import { ProductFormModal, ProductFormData } from './components/product-form-modal/product-form-modal';
 import { ProductDetailModal, ProductDetailData } from './components/product-detail-modal/product-detail-modal';
@@ -31,19 +30,22 @@ import { ProductDeleteConfirmModal } from './components/product-delete-confirm-m
 export class ProductDashboard {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private service = inject(SPProduct);
+  private categoryService = inject(SPProductCategory);
+  private presentationService = inject(SPProductPresentation);
 
-  private products = signal<Product[]>(PRODUCT_MOCK);
-  searchTerm = signal('');
+  readonly products = toSignal(this.service.listen(), { initialValue: [] });
+  readonly categories = toSignal(this.categoryService.listen(), { initialValue: [] });
+  readonly presentations = toSignal(this.presentationService.listen(), { initialValue: [] });
+  readonly searchTerm = signal('');
 
-  readonly categories: ProductCategory[] = PRODUCT_CATEGORY_MOCK;
-  readonly presentations: ProductPresentation[] = PRODUCT_PRESENTATION_MOCK;
-
-  filteredProducts = computed(() => {
+  readonly filteredProducts = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.products();
-    return this.products().filter(p =>
-      (p.name ?? '').toLowerCase().includes(term) ||
-      (p.description ?? '').toLowerCase().includes(term)
+    return this.products().filter(
+      (p) =>
+        (p.name ?? '').toLowerCase().includes(term) ||
+        (p.description ?? '').toLowerCase().includes(term),
     );
   });
 
@@ -56,20 +58,23 @@ export class ProductDashboard {
     const ref = this.dialog.open(ProductFormModal, {
       width: '44rem',
       maxWidth: '95vw',
-      data: { categories: this.categories, presentations: this.presentations } satisfies ProductFormData,
+      data: {
+        categories: this.categories(),
+        presentations: this.presentations(),
+      } satisfies ProductFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const newProduct: Product = {
         ...result,
         id: crypto.randomUUID(),
         state: result.state ?? 'ACTIVE',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-      this.products.update(list => [newProduct, ...list]);
-      this.snackBar.open('Producto registrado correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.add(newProduct).subscribe(() => {
+        this.snackBar.open('Producto registrado correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -77,18 +82,19 @@ export class ProductDashboard {
     const ref = this.dialog.open(ProductFormModal, {
       width: '44rem',
       maxWidth: '95vw',
-      data: { product, categories: this.categories, presentations: this.presentations } satisfies ProductFormData,
+      data: {
+        product,
+        categories: this.categories(),
+        presentations: this.presentations(),
+      } satisfies ProductFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.products.update(list =>
-        list.map(p => p.id === product.id
-          ? { ...p, ...result, updatedAt: new Date() }
-          : p
-        )
-      );
-      this.snackBar.open('Producto actualizado correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.update({ ...result, id: product.id }).subscribe(() => {
+        this.snackBar.open('Producto actualizado correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -96,7 +102,11 @@ export class ProductDashboard {
     this.dialog.open(ProductDetailModal, {
       width: '40rem',
       maxWidth: '95vw',
-      data: { product, categories: this.categories, presentations: this.presentations } satisfies ProductDetailData,
+      data: {
+        product,
+        categories: this.categories(),
+        presentations: this.presentations(),
+      } satisfies ProductDetailData,
     });
   }
 
@@ -107,10 +117,12 @@ export class ProductDashboard {
       data: product,
     });
 
-    ref.afterClosed().subscribe(confirmed => {
+    ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
-      this.products.update(list => list.filter(p => p.id !== product.id));
-      this.snackBar.open('Producto eliminado', 'Cerrar', { duration: 3000 });
+
+      this.service.delete(product.id).subscribe(() => {
+        this.snackBar.open('Producto eliminado', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 }

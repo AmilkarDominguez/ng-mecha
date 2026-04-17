@@ -2,12 +2,12 @@ export type EntityState = 'ACTIVE' | 'INACTIVE';
 
 export interface Product {
   id: string;
-  categoryId: string | null;
-  presentationId: string | null;
+  category_id: string | null;
+  presentation_id: string | null;
   name: string | null;
   description: string | null;
   photo: string | null;
   state: EntityState;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at?: string | Date;
+  updated_at?: string | Date;
 }

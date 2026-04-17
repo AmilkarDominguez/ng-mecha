@@ -6,10 +6,10 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Product } from '../../../../../core/models/product.model';
 import { ProductCategory } from '../../../../../core/models/product-category.model';
 import { ProductPresentation } from '../../../../../core/models/product-presentation.model';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 export interface ProductFormData {
   product?: Product;
@@ -42,17 +42,17 @@ export class ProductFormModal implements OnInit {
   }
 
   get categories(): ProductCategory[] {
-    return this.data.categories.filter(c => c.state === 'ACTIVE');
+    return this.data.categories.filter((c) => c.state === 'ACTIVE');
   }
 
   get presentations(): ProductPresentation[] {
-    return this.data.presentations.filter(p => p.state === 'ACTIVE');
+    return this.data.presentations.filter((p) => p.state === 'ACTIVE');
   }
 
   form = this.fb.group({
     name: ['', [Validators.maxLength(200)]],
-    categoryId: [null as string | null],
-    presentationId: [null as string | null],
+    category_id: [null as string | null],
+    presentation_id: [null as string | null],
     description: ['', [Validators.maxLength(1000)]],
     photo: ['', [Validators.maxLength(500)]],
     active: [true],
@@ -62,8 +62,8 @@ export class ProductFormModal implements OnInit {
     if (this.data?.product) {
       this.form.patchValue({
         name: this.data.product.name ?? '',
-        categoryId: this.data.product.categoryId,
-        presentationId: this.data.product.presentationId,
+        category_id: this.data.product.category_id,
+        presentation_id: this.data.product.presentation_id,
         description: this.data.product.description ?? '',
         photo: this.data.product.photo ?? '',
         active: this.data.product.state === 'ACTIVE',
@@ -79,8 +79,8 @@ export class ProductFormModal implements OnInit {
     const raw = this.form.value;
     this.dialogRef.close({
       name: raw.name || null,
-      categoryId: raw.categoryId ?? null,
-      presentationId: raw.presentationId ?? null,
+      category_id: raw.category_id ?? null,
+      presentation_id: raw.presentation_id ?? null,
       description: raw.description || null,
       photo: raw.photo || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
@@ -95,7 +95,8 @@ export class ProductFormModal implements OnInit {
     const control = this.form.get(field);
     if (!control?.errors || !control.touched) return '';
     if (control.errors['required']) return 'Este campo es obligatorio';
-    if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+    if (control.errors['maxlength'])
+      return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
     return 'Campo inválido';
   }
 }

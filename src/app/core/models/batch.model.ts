@@ -2,21 +2,21 @@ export type EntityState = 'ACTIVE' | 'INACTIVE';
 
 export interface Batch {
   id: string;
-  productId: string;
-  warehouseId: string;
-  supplierId: string;
-  industryId: string;
-  brandId: string | null;
-  wholesalePrice: number | null;
-  retailPrice: number | null;
-  finalPrice: number | null;
+  product_id: string;
+  warehouse_id: string;
+  supplier_id: string;
+  industry_id: string;
+  brand_id: string | null;
+  wholesale_price: number | null;
+  retail_price: number | null;
+  final_price: number | null;
   code: string | null;
   stock: number | null;
   description: string | null;
   brand: string | null;
   model: string | null;
-  expirationDate: Date | null;
+  expiration_date: string | Date | null;
   state: EntityState;
-  createdAt: Date;
-  updatedAt: Date;
+  created_at?: string | Date;
+  updated_at?: string | Date;
 }

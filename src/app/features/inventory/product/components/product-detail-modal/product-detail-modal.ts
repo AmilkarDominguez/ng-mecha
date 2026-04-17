@@ -33,13 +33,13 @@ export class ProductDetailModal {
   readonly product: Product = this.data.product;
 
   getCategoryName(): string {
-    if (!this.product.categoryId) return '—';
-    return this.data.categories.find(c => c.id === this.product.categoryId)?.name ?? '—';
+    if (!this.product.category_id) return '—';
+    return this.data.categories.find(c => c.id === this.product.category_id)?.name ?? '—';
   }
 
   getPresentationName(): string {
-    if (!this.product.presentationId) return '—';
-    const p = this.data.presentations.find(p => p.id === this.product.presentationId);
+    if (!this.product.presentation_id) return '—';
+    const p = this.data.presentations.find(p => p.id === this.product.presentation_id);
     if (!p) return '—';
     return p.code ? `${p.name} (${p.code})` : (p.name ?? '—');
   }

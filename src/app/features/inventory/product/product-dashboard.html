@@ -22,8 +22,8 @@
 
   <app-product-table
     [data]="filteredProducts()"
-    [categories]="categories"
-    [presentations]="presentations"
+    [categories]="categories()"
+    [presentations]="presentations()"
     (edit)="onEdit($event)"
     (view)="onView($event)"
     (delete)="onDelete($event)"

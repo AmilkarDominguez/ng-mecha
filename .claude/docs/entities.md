@@ -15,10 +15,9 @@
 | name        | String        | nullable         |
 | title       | String        | nullable         |
 | description | String        | nullable         |
-| icon        | String        | nullable         |
 | state       | State (enum)  | default: ACTIVE  |
-| createdAt   | LocalDateTime | auto             |
-| updatedAt   | LocalDateTime | auto             |
+| created_at   | LocalDateTime | auto             |
+| updated_at   | LocalDateTime | auto             |
 
 **Relaciones:**
 - One-to-Many → `Product`
@@ -36,8 +35,8 @@
 | code        | String        | nullable         |
 | description | String        | nullable         |
 | state       | State (enum)  | default: ACTIVE  |
-| createdAt   | LocalDateTime | auto             |
-| updatedAt   | LocalDateTime | auto             |
+| created_at   | LocalDateTime | auto             |
+| updated_at   | LocalDateTime | auto             |
 
 **Relaciones:**
 - One-to-Many → `Product`
@@ -57,8 +56,8 @@
 | description    | String        | nullable                            |
 | photo          | String        | nullable                            |
 | state          | State (enum)  | default: ACTIVE                     |
-| createdAt      | LocalDateTime | auto                                |
-| updatedAt      | LocalDateTime | auto                                |
+| created_at      | LocalDateTime | auto                                |
+| updated_at      | LocalDateTime | auto                                |
 
 **Relaciones:**
 - Many-to-One → `ProductCategory`
@@ -77,8 +76,8 @@
 | id        | String (UUID) | PK, auto-increment        |
 | productId | Long (FK)     | nullable → products.id    |
 | path      | String        | nullable                  |
-| createdAt | LocalDateTime | auto                      |
-| updatedAt | LocalDateTime | auto                      |
+| created_at | LocalDateTime | auto                      |
+| updated_at | LocalDateTime | auto                      |
 
 **Relaciones:**
 - Many-to-One → `Product`
@@ -97,8 +96,8 @@
 | email       | String        | nullable         |
 | address     | String        | nullable         |
 | state       | State (enum)  | default: ACTIVE  |
-| createdAt   | LocalDateTime | auto             |
-| updatedAt   | LocalDateTime | auto             |
+| created_at   | LocalDateTime | auto             |
+| updated_at   | LocalDateTime | auto             |
 
 **Relaciones:**
 - One-to-Many → `Batch`
@@ -115,8 +114,8 @@
 | name        | String        | not null         |
 | description | String        | nullable         |
 | state       | State (enum)  | default: ACTIVE  |
-| createdAt   | LocalDateTime | auto             |
-| updatedAt   | LocalDateTime | auto             |
+| created_at   | LocalDateTime | auto             |
+| updated_at   | LocalDateTime | auto             |
 
 **Relaciones:**
 - One-to-Many → `Batch`
@@ -134,8 +133,8 @@
 | description | String        | nullable         |
 | score       | String        | nullable         |
 | state       | State (enum)  | default: ACTIVE  |
-| createdAt   | LocalDateTime | auto             |
-| updatedAt   | LocalDateTime | auto             |
+| created_at   | LocalDateTime | auto             |
+| updated_at   | LocalDateTime | auto             |
 
 **Relaciones:**
 - One-to-Many → `Batch`
@@ -152,8 +151,8 @@
 | name        | String        | not null         |
 | description | String        | nullable         |
 | state       | State (enum)  | default: ACTIVE  |
-| createdAt   | LocalDateTime | auto             |
-| updatedAt   | LocalDateTime | auto             |
+| created_at   | LocalDateTime | auto             |
+| updated_at   | LocalDateTime | auto             |
 
 **Relaciones:**
 - One-to-Many → `Batch`
@@ -182,8 +181,8 @@
 | model          | String          | nullable                      |
 | expirationDate | LocalDate       | nullable                      |
 | state          | State (enum)    | default: ACTIVE               |
-| createdAt      | LocalDateTime   | auto                          |
-| updatedAt      | LocalDateTime   | auto                          |
+| created_at      | LocalDateTime   | auto                          |
+| updated_at      | LocalDateTime   | auto                          |
 
 **Relaciones:**
 - Many-to-One → `Product`

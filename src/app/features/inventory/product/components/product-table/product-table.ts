@@ -51,8 +51,8 @@ export class ProductTable implements AfterViewInit {
     this.dataSource.sortingDataAccessor = (item, property) => {
       switch (property) {
         case 'name': return (item.name ?? '').toLowerCase();
-        case 'category': return this.getCategoryName(item.categoryId).toLowerCase();
-        case 'presentation': return this.getPresentationName(item.presentationId).toLowerCase();
+        case 'category': return this.getCategoryName(item.category_id).toLowerCase();
+        case 'presentation': return this.getPresentationName(item.presentation_id).toLowerCase();
         case 'state': return item.state;
         default: return '';
       }

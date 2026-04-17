@@ -16,7 +16,7 @@
 
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Categoría</mat-label>
-      <mat-select formControlName="categoryId">
+      <mat-select formControlName="category_id">
         <mat-option [value]="null">— Sin categoría —</mat-option>
         @for (cat of categories; track cat.id) {
           <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
@@ -26,7 +26,7 @@
 
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Presentación</mat-label>
-      <mat-select formControlName="presentationId">
+      <mat-select formControlName="presentation_id">
         <mat-option [value]="null">— Sin presentación —</mat-option>
         @for (pres of presentations; track pres.id) {
           <mat-option [value]="pres.id">

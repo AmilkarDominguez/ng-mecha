@@ -22,14 +22,6 @@
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Ícono (Material Icon)</mat-label>
-      <input matInput formControlName="icon" placeholder="Ej. oil_barrel, build, tire_repair" />
-      @if (getFieldError('icon')) {
-      <mat-error>{{ getFieldError('icon') }}</mat-error>
-      }
-    </mat-form-field>
-
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Descripción</mat-label>
       <textarea matInput formControlName="description" rows="2"

@@ -29,7 +29,7 @@ export class ProductCategoryTable implements AfterViewInit {
   view = output<ProductCategory>();
   delete = output<ProductCategory>();
 
-  readonly displayedColumns = ['name', 'icon', 'state', 'actions'];
+  readonly displayedColumns = ['name', 'state', 'actions'];
 
   dataSource = new MatTableDataSource<ProductCategory>([]);
 
@@ -49,7 +49,6 @@ export class ProductCategoryTable implements AfterViewInit {
     this.dataSource.sortingDataAccessor = (item, property) => {
       switch (property) {
         case 'name': return (item.name ?? '').toLowerCase();
-        case 'icon': return (item.icon ?? '').toLowerCase();
         case 'state': return item.state;
         default: return '';
       }

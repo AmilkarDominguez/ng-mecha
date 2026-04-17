@@ -11,7 +11,7 @@
     <ng-container matColumnDef="category">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Categoría</th>
       <td mat-cell *matCellDef="let row" class="cell-category">
-        {{ getCategoryName(row.categoryId) }}
+        {{ getCategoryName(row.category_id) }}
       </td>
     </ng-container>
 
@@ -19,8 +19,8 @@
     <ng-container matColumnDef="presentation">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Presentación</th>
       <td mat-cell *matCellDef="let row">
-        @if (row.presentationId) {
-          <span class="presentation-badge">{{ getPresentationName(row.presentationId) }}</span>
+        @if (row.presentation_id) {
+          <span class="presentation-badge">{{ getPresentationName(row.presentation_id) }}</span>
         } @else {
           <span class="cell-empty">—</span>
         }

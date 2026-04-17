@@ -5,8 +5,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ProductPresentation } from '../../../core/models/product-presentation.model';
-import { PRODUCT_PRESENTATION_MOCK } from './product-presentation.mock';
+import { SPProductPresentation } from '../../../core/services/supabase/sb-product-presentation';
 import { ProductPresentationTable } from './components/product-presentation-table/product-presentation-table';
 import {
   ProductPresentationFormModal,
@@ -30,17 +31,19 @@ import { ProductPresentationDeleteConfirmModal } from './components/product-pres
 export class ProductPresentationDashboard {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private service = inject(SPProductPresentation);
 
-  private presentations = signal<ProductPresentation[]>(PRODUCT_PRESENTATION_MOCK);
-  searchTerm = signal('');
+  readonly presentations = toSignal(this.service.listen(), { initialValue: [] });
+  readonly searchTerm = signal('');
 
-  filteredPresentations = computed(() => {
+  readonly filteredPresentations = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.presentations();
-    return this.presentations().filter(p =>
-      (p.name ?? '').toLowerCase().includes(term) ||
-      (p.code ?? '').toLowerCase().includes(term) ||
-      (p.description ?? '').toLowerCase().includes(term)
+    return this.presentations().filter(
+      (p) =>
+        (p.name ?? '').toLowerCase().includes(term) ||
+        (p.code ?? '').toLowerCase().includes(term) ||
+        (p.description ?? '').toLowerCase().includes(term),
     );
   });
 
@@ -56,17 +59,17 @@ export class ProductPresentationDashboard {
       data: {} satisfies ProductPresentationFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const newPresentation: ProductPresentation = {
         ...result,
         id: crypto.randomUUID(),
         state: result.state ?? 'ACTIVE',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-      this.presentations.update(list => [newPresentation, ...list]);
-      this.snackBar.open('Presentación registrada correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.add(newPresentation).subscribe(() => {
+        this.snackBar.open('Presentación registrada correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -77,15 +80,12 @@ export class ProductPresentationDashboard {
       data: { presentation } satisfies ProductPresentationFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.presentations.update(list =>
-        list.map(p => p.id === presentation.id
-          ? { ...p, ...result, updatedAt: new Date() }
-          : p
-        )
-      );
-      this.snackBar.open('Presentación actualizada correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.update({ ...result, id: presentation.id }).subscribe(() => {
+        this.snackBar.open('Presentación actualizada correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -104,10 +104,12 @@ export class ProductPresentationDashboard {
       data: presentation,
     });
 
-    ref.afterClosed().subscribe(confirmed => {
+    ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
-      this.presentations.update(list => list.filter(p => p.id !== presentation.id));
-      this.snackBar.open('Presentación eliminada', 'Cerrar', { duration: 3000 });
+
+      this.service.delete(presentation.id).subscribe(() => {
+        this.snackBar.open('Presentación eliminada', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 }

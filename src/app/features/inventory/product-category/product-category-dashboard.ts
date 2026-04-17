@@ -5,8 +5,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ProductCategory } from '../../../core/models/product-category.model';
-import { PRODUCT_CATEGORY_MOCK } from './product-category.mock';
+import { SPProductCategory } from '../../../core/services/supabase/sb-product-cateogory';
 import { ProductCategoryTable } from './components/product-category-table/product-category-table';
 import {
   ProductCategoryFormModal,
@@ -30,17 +31,19 @@ import { ProductCategoryDeleteConfirmModal } from './components/product-category
 export class ProductCategoryDashboard {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
+  private service = inject(SPProductCategory);
 
-  private categories = signal<ProductCategory[]>(PRODUCT_CATEGORY_MOCK);
-  searchTerm = signal('');
+  readonly categories = toSignal(this.service.listen(), { initialValue: [] });
+  readonly searchTerm = signal('');
 
-  filteredCategories = computed(() => {
+  readonly filteredCategories = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     if (!term) return this.categories();
-    return this.categories().filter(c =>
-      (c.name ?? '').toLowerCase().includes(term) ||
-      (c.title ?? '').toLowerCase().includes(term) ||
-      (c.description ?? '').toLowerCase().includes(term)
+    return this.categories().filter(
+      (c) =>
+        (c.name ?? '').toLowerCase().includes(term) ||
+        (c.title ?? '').toLowerCase().includes(term) ||
+        (c.description ?? '').toLowerCase().includes(term),
     );
   });
 
@@ -56,17 +59,17 @@ export class ProductCategoryDashboard {
       data: {} satisfies ProductCategoryFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
       const newCategory: ProductCategory = {
         ...result,
         id: crypto.randomUUID(),
         state: result.state ?? 'ACTIVE',
-        createdAt: new Date(),
-        updatedAt: new Date(),
       };
-      this.categories.update(list => [newCategory, ...list]);
-      this.snackBar.open('Categoría registrada correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.add(newCategory).subscribe(() => {
+        this.snackBar.open('Categoría registrada correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -77,15 +80,12 @@ export class ProductCategoryDashboard {
       data: { category } satisfies ProductCategoryFormData,
     });
 
-    ref.afterClosed().subscribe(result => {
+    ref.afterClosed().subscribe((result) => {
       if (!result) return;
-      this.categories.update(list =>
-        list.map(c => c.id === category.id
-          ? { ...c, ...result, updatedAt: new Date() }
-          : c
-        )
-      );
-      this.snackBar.open('Categoría actualizada correctamente', 'Cerrar', { duration: 3000 });
+
+      this.service.update({ ...result, id: category.id }).subscribe(() => {
+        this.snackBar.open('Categoría actualizada correctamente', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 
@@ -104,10 +104,12 @@ export class ProductCategoryDashboard {
       data: category,
     });
 
-    ref.afterClosed().subscribe(confirmed => {
+    ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
-      this.categories.update(list => list.filter(c => c.id !== category.id));
-      this.snackBar.open('Categoría eliminada', 'Cerrar', { duration: 3000 });
+
+      this.service.delete(category.id).subscribe(() => {
+        this.snackBar.open('Categoría eliminada', 'Cerrar', { duration: 3000 });
+      });
     });
   }
 }
