@@ -12,7 +12,7 @@
     }
   },
   "projects": {
-    "trace_sys": {
+    "sys": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -71,10 +71,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "trace_sys:build:production"
+              "buildTarget": "sys:build:production"
             },
             "development": {
-              "buildTarget": "trace_sys:build:development"
+              "buildTarget": "sys:build:development"
             }
           },
           "defaultConfiguration": "development"

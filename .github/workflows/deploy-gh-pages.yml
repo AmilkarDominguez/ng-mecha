@@ -21,6 +21,9 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
+    env:
+      DIST_PATH: dist/sys/browser
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,10 +37,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Genera ambos archivos de environment.
-      # environment.ts no existe en el repo (está en .gitignore)
-      # pero Angular necesita que exista para que fileReplacements funcione.
-      # environment.prod.ts se genera con los secrets reales.
       - name: Create environment files
         run: |
           mkdir -p src/environments
@@ -61,8 +60,11 @@ jobs:
       - name: Build
         run: npx ng build --configuration production --base-href /${{ github.event.repository.name }}/
 
+      - name: Verify dist output
+        run: ls -la ${{ env.DIST_PATH }}
+
       - name: Fix SPA routing
-        run: cp dist/*/browser/index.html dist/*/browser/404.html
+        run: cp ${{ env.DIST_PATH }}/index.html ${{ env.DIST_PATH }}/404.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -70,7 +72,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: dist/*/browser
+          path: ${{ env.DIST_PATH }}
 
       - name: Deploy to GitHub Pages
         id: deployment

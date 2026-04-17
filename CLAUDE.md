@@ -1,4 +1,4 @@
-# CLAUDE.md — trace_sys
+# CLAUDE.md — sys
 
 ## Descripcion del proyecto
 

@@ -1,7 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(find \"D:\\\\angular\\\\21\\\\trace_sys\" -name \"entities.md\" -o -name \"*.md\" 2>/dev/null | head -10)",
+      "Bash(find \"D:\\\\angular\\\\21\\\\sys\" -name \"entities.md\" -o -name \"*.md\" 2>/dev/null | head -10)",
       "Bash(npx ng:*)",
       "Bash(cmd /c \"npx ng build --configuration development 2>&1\" | tail -50)",
       "Bash(node_modules/.bin/ng build:*)",

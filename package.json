@@ -1,5 +1,5 @@
 {
-  "name": "trace-sys",
+  "name": "sys",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
