@@ -1,0 +1,30 @@
+<div class="customer-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Clientes</h1>
+      <span class="page-subtitle">Gestión de clientes del taller mecánico</span>
+    </div>
+    <button mat-flat-button color="primary" class="add-button" (click)="openCreateModal()">
+      <mat-icon>add_circle</mat-icon>
+      Nuevo Cliente
+    </button>
+  </div>
+
+  <div class="toolbar-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar cliente</mat-label>
+      <input matInput (input)="onSearch($event)" placeholder="Nombre, CI, teléfono o correo..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <span class="result-count">{{ filteredCustomers().length }} resultado(s)</span>
+  </div>
+
+  <app-customer-table
+    [data]="filteredCustomers()"
+    (edit)="onEdit($event)"
+    (view)="onView($event)"
+    (delete)="onDelete($event)"
+  />
+
+</div>

@@ -24,7 +24,7 @@
 
 ---
 
-## 14. ProductPresentation
+## 2. ProductPresentation
 
 **Tabla:** `product_presentations`
 
@@ -43,7 +43,7 @@
 
 ---
 
-## 15. Product
+## 3. Product
 
 **Tabla:** `products`
 
@@ -67,7 +67,7 @@
 
 ---
 
-## 16. Multimedia
+## 4. Multimedia
 
 **Tabla:** `multimedia`
 
@@ -84,7 +84,7 @@
 
 ---
 
-## 17. Supplier
+## 5. Supplier
 
 **Tabla:** `suppliers`
 
@@ -104,7 +104,7 @@
 
 ---
 
-## 18. Industry
+## 6. Industry
 
 **Tabla:** `industries`
 
@@ -122,7 +122,7 @@
 
 ---
 
-## 19. Brand
+## 7. Brand
 
 **Tabla:** `brands`
 
@@ -141,7 +141,7 @@
 
 ---
 
-## 20. Warehouse
+## 8. Warehouse
 
 **Tabla:** `warehouses`
 
@@ -159,7 +159,7 @@
 
 ---
 
-## 21. Batch
+## 9. Batch
 
 **Tabla:** `batches`
 
@@ -192,4 +192,45 @@
 - Many-to-One → `Brand`
 - One-to-Many → `ServiceOrderBatch`
 - One-to-Many → `QuoteBatch`
+---
+
+# Workshop Module
+
+## 1. Contact
+
+**Tabla:** `contacts`
+
+| Columna     | Tipo          | Restricciones    |
+|-------------|---------------|------------------|
+| id          | String (UUID) | PK, auto-increment|
+| referenceId | UUID          | nullable         |
+| name       | String        | nullable         |
+| number     | String        | nullable         |
+| type        | ContactType (enum) | default: PRIMARY, nullable |
+| created_at   | LocalDateTime | auto             |
+| updated_at   | LocalDateTime | auto             |
+
+---
+
+## 2. Customer
+
+**Tabla:** `customers`
+
+| Columna     | Tipo          | Restricciones        |
+| ----------- | ------------- | -------------------- |
+| id          | String UUID    | PK, auto-generated   |
+| name        | String        | nullable             |
+| lastname        | String        | nullable             |
+| ci          | String        | nullable             |
+| expeditionCi| String        | nullable             |
+| codeCi      | String        | nullable             |
+| nit          | String        | nullable             |
+| address    | LocalDate     | nullable             |
+| email    | LocalDate     | nullable             |
+| birthdate    | LocalDate     | nullable             |
+| phone         | String        | nullable             |
+| state       | State (enum)  | default: ACTIVE      |
+| createdAt   | LocalDateTime | auto                 |
+| updatedAt   | LocalDateTime | auto                 |
+
 ---

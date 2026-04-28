@@ -56,6 +56,13 @@ export class NavMenu {
       ],
     },
     {
+      title: 'Taller',
+      icon: 'build',
+      items: [
+        { label: 'Clientes', icon: 'people', route: '/dashboard/taller/clientes' },
+      ],
+    },
+    {
       title: 'Auditoría y Reportes',
       icon: 'fact_check',
       items: [],

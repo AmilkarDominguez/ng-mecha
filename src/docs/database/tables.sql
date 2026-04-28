@@ -17,6 +17,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE contact_type_enum AS ENUM ('PRIMARY', 'SECONDARY', 'EMERGENCY');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 
 -- ============================================================
 -- TABLES
@@ -133,6 +138,40 @@ CREATE TABLE IF NOT EXISTS batches (
 
 
 -- ============================================================
+-- Workshop Module
+-- ============================================================
+
+-- 10. contacts
+CREATE TABLE IF NOT EXISTS contacts (
+  id           UUID               PRIMARY KEY DEFAULT gen_random_uuid(),
+  reference_id UUID,
+  name         TEXT,
+  number       TEXT,
+  type         contact_type_enum  DEFAULT 'PRIMARY',
+  created_at   TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
+  updated_at   TIMESTAMPTZ        NOT NULL DEFAULT NOW()
+);
+
+-- 11. customers
+CREATE TABLE IF NOT EXISTS customers (
+  id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  name           TEXT,
+  lastname       TEXT,
+  ci             TEXT,
+  expedition_ci  TEXT,
+  code_ci        TEXT,
+  nit            TEXT,
+  address        TEXT,
+  email          TEXT,
+  birthdate      DATE,
+  phone          TEXT,
+  state          state_enum  NOT NULL DEFAULT 'ACTIVE',
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
+-- ============================================================
 -- INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_products_category_id     ON products(category_id);
@@ -143,6 +182,8 @@ CREATE INDEX IF NOT EXISTS idx_batches_warehouse_id     ON batches(warehouse_id)
 CREATE INDEX IF NOT EXISTS idx_batches_supplier_id      ON batches(supplier_id);
 CREATE INDEX IF NOT EXISTS idx_batches_industry_id      ON batches(industry_id);
 CREATE INDEX IF NOT EXISTS idx_batches_brand_id         ON batches(brand_id);
+CREATE INDEX IF NOT EXISTS idx_contacts_reference_id    ON contacts(reference_id);
+CREATE INDEX IF NOT EXISTS idx_customers_state          ON customers(state);
 
 
 -- ============================================================
@@ -168,7 +209,9 @@ BEGIN
     'industries',
     'brands',
     'warehouses',
-    'batches'
+    'batches',
+    'contacts',
+    'customers'
   ] LOOP
     EXECUTE format(
       'DROP TRIGGER IF EXISTS trg_set_updated_at ON %I;
@@ -193,6 +236,8 @@ ALTER TABLE industries            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brands                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE warehouses            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE batches               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contacts              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers             ENABLE ROW LEVEL SECURITY;
 
 
 -- ============================================================
@@ -289,6 +334,26 @@ CREATE POLICY "auth_update_batches"
   ON batches FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "auth_delete_batches"
   ON batches FOR DELETE TO authenticated USING (true);
+
+-- contacts
+CREATE POLICY "auth_select_contacts"
+  ON contacts FOR SELECT TO authenticated USING (true);
+CREATE POLICY "auth_insert_contacts"
+  ON contacts FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "auth_update_contacts"
+  ON contacts FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_delete_contacts"
+  ON contacts FOR DELETE TO authenticated USING (true);
+
+-- customers
+CREATE POLICY "auth_select_customers"
+  ON customers FOR SELECT TO authenticated USING (true);
+CREATE POLICY "auth_insert_customers"
+  ON customers FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "auth_update_customers"
+  ON customers FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_delete_customers"
+  ON customers FOR DELETE TO authenticated USING (true);
 
 
 -- ============================================================
@@ -387,6 +452,26 @@ CREATE POLICY "anon_update_batches"
 CREATE POLICY "anon_delete_batches"
   ON batches FOR DELETE TO anon USING (true);
 
+-- contacts
+CREATE POLICY "anon_select_contacts"
+  ON contacts FOR SELECT TO anon USING (true);
+CREATE POLICY "anon_insert_contacts"
+  ON contacts FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "anon_update_contacts"
+  ON contacts FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_delete_contacts"
+  ON contacts FOR DELETE TO anon USING (true);
+
+-- customers
+CREATE POLICY "anon_select_customers"
+  ON customers FOR SELECT TO anon USING (true);
+CREATE POLICY "anon_insert_customers"
+  ON customers FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "anon_update_customers"
+  ON customers FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_delete_customers"
+  ON customers FOR DELETE TO anon USING (true);
+
 
 -- ============================================================
 -- REALTIME — enable publications for live listening
@@ -404,7 +489,9 @@ BEGIN
     'industries',
     'brands',
     'warehouses',
-    'batches'
+    'batches',
+    'contacts',
+    'customers'
   ] LOOP
     -- Add table to the supabase_realtime publication if not already present
     IF NOT EXISTS (

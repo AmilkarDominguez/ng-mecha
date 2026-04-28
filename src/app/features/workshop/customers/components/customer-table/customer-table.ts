@@ -1,0 +1,65 @@
+import { AfterViewInit, Component, effect, input, output, viewChild } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
+import { Customer } from '../../../../../core/models/customer.model';
+
+@Component({
+  selector: 'app-customer-table',
+  imports: [
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatChipsModule,
+  ],
+  templateUrl: './customer-table.html',
+  styleUrl: './customer-table.scss',
+})
+export class CustomerTable implements AfterViewInit {
+  data = input<Customer[]>([]);
+
+  edit = output<Customer>();
+  view = output<Customer>();
+  delete = output<Customer>();
+
+  readonly displayedColumns = ['fullName', 'ci', 'phone', 'email', 'state', 'actions'];
+
+  dataSource = new MatTableDataSource<Customer>([]);
+
+  sort = viewChild.required(MatSort);
+  paginator = viewChild.required(MatPaginator);
+
+  constructor() {
+    effect(() => {
+      this.dataSource.data = this.data();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.sort = this.sort();
+    this.dataSource.paginator = this.paginator();
+
+    this.dataSource.sortingDataAccessor = (item, property) => {
+      switch (property) {
+        case 'fullName': return `${item.name ?? ''} ${item.lastname ?? ''}`.toLowerCase();
+        case 'ci': return (item.ci ?? '').toLowerCase();
+        case 'phone': return (item.phone ?? '').toLowerCase();
+        case 'email': return (item.email ?? '').toLowerCase();
+        case 'state': return item.state;
+        default: return '';
+      }
+    };
+  }
+
+  fullName(customer: Customer): string {
+    const parts = [customer.name, customer.lastname].filter(Boolean);
+    return parts.length ? parts.join(' ') : '—';
+  }
+}
