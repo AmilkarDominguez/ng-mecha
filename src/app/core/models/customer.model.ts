@@ -1,3 +1,4 @@
+import { Contact } from './contact.model';
 import { EntityState } from './product-category.model';
 
 export interface Customer {
@@ -13,6 +14,7 @@ export interface Customer {
   birthdate: string | null;
   phone: string | null;
   state: EntityState;
+  contacts?: Contact[];
   created_at?: string | Date;
   updated_at?: string | Date;
 }

@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, effect, input, output, viewChild } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -11,6 +12,7 @@ import { Customer } from '../../../../../core/models/customer.model';
 @Component({
   selector: 'app-customer-table',
   imports: [
+    DatePipe,
     MatTableModule,
     MatSortModule,
     MatPaginatorModule,
@@ -29,7 +31,7 @@ export class CustomerTable implements AfterViewInit {
   view = output<Customer>();
   delete = output<Customer>();
 
-  readonly displayedColumns = ['fullName', 'ci', 'phone', 'email', 'state', 'actions'];
+  readonly displayedColumns = ['fullName', 'ci', 'phone', 'email', 'birthdate', 'state', 'actions'];
 
   dataSource = new MatTableDataSource<Customer>([]);
 
@@ -52,6 +54,7 @@ export class CustomerTable implements AfterViewInit {
         case 'ci': return (item.ci ?? '').toLowerCase();
         case 'phone': return (item.phone ?? '').toLowerCase();
         case 'email': return (item.email ?? '').toLowerCase();
+        case 'birthdate': return item.birthdate ?? '';
         case 'state': return item.state;
         default: return '';
       }

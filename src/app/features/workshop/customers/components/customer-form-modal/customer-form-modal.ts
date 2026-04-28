@@ -2,10 +2,12 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { Contact } from '../../../../../core/models/contact.model';
 import { Customer } from '../../../../../core/models/customer.model';
 
 export interface CustomerFormData {
@@ -22,6 +24,7 @@ export interface CustomerFormData {
     MatButtonModule,
     MatSlideToggleModule,
     MatIconModule,
+    MatExpansionModule,
   ],
   templateUrl: './customer-form-modal.html',
   styleUrl: './customer-form-modal.scss',
@@ -47,11 +50,24 @@ export class CustomerFormModal implements OnInit {
     birthdate: [''],
     address: ['', [Validators.maxLength(300)]],
     active: [true],
+    contacts: this.fb.group({
+      primary: this.fb.group({
+        name: ['', [Validators.maxLength(100)]],
+        number: ['', [Validators.maxLength(20)]],
+      }),
+      secondary: this.fb.group({
+        name: ['', [Validators.maxLength(100)]],
+        number: ['', [Validators.maxLength(20)]],
+      }),
+    }),
   });
 
   ngOnInit(): void {
     if (this.data?.customer) {
       const c = this.data.customer;
+      const primary = c.contacts?.find((ct) => ct.type === 'PRIMARY');
+      const secondary = c.contacts?.find((ct) => ct.type === 'SECONDARY');
+
       this.form.patchValue({
         name: c.name ?? '',
         lastname: c.lastname ?? '',
@@ -64,6 +80,10 @@ export class CustomerFormModal implements OnInit {
         birthdate: c.birthdate ?? '',
         address: c.address ?? '',
         active: c.state === 'ACTIVE',
+        contacts: {
+          primary: { name: primary?.name ?? '', number: primary?.number ?? '' },
+          secondary: { name: secondary?.name ?? '', number: secondary?.number ?? '' },
+        },
       });
     }
   }
@@ -74,6 +94,18 @@ export class CustomerFormModal implements OnInit {
       return;
     }
     const raw = this.form.value;
+    const contacts: Contact[] = [];
+
+    const p = raw.contacts?.primary;
+    if (p?.name || p?.number) {
+      contacts.push({ name: p.name || null, number: p.number || null, type: 'PRIMARY' });
+    }
+
+    const s = raw.contacts?.secondary;
+    if (s?.name || s?.number) {
+      contacts.push({ name: s.name || null, number: s.number || null, type: 'SECONDARY' });
+    }
+
     this.dialogRef.close({
       id: this.data.customer?.id || null,
       name: raw.name || null,
@@ -87,6 +119,7 @@ export class CustomerFormModal implements OnInit {
       birthdate: raw.birthdate || null,
       address: raw.address || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
+      contacts,
     });
   }
 
@@ -99,6 +132,13 @@ export class CustomerFormModal implements OnInit {
     if (!control?.errors || !control.touched) return '';
     if (control.errors['required']) return 'Este campo es obligatorio';
     if (control.errors['email']) return 'Correo electrónico inválido';
+    if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+    return 'Campo inválido';
+  }
+
+  getContactError(group: 'primary' | 'secondary', field: string): string {
+    const control = this.form.get(`contacts.${group}.${field}`);
+    if (!control?.errors || !control.touched) return '';
     if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
     return 'Campo inválido';
   }

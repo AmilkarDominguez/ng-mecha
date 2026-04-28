@@ -34,6 +34,18 @@
       <td mat-cell *matCellDef="let row" class="cell-email">{{ row.email ?? '—' }}</td>
     </ng-container>
 
+    <!-- Column: birthdate -->
+    <ng-container matColumnDef="birthdate">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cumpleaños</th>
+      <td mat-cell *matCellDef="let row">
+        @if (row.birthdate) {
+          {{ row.birthdate | date:'dd/MM/yyyy' }}
+        } @else {
+          <span class="cell-empty">—</span>
+        }
+      </td>
+    </ng-container>
+
     <!-- Column: state -->
     <ng-container matColumnDef="state">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Estado</th>
