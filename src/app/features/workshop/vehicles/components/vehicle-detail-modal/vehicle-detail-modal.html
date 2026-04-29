@@ -1,0 +1,101 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">directions_car</mat-icon>
+  Detalle de Vehículo
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <div class="detail-header">
+      <div class="detail-name">{{ vehicle.license_plate ?? '—' }}</div>
+      <mat-chip-set>
+        <mat-chip [class]="vehicle.state === 'ACTIVE' ? 'chip-active' : 'chip-inactive'">
+          <mat-icon matChipAvatar>{{ vehicle.state === 'ACTIVE' ? 'check_circle' : 'cancel' }}</mat-icon>
+          {{ vehicle.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section-grid">
+
+      @if (customerName()) {
+        <div class="detail-section detail-section-full">
+          <span class="detail-label">Cliente</span>
+          <span class="detail-value">{{ customerName() }}</span>
+        </div>
+      }
+
+      @if (vehicle.brand) {
+        <div class="detail-section">
+          <span class="detail-label">Marca</span>
+          <span class="detail-value">{{ vehicle.brand }}</span>
+        </div>
+      }
+
+      @if (vehicle.model) {
+        <div class="detail-section">
+          <span class="detail-label">Modelo</span>
+          <span class="detail-value">{{ vehicle.model }}</span>
+        </div>
+      }
+
+      @if (vehicle.year) {
+        <div class="detail-section">
+          <span class="detail-label">Año</span>
+          <span class="detail-value">{{ vehicle.year }}</span>
+        </div>
+      }
+
+      @if (vehicle.displacement) {
+        <div class="detail-section">
+          <span class="detail-label">Cilindraje</span>
+          <span class="detail-value">{{ vehicle.displacement }}</span>
+        </div>
+      }
+
+      @if (vehicle.chassis_number) {
+        <div class="detail-section detail-section-full">
+          <span class="detail-label">Número de Chasis</span>
+          <span class="detail-value detail-mono">{{ vehicle.chassis_number }}</span>
+        </div>
+      }
+
+      @if (vehicle.description) {
+        <div class="detail-section detail-section-full">
+          <span class="detail-label">Descripción</span>
+          <span class="detail-value">{{ vehicle.description }}</span>
+        </div>
+      }
+
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-dates">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ vehicle.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ vehicle.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ vehicle.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

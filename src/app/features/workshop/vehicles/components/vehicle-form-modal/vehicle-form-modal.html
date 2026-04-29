@@ -1,0 +1,97 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'add_circle' }}</mat-icon>
+  {{ isEditMode ? 'Editar Vehículo' : 'Nuevo Vehículo' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Cliente</mat-label>
+      <input
+        matInput
+        [formControl]="customerCtrl"
+        [matAutocomplete]="customerAuto"
+        placeholder="Buscar cliente por nombre..." />
+      <mat-autocomplete #customerAuto="matAutocomplete" [displayWith]="displayCustomer">
+        <mat-option [value]="null">Sin asignar</mat-option>
+        @for (c of filteredCustomers(); track c.id) {
+          <mat-option [value]="c">{{ customerLabel(c) }}</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Placa *</mat-label>
+      <input matInput formControlName="license_plate" placeholder="Ej. 1234ABC" />
+      @if (getFieldError('license_plate')) {
+        <mat-error>{{ getFieldError('license_plate') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Año</mat-label>
+      <input matInput formControlName="year" placeholder="Ej. 2023" maxlength="4" />
+      @if (getFieldError('year')) {
+        <mat-error>{{ getFieldError('year') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Marca</mat-label>
+      <input matInput formControlName="brand" placeholder="Ej. Toyota" />
+      @if (getFieldError('brand')) {
+        <mat-error>{{ getFieldError('brand') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Modelo</mat-label>
+      <input matInput formControlName="model" placeholder="Ej. Hilux" />
+      @if (getFieldError('model')) {
+        <mat-error>{{ getFieldError('model') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Cilindraje</mat-label>
+      <input matInput formControlName="displacement" placeholder="Ej. 2400cc" />
+      @if (getFieldError('displacement')) {
+        <mat-error>{{ getFieldError('displacement') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Número de Chasis</mat-label>
+      <input matInput formControlName="chassis_number" placeholder="Ej. JTMB52FX..." />
+      @if (getFieldError('chassis_number')) {
+        <mat-error>{{ getFieldError('chassis_number') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="2"
+        placeholder="Observaciones adicionales del vehículo..."></textarea>
+      @if (getFieldError('description')) {
+        <mat-error>{{ getFieldError('description') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-half field-toggle">
+      <span class="toggle-label">Estado</span>
+      <mat-slide-toggle formControlName="active" color="primary">
+        {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

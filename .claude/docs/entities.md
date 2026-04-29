@@ -50,8 +50,8 @@
 | Columna        | Tipo          | Restricciones                       |
 |----------------|---------------|-------------------------------------|
 | id             | String (UUID) | PK, auto-increment                  |
-| categoryId     | Long (FK)     | nullable → product_categories.id    |
-| presentationId | Long (FK)     | nullable → product_presentations.id |
+| category_id     | Long (FK)     | nullable → product_categories.id    |
+| presentation_id | Long (FK)     | nullable → product_presentations.id |
 | name           | String        | nullable                            |
 | description    | String        | nullable                            |
 | photo          | String        | nullable                            |
@@ -74,7 +74,7 @@
 | Columna   | Tipo          | Restricciones             |
 |-----------|---------------|---------------------------|
 | id        | String (UUID) | PK, auto-increment        |
-| productId | Long (FK)     | nullable → products.id    |
+| product_id | Long (FK)     | nullable → products.id    |
 | path      | String        | nullable                  |
 | created_at | LocalDateTime | auto                      |
 | updated_at | LocalDateTime | auto                      |
@@ -166,20 +166,20 @@
 | Columna        | Tipo            | Restricciones                 |
 |----------------|-----------------|-------------------------------|
 | id             | String (UUID)   | PK, auto-increment            |
-| productId      | Long (FK)       | not null → products.id        |
-| warehouseId    | Long (FK)       | not null → warehouses.id      |
-| supplierId     | Long (FK)       | not null → suppliers.id       |
-| industryId     | Long (FK)       | not null → industries.id      |
-| brandId        | Long (FK)       | nullable → brands.id          |
-| wholesalePrice | BigDecimal(8,2) | nullable                      |
-| retailPrice    | BigDecimal(8,2) | nullable                      |
-| finalPrice     | BigDecimal(8,2) | nullable                      |
+| product_id      | Long (FK)       | not null → products.id        |
+| warehouse_id    | Long (FK)       | not null → warehouses.id      |
+| supplier_id     | Long (FK)       | not null → suppliers.id       |
+| industry_id     | Long (FK)       | not null → industries.id      |
+| brand_id        | Long (FK)       | nullable → brands.id          |
+| wholesale_price | BigDecimal(8,2) | nullable                      |
+| retail_price    | BigDecimal(8,2) | nullable                      |
+| final_price     | BigDecimal(8,2) | nullable                      |
 | code           | String          | nullable                      |
 | stock          | BigDecimal      | nullable                      |
 | description    | String          | nullable                      |
 | brand          | String          | nullable                      |
 | model          | String          | nullable                      |
-| expirationDate | LocalDate       | nullable                      |
+| expiration_date | LocalDate       | nullable                      |
 | state          | State (enum)    | default: ACTIVE               |
 | created_at      | LocalDateTime   | auto                          |
 | updated_at      | LocalDateTime   | auto                          |
@@ -222,15 +222,41 @@
 | name        | String        | nullable             |
 | lastname        | String        | nullable             |
 | ci          | String        | nullable             |
-| expeditionCi| String        | nullable             |
-| codeCi      | String        | nullable             |
+| expedition_ci| String        | nullable             |
+| code_ci      | String        | nullable             |
 | nit          | String        | nullable             |
 | address    | LocalDate     | nullable             |
 | email    | LocalDate     | nullable             |
 | birthdate    | LocalDate     | nullable             |
 | phone         | String        | nullable             |
 | state       | State (enum)  | default: ACTIVE      |
-| createdAt   | LocalDateTime | auto                 |
-| updatedAt   | LocalDateTime | auto                 |
+| created_at   | LocalDateTime | auto                 |
+| updated_at   | LocalDateTime | auto                 |
 
 ---
+
+## 3. Vehicle
+
+**Tabla:** `vehicles`
+
+| Columna       | Tipo          | Restricciones           |
+| ------------- | ------------- | ----------------------- |
+| id            | String UUID   | PK, auto-generated      |
+| customer_id    | UUID (FK)     | nullable → customers.id |
+| license_plate  | String        | nullable                |
+| brand         | String        | nullable                |
+| model         | String        | nullable                |
+| displacement  | String        | nullable                |
+| year          | String        | nullable                |
+| chassis_number | String        | nullable                |
+| description   | String        | nullable                |
+| state         | State (enum)  | default: ACTIVE         |
+| created_at     | LocalDateTime | auto                    |
+| updated_at     | LocalDateTime | auto                    |
+
+**Relaciones:**
+
+- Many-to-One → `Customer`
+- One-to-Many → `ServiceOrder`
+- One-to-Many → `Quote`
+

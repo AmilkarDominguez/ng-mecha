@@ -54,6 +54,10 @@ export const routes: Routes = [
         path: 'taller/clientes',
         loadComponent: () => import('./features/workshop/customers/customer-dashboard').then(m => m.CustomerDashboard),
       },
+      {
+        path: 'inventario/vehiculos',
+        loadComponent: () => import('./features/workshop/vehicles/vehicle-dashboard').then(m => m.VehicleDashboard),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }

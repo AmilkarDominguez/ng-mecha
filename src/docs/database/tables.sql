@@ -171,6 +171,23 @@ CREATE TABLE IF NOT EXISTS customers (
 );
 
 
+-- 12. vehicles
+CREATE TABLE IF NOT EXISTS vehicles (
+  id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id    UUID        REFERENCES customers(id) ON DELETE SET NULL,
+  license_plate  TEXT,
+  brand          TEXT,
+  model          TEXT,
+  displacement   TEXT,
+  year           TEXT,
+  chassis_number TEXT,
+  description    TEXT,
+  state          state_enum  NOT NULL DEFAULT 'ACTIVE',
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
 -- ============================================================
 -- INDEXES
 -- ============================================================
@@ -183,6 +200,8 @@ CREATE INDEX IF NOT EXISTS idx_batches_supplier_id      ON batches(supplier_id);
 CREATE INDEX IF NOT EXISTS idx_batches_industry_id      ON batches(industry_id);
 CREATE INDEX IF NOT EXISTS idx_batches_brand_id         ON batches(brand_id);
 CREATE INDEX IF NOT EXISTS idx_contacts_reference_id    ON contacts(reference_id);
+CREATE INDEX IF NOT EXISTS idx_vehicles_customer_id     ON vehicles(customer_id);
+CREATE INDEX IF NOT EXISTS idx_vehicles_state           ON vehicles(state);
 CREATE INDEX IF NOT EXISTS idx_customers_state          ON customers(state);
 
 
@@ -211,7 +230,8 @@ BEGIN
     'warehouses',
     'batches',
     'contacts',
-    'customers'
+    'customers',
+    'vehicles'
   ] LOOP
     EXECUTE format(
       'DROP TRIGGER IF EXISTS trg_set_updated_at ON %I;
@@ -238,6 +258,7 @@ ALTER TABLE warehouses            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE batches               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contacts              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE customers             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE vehicles              ENABLE ROW LEVEL SECURITY;
 
 
 -- ============================================================
@@ -354,6 +375,16 @@ CREATE POLICY "auth_update_customers"
   ON customers FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "auth_delete_customers"
   ON customers FOR DELETE TO authenticated USING (true);
+
+-- vehicles
+CREATE POLICY "auth_select_vehicles"
+  ON vehicles FOR SELECT TO authenticated USING (true);
+CREATE POLICY "auth_insert_vehicles"
+  ON vehicles FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "auth_update_vehicles"
+  ON vehicles FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_delete_vehicles"
+  ON vehicles FOR DELETE TO authenticated USING (true);
 
 
 -- ============================================================
@@ -472,6 +503,16 @@ CREATE POLICY "anon_update_customers"
 CREATE POLICY "anon_delete_customers"
   ON customers FOR DELETE TO anon USING (true);
 
+-- vehicles
+CREATE POLICY "anon_select_vehicles"
+  ON vehicles FOR SELECT TO anon USING (true);
+CREATE POLICY "anon_insert_vehicles"
+  ON vehicles FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "anon_update_vehicles"
+  ON vehicles FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_delete_vehicles"
+  ON vehicles FOR DELETE TO anon USING (true);
+
 
 -- ============================================================
 -- REALTIME — enable publications for live listening
@@ -491,7 +532,8 @@ BEGIN
     'warehouses',
     'batches',
     'contacts',
-    'customers'
+    'customers',
+    'vehicles'
   ] LOOP
     -- Add table to the supabase_realtime publication if not already present
     IF NOT EXISTS (
