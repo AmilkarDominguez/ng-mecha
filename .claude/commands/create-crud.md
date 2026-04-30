@@ -4,7 +4,7 @@ utiliza un razonamiento: adaptive thinking
 
 1. Toma como ejemplo el CRUD de product-category en `src\app\features\inventory\product-category` analizalo para mantener el estilo
 Con la siguientes consideraciones
-2. Actualiza el script de base de datos para compatible con supabase considerando todas las reglas previstas definidos en `src\docs\database\tables.sql`
+2. Actualiza el script de base de datos para compatible con supabase considerando todas las reglas previstas definidos en `src\docs\database\tables.sql` y para eliminar los registros en `src\docs\database\delete_bd.sql`
 3. Todos los componentes, class de estilo y variables deben estar en ingles, solo los labels y registros en ES, no agregues iconos innecesarios y conserva el estilo base.
 4. Ruta base para todo el CRUD en `src/app/features/dashboard/$ARGUMENTS/`.
 5. Utliza las propiedades que se espesifican en `docs/entities.md` y agrega la interfaz en `src/app/core/models/` y realiza los ajustes en otras solo si fuera necesario y estan relacionadas

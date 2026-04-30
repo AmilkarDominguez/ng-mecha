@@ -1,0 +1,164 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'engineering' }}</mat-icon>
+  {{ isEditMode ? 'Editar Mecánico' : 'Nuevo Mecánico' }}
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Nombre *</mat-label>
+      <input matInput formControlName="name" placeholder="Ej. Carlos" />
+      @if (getFieldError('name')) {
+        <mat-error>{{ getFieldError('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Apellido(s)</mat-label>
+      <input matInput formControlName="lastname" placeholder="Ej. Flores Rios" />
+      @if (getFieldError('lastname')) {
+        <mat-error>{{ getFieldError('lastname') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>CI</mat-label>
+      <input matInput formControlName="ci" placeholder="Ej. 7654321" />
+      @if (getFieldError('ci')) {
+        <mat-error>{{ getFieldError('ci') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Expedición CI</mat-label>
+      <input matInput formControlName="expedition_ci" placeholder="Ej. LP" />
+      @if (getFieldError('expedition_ci')) {
+        <mat-error>{{ getFieldError('expedition_ci') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-third">
+      <mat-label>Código CI</mat-label>
+      <input matInput formControlName="code_ci" placeholder="Ej. 1A" />
+      @if (getFieldError('code_ci')) {
+        <mat-error>{{ getFieldError('code_ci') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>NIT</mat-label>
+      <input matInput formControlName="nit" placeholder="Ej. 7654321001" />
+      @if (getFieldError('nit')) {
+        <mat-error>{{ getFieldError('nit') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="phone" placeholder="Ej. 71234567" />
+      @if (getFieldError('phone')) {
+        <mat-error>{{ getFieldError('phone') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Correo electrónico</mat-label>
+      <input matInput formControlName="email" type="email" placeholder="Ej. mecanico@correo.com" />
+      @if (getFieldError('email')) {
+        <mat-error>{{ getFieldError('email') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Fecha de nacimiento</mat-label>
+      <input matInput formControlName="birthdate" type="date" />
+      @if (getFieldError('birthdate')) {
+        <mat-error>{{ getFieldError('birthdate') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Dirección</mat-label>
+      <textarea matInput formControlName="address" rows="2"
+        placeholder="Ej. Av. 6 de Agosto #123, La Paz"></textarea>
+      @if (getFieldError('address')) {
+        <mat-error>{{ getFieldError('address') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-full">
+      <mat-expansion-panel class="contacts-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="contacts-panel-title">
+            <mat-icon>contacts</mat-icon>
+            Contactos adicionales
+            <span class="contacts-panel-hint">(opcional)</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div formGroupName="contacts" class="contacts-grid">
+
+          <div class="contact-section" formGroupName="primary">
+            <p class="contact-label">
+              <mat-icon class="contact-label-icon">star</mat-icon>
+              Contacto principal
+            </p>
+            <mat-form-field appearance="outline" class="contact-field">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="name" placeholder="Ej. María García" />
+              @if (getContactError('primary', 'name')) {
+                <mat-error>{{ getContactError('primary', 'name') }}</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="contact-field">
+              <mat-label>Teléfono</mat-label>
+              <input matInput formControlName="number" placeholder="Ej. 76543210" />
+              @if (getContactError('primary', 'number')) {
+                <mat-error>{{ getContactError('primary', 'number') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <div class="contact-section" formGroupName="secondary">
+            <p class="contact-label">
+              <mat-icon class="contact-label-icon">person_outline</mat-icon>
+              Contacto secundario
+            </p>
+            <mat-form-field appearance="outline" class="contact-field">
+              <mat-label>Nombre</mat-label>
+              <input matInput formControlName="name" placeholder="Ej. Juan Pérez" />
+              @if (getContactError('secondary', 'name')) {
+                <mat-error>{{ getContactError('secondary', 'name') }}</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="contact-field">
+              <mat-label>Teléfono</mat-label>
+              <input matInput formControlName="number" placeholder="Ej. 79876543" />
+              @if (getContactError('secondary', 'number')) {
+                <mat-error>{{ getContactError('secondary', 'number') }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+        </div>
+      </mat-expansion-panel>
+    </div>
+
+    <div class="field-half field-toggle">
+      <span class="toggle-label">Estado</span>
+      <mat-slide-toggle formControlName="active" color="primary">
+        {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </div>
+
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+  <button mat-flat-button color="primary" (click)="onSave()">
+    <mat-icon>save</mat-icon>
+    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+  </button>
+</mat-dialog-actions>

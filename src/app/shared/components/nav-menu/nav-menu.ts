@@ -60,6 +60,7 @@ export class NavMenu {
       icon: 'build',
       items: [
         { label: 'Clientes', icon: 'people', route: '/dashboard/taller/clientes' },
+        { label: 'Mecánicos', icon: 'engineering', route: '/dashboard/taller/mecanicos' },
         { label: 'Vehículos', icon: 'directions_car', route: '/dashboard/inventario/vehiculos' },
       ],
     },

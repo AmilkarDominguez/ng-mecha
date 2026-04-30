@@ -11,6 +11,7 @@
 -- CASCADE elimina FK constraints y políticas asociadas
 -- ============================================================
 DROP TABLE IF EXISTS vehicles              CASCADE;
+DROP TABLE IF EXISTS mechanics             CASCADE;
 DROP TABLE IF EXISTS contacts              CASCADE;
 DROP TABLE IF EXISTS batches               CASCADE;
 DROP TABLE IF EXISTS multimedia            CASCADE;
