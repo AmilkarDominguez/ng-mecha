@@ -282,3 +282,28 @@
 | state       | State (enum)  | default: ACTIVE      |
 | created_at   | LocalDateTime | auto                 |
 | updated_at   | LocalDateTime | auto                 |
+
+**Relaciones:**
+
+- One-to-Many → `LabourDetail`
+
+---
+
+## 5. Service
+
+**Tabla:** `services`
+
+| Columna     | Tipo            | Restricciones      |
+| ----------- | --------------- | ------------------ |
+| id          | String UUID     | PK, auto-generated |
+| name        | String          | nullable           |
+| code        | String          | nullable           |
+| description | String          | nullable           |
+| price       | BigDecimal(8,2) | nullable           |
+| state       | State (enum)    | default: ACTIVE    |
+| created_at   | LocalDateTime | auto                 |
+| updated_at   | LocalDateTime | auto                 |
+
+**Relaciones:**
+
+- One-to-Many → `LabourDetail`

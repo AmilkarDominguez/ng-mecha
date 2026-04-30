@@ -1,0 +1,75 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">build_circle</mat-icon>
+  Detalle de Servicio
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <div class="detail-header">
+      <div class="detail-name">{{ service.name ?? '—' }}</div>
+      <mat-chip-set>
+        <mat-chip [class]="service.state === 'ACTIVE' ? 'chip-active' : 'chip-inactive'">
+          <mat-icon matChipAvatar>{{ service.state === 'ACTIVE' ? 'check_circle' : 'cancel' }}</mat-icon>
+          {{ service.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-columns">
+
+      @if (service.code) {
+        <div class="detail-section">
+          <span class="detail-label">Código</span>
+          <span class="detail-value detail-code">{{ service.code }}</span>
+        </div>
+      }
+
+      @if (service.price !== null && service.price !== undefined) {
+        <div class="detail-section">
+          <span class="detail-label">Precio base</span>
+          <span class="detail-value detail-price">
+            {{ service.price | currency:'BOB':'symbol-narrow':'1.2-2' }}
+          </span>
+        </div>
+      }
+
+    </div>
+
+    @if (service.description) {
+      <div class="detail-section">
+        <span class="detail-label">Descripción</span>
+        <span class="detail-value">{{ service.description }}</span>
+      </div>
+    }
+
+    <mat-divider />
+
+    <div class="detail-dates">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ service.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ service.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ service.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>
