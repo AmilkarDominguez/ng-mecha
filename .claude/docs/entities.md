@@ -307,3 +307,21 @@
 **Relaciones:**
 
 - One-to-Many → `LabourDetail`
+
+
+---
+
+## 6. ExternalServices
+
+**Tabla:** `external_services`
+
+| Columna     | Tipo            | Restricciones      |
+| ----------- | --------------- | ------------------ |
+| id          | String UUID     | PK, auto-generated |
+| name        | String          | nullable           |
+| description | String          | nullable           |
+| cost        | BigDecimal(8,2) | nullable           |
+| price       | BigDecimal(8,2) | nullable           |
+| state       | State (enum)    | default: ACTIVE    |
+| created_at  | LocalDateTime | auto                 |
+| updated_at  | LocalDateTime | auto                 |

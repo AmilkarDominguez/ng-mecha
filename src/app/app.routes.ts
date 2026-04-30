@@ -66,6 +66,10 @@ export const routes: Routes = [
         path: 'taller/servicios',
         loadComponent: () => import('./features/workshop/services/service-dashboard').then(m => m.ServiceDashboard),
       },
+      {
+        path: 'taller/servicios-externos',
+        loadComponent: () => import('./features/workshop/external-services/external-service-dashboard').then(m => m.ExternalServiceDashboard),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }

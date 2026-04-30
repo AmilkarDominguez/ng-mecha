@@ -203,7 +203,20 @@ CREATE TABLE IF NOT EXISTS services (
 );
 
 
--- 14. vehicles
+-- 14. external_services
+CREATE TABLE IF NOT EXISTS external_services (
+  id          UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        TEXT,
+  description TEXT,
+  cost        NUMERIC(8,2),
+  price       NUMERIC(8,2),
+  state       state_enum     NOT NULL DEFAULT 'ACTIVE',
+  created_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+);
+
+
+-- 15. vehicles
 CREATE TABLE IF NOT EXISTS vehicles (
   id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   customer_id    UUID        REFERENCES customers(id) ON DELETE SET NULL,
@@ -234,6 +247,7 @@ CREATE INDEX IF NOT EXISTS idx_batches_brand_id         ON batches(brand_id);
 CREATE INDEX IF NOT EXISTS idx_contacts_reference_id    ON contacts(reference_id);
 CREATE INDEX IF NOT EXISTS idx_mechanics_state           ON mechanics(state);
 CREATE INDEX IF NOT EXISTS idx_services_state            ON services(state);
+CREATE INDEX IF NOT EXISTS idx_external_services_state   ON external_services(state);
 CREATE INDEX IF NOT EXISTS idx_vehicles_customer_id     ON vehicles(customer_id);
 CREATE INDEX IF NOT EXISTS idx_vehicles_state           ON vehicles(state);
 CREATE INDEX IF NOT EXISTS idx_customers_state          ON customers(state);
@@ -267,6 +281,7 @@ BEGIN
     'customers',
     'mechanics',
     'services',
+    'external_services',
     'vehicles'
   ] LOOP
     EXECUTE format(
@@ -296,6 +311,7 @@ ALTER TABLE contacts              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE customers             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mechanics             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE services              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE external_services     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vehicles              ENABLE ROW LEVEL SECURITY;
 
 
@@ -433,6 +449,16 @@ CREATE POLICY "auth_update_services"
   ON services FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "auth_delete_services"
   ON services FOR DELETE TO authenticated USING (true);
+
+-- external_services
+CREATE POLICY "auth_select_external_services"
+  ON external_services FOR SELECT TO authenticated USING (true);
+CREATE POLICY "auth_insert_external_services"
+  ON external_services FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "auth_update_external_services"
+  ON external_services FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_delete_external_services"
+  ON external_services FOR DELETE TO authenticated USING (true);
 
 -- vehicles
 CREATE POLICY "auth_select_vehicles"
@@ -581,6 +607,16 @@ CREATE POLICY "anon_update_services"
 CREATE POLICY "anon_delete_services"
   ON services FOR DELETE TO anon USING (true);
 
+-- external_services
+CREATE POLICY "anon_select_external_services"
+  ON external_services FOR SELECT TO anon USING (true);
+CREATE POLICY "anon_insert_external_services"
+  ON external_services FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "anon_update_external_services"
+  ON external_services FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_delete_external_services"
+  ON external_services FOR DELETE TO anon USING (true);
+
 -- vehicles
 CREATE POLICY "anon_select_vehicles"
   ON vehicles FOR SELECT TO anon USING (true);
@@ -613,6 +649,7 @@ BEGIN
     'customers',
     'mechanics',
     'services',
+    'external_services',
     'vehicles'
   ] LOOP
     -- Add table to the supabase_realtime publication if not already present

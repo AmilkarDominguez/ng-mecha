@@ -62,6 +62,7 @@ export class NavMenu {
         { label: 'Clientes', icon: 'people', route: '/dashboard/taller/clientes' },
         { label: 'Mecánicos', icon: 'engineering', route: '/dashboard/taller/mecanicos' },
         { label: 'Servicios', icon: 'build_circle', route: '/dashboard/taller/servicios' },
+        { label: 'Servicios Externos', icon: 'handyman', route: '/dashboard/taller/servicios-externos' },
         { label: 'Vehículos', icon: 'directions_car', route: '/dashboard/inventario/vehiculos' },
       ],
     },
