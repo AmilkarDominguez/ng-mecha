@@ -16,15 +16,32 @@
   font-size: 0.875rem;
 }
 
-.cell-expedition {
+.cell-nit {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.rating-badge {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
   font-size: 0.75rem;
-  color: var(--color-text-muted);
   font-weight: 500;
 }
 
-.cell-email {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
+.rating-good {
+  background-color: var(--color-status-active-bg);
+  color: var(--color-status-active-text);
+}
+
+.rating-regular {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.rating-bad {
+  background-color: var(--color-status-inactive-bg);
+  color: var(--color-status-inactive-text);
 }
 
 .cell-empty {

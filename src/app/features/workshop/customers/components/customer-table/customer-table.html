@@ -10,16 +10,13 @@
     <!-- Column: ci -->
     <ng-container matColumnDef="ci">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>CI</th>
-      <td mat-cell *matCellDef="let row" class="cell-ci">
-        @if (row.ci) {
-          {{ row.ci }}
-          @if (row.expedition_ci) {
-            <span class="cell-expedition"> {{ row.expedition_ci }}</span>
-          }
-        } @else {
-          <span class="cell-empty">—</span>
-        }
-      </td>
+      <td mat-cell *matCellDef="let row" class="cell-ci">{{ row.ci ?? '—' }}</td>
+    </ng-container>
+
+    <!-- Column: nit -->
+    <ng-container matColumnDef="nit">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>NIT</th>
+      <td mat-cell *matCellDef="let row" class="cell-nit">{{ row.nit ?? '—' }}</td>
     </ng-container>
 
     <!-- Column: phone -->
@@ -28,18 +25,17 @@
       <td mat-cell *matCellDef="let row">{{ row.phone ?? '—' }}</td>
     </ng-container>
 
-    <!-- Column: email -->
-    <ng-container matColumnDef="email">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Correo</th>
-      <td mat-cell *matCellDef="let row" class="cell-email">{{ row.email ?? '—' }}</td>
-    </ng-container>
-
-    <!-- Column: birthdate -->
-    <ng-container matColumnDef="birthdate">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cumpleaños</th>
+    <!-- Column: rating -->
+    <ng-container matColumnDef="rating">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Calificación</th>
       <td mat-cell *matCellDef="let row">
-        @if (row.birthdate) {
-          {{ row.birthdate | date:'dd/MM/yyyy' }}
+        @if (row.rating) {
+          <span class="rating-badge"
+            [class.rating-good]="row.rating === 'GOOD'"
+            [class.rating-regular]="row.rating === 'REGULAR'"
+            [class.rating-bad]="row.rating === 'BAD'">
+            {{ row.rating === 'GOOD' ? 'Bueno' : row.rating === 'REGULAR' ? 'Regular' : 'Malo' }}
+          </span>
         } @else {
           <span class="cell-empty">—</span>
         }

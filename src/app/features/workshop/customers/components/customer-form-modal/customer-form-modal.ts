@@ -6,9 +6,10 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Contact } from '../../../../../core/models/contact.model';
-import { Customer } from '../../../../../core/models/customer.model';
+import { Customer, CustomerRating } from '../../../../../core/models/customer.model';
 
 export interface CustomerFormData {
   customer?: Customer;
@@ -21,6 +22,7 @@ export interface CustomerFormData {
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatSlideToggleModule,
     MatIconModule,
@@ -38,17 +40,21 @@ export class CustomerFormModal implements OnInit {
     return !!this.data?.customer;
   }
 
+  readonly ratingOptions: { value: CustomerRating; label: string }[] = [
+    { value: 'GOOD', label: 'Bueno' },
+    { value: 'REGULAR', label: 'Regular' },
+    { value: 'BAD', label: 'Malo' },
+  ];
+
   form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(100)]],
     lastname: ['', [Validators.maxLength(150)]],
     ci: ['', [Validators.maxLength(20)]],
-    expedition_ci: ['', [Validators.maxLength(10)]],
-    code_ci: ['', [Validators.maxLength(10)]],
     nit: ['', [Validators.maxLength(20)]],
     phone: ['', [Validators.maxLength(20)]],
-    email: ['', [Validators.email, Validators.maxLength(150)]],
     birthdate: [''],
     address: ['', [Validators.maxLength(300)]],
+    rating: [null as CustomerRating | null],
     active: [true],
     contacts: this.fb.group({
       primary: this.fb.group({
@@ -72,13 +78,11 @@ export class CustomerFormModal implements OnInit {
         name: c.name ?? '',
         lastname: c.lastname ?? '',
         ci: c.ci ?? '',
-        expedition_ci: c.expedition_ci ?? '',
-        code_ci: c.code_ci ?? '',
         nit: c.nit ?? '',
         phone: c.phone ?? '',
-        email: c.email ?? '',
         birthdate: c.birthdate ?? '',
         address: c.address ?? '',
+        rating: c.rating ?? null,
         active: c.state === 'ACTIVE',
         contacts: {
           primary: { name: primary?.name ?? '', number: primary?.number ?? '' },
@@ -111,13 +115,11 @@ export class CustomerFormModal implements OnInit {
       name: raw.name || null,
       lastname: raw.lastname || null,
       ci: raw.ci || null,
-      expedition_ci: raw.expedition_ci || null,
-      code_ci: raw.code_ci || null,
       nit: raw.nit || null,
       phone: raw.phone || null,
-      email: raw.email || null,
       birthdate: raw.birthdate || null,
       address: raw.address || null,
+      rating: raw.rating || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
       contacts,
     });

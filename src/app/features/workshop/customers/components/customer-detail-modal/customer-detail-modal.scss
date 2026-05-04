@@ -65,6 +65,29 @@
   color: var(--color-text-muted);
 }
 
+.detail-rating {
+  display: inline-block;
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.rating-good {
+  background-color: var(--color-status-active-bg);
+  color: var(--color-status-active-text);
+}
+
+.rating-regular {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.rating-bad {
+  background-color: var(--color-status-inactive-bg);
+  color: var(--color-status-inactive-text);
+}
+
 .detail-id {
   font-family: monospace;
   font-size: 0.75rem;

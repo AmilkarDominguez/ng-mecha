@@ -8,7 +8,6 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Batch } from '../../../../../core/models/batch.model';
 import { Product } from '../../../../../core/models/product.model';
-import { Warehouse } from '../../../../../core/models/warehouse.model';
 
 @Component({
   selector: 'app-batch-table',
@@ -27,13 +26,12 @@ import { Warehouse } from '../../../../../core/models/warehouse.model';
 export class BatchTable implements AfterViewInit {
   data = input<Batch[]>([]);
   products = input<Product[]>([]);
-  warehouses = input<Warehouse[]>([]);
 
   edit = output<Batch>();
   view = output<Batch>();
   delete = output<Batch>();
 
-  readonly displayedColumns = ['code', 'product', 'warehouse', 'stock', 'price', 'state', 'actions'];
+  readonly displayedColumns = ['code', 'product', 'compatibleModels', 'stock', 'price', 'state', 'actions'];
 
   dataSource = new MatTableDataSource<Batch>([]);
 
@@ -54,7 +52,7 @@ export class BatchTable implements AfterViewInit {
       switch (property) {
         case 'code': return item.code ?? '';
         case 'product': return this.getProductName(item.product_id).toLowerCase();
-        case 'warehouse': return this.getWarehouseName(item.warehouse_id).toLowerCase();
+        case 'compatibleModels': return (item.compatible_models ?? '').toLowerCase();
         case 'stock': return item.stock ?? 0;
         case 'price': return item.price ?? 0;
         case 'state': return item.state;
@@ -65,9 +63,5 @@ export class BatchTable implements AfterViewInit {
 
   getProductName(productId: string): string {
     return this.products().find(p => p.id === productId)?.name ?? '—';
-  }
-
-  getWarehouseName(warehouseId: string): string {
-    return this.warehouses().find(w => w.id === warehouseId)?.name ?? '—';
   }
 }

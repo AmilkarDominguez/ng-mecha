@@ -23,15 +23,7 @@
       @if (customer.ci) {
         <div class="detail-section">
           <span class="detail-label">CI</span>
-          <span class="detail-value">
-            {{ customer.ci }}
-            @if (customer.expedition_ci) {
-              <span class="detail-sub"> - {{ customer.expedition_ci }}</span>
-            }
-            @if (customer.code_ci) {
-              <span class="detail-sub"> ({{ customer.code_ci }})</span>
-            }
-          </span>
+          <span class="detail-value">{{ customer.ci }}</span>
         </div>
       }
 
@@ -49,17 +41,22 @@
         </div>
       }
 
-      @if (customer.email) {
-        <div class="detail-section">
-          <span class="detail-label">Correo electrónico</span>
-          <span class="detail-value">{{ customer.email }}</span>
-        </div>
-      }
-
       @if (customer.birthdate) {
         <div class="detail-section">
           <span class="detail-label">Fecha de nacimiento</span>
           <span class="detail-value">{{ customer.birthdate | date: 'dd/MM/yyyy' }}</span>
+        </div>
+      }
+
+      @if (customer.rating) {
+        <div class="detail-section">
+          <span class="detail-label">Calificación</span>
+          <span class="detail-value detail-rating"
+            [class.rating-good]="customer.rating === 'GOOD'"
+            [class.rating-regular]="customer.rating === 'REGULAR'"
+            [class.rating-bad]="customer.rating === 'BAD'">
+            {{ customer.rating === 'GOOD' ? 'Bueno' : customer.rating === 'REGULAR' ? 'Regular' : 'Malo' }}
+          </span>
         </div>
       }
 

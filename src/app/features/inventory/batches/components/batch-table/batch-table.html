@@ -19,10 +19,10 @@
       <td mat-cell *matCellDef="let row" class="cell-product">{{ getProductName(row.product_id) }}</td>
     </ng-container>
 
-    <!-- Column: warehouse -->
-    <ng-container matColumnDef="warehouse">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Almacén</th>
-      <td mat-cell *matCellDef="let row" class="cell-warehouse">{{ getWarehouseName(row.warehouse_id) }}</td>
+    <!-- Column: compatibleModels -->
+    <ng-container matColumnDef="compatibleModels">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Modelos Compatibles</th>
+      <td mat-cell *matCellDef="let row" class="cell-compatible-models">{{ row.compatible_models ?? '—' }}</td>
     </ng-container>
 
     <!-- Column: stock -->

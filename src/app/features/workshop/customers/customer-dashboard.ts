@@ -44,7 +44,7 @@ export class CustomerDashboard {
         (c.name ?? '').toLowerCase().includes(term) ||
         (c.lastname ?? '').toLowerCase().includes(term) ||
         (c.ci ?? '').toLowerCase().includes(term) ||
-        (c.email ?? '').toLowerCase().includes(term) ||
+        (c.nit ?? '').toLowerCase().includes(term) ||
         (c.phone ?? '').toLowerCase().includes(term),
     );
   });

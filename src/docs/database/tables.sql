@@ -22,6 +22,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE customer_rating_enum AS ENUM ('GOOD', 'REGULAR', 'BAD');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 
 -- ============================================================
 -- TABLES
@@ -155,20 +160,18 @@ CREATE TABLE IF NOT EXISTS contacts (
 
 -- 11. customers
 CREATE TABLE IF NOT EXISTS customers (
-  id             UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  id             UUID                  PRIMARY KEY DEFAULT gen_random_uuid(),
   name           TEXT,
   lastname       TEXT,
   ci             TEXT,
-  expedition_ci  TEXT,
-  code_ci        TEXT,
   nit            TEXT,
   address        TEXT,
-  email          TEXT,
   birthdate      DATE,
   phone          TEXT,
-  state          state_enum  NOT NULL DEFAULT 'ACTIVE',
-  created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  rating         customer_rating_enum,
+  state          state_enum            NOT NULL DEFAULT 'ACTIVE',
+  created_at     TIMESTAMPTZ           NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ           NOT NULL DEFAULT NOW()
 );
 
 
