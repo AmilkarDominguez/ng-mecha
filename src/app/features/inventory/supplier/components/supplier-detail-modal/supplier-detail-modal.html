@@ -18,6 +18,20 @@
 
     <mat-divider />
 
+    @if (supplier.nit) {
+      <div class="detail-section">
+        <span class="detail-label">NIT</span>
+        <span class="detail-value">{{ supplier.nit }}</span>
+      </div>
+    }
+
+    @if (supplier.phone) {
+      <div class="detail-section">
+        <span class="detail-label">Teléfono</span>
+        <span class="detail-value">{{ supplier.phone }}</span>
+      </div>
+    }
+
     @if (supplier.email) {
       <div class="detail-section">
         <span class="detail-label">Correo Electrónico</span>
@@ -36,6 +50,25 @@
       <div class="detail-section">
         <span class="detail-label">Descripción</span>
         <span class="detail-value">{{ supplier.description }}</span>
+      </div>
+    }
+
+    @if (supplier.contacts?.length) {
+      <mat-divider />
+      <div class="detail-contacts">
+        <span class="detail-contacts-title">
+          <mat-icon class="detail-contacts-icon">contacts</mat-icon>
+          Contactos adicionales
+        </span>
+        @for (contact of supplier.contacts; track contact.id) {
+          <div class="detail-contact-item">
+            <mat-icon class="detail-contact-type-icon">
+              {{ contact.type === 'PRIMARY' ? 'star' : 'person_outline' }}
+            </mat-icon>
+            <span class="detail-contact-name">{{ contact.name }}</span>
+            <span class="detail-contact-number">{{ contact.number }}</span>
+          </div>
+        }
       </div>
     }
 

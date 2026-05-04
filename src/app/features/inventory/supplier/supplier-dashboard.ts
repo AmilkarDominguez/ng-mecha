@@ -39,6 +39,8 @@ export class SupplierDashboard {
     return this.suppliers().filter(
       (s) =>
         s.name.toLowerCase().includes(term) ||
+        (s.nit ?? '').toLowerCase().includes(term) ||
+        (s.phone ?? '').toLowerCase().includes(term) ||
         (s.email ?? '').toLowerCase().includes(term) ||
         (s.address ?? '').toLowerCase().includes(term) ||
         (s.description ?? '').toLowerCase().includes(term),

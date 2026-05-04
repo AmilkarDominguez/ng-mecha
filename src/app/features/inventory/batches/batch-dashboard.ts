@@ -55,8 +55,8 @@ export class BatchDashboard {
       const warehouse = this.warehouses().find((w) => w.id === b.warehouse_id);
       return (
         (b.code ?? '').toLowerCase().includes(term) ||
-        (b.brand ?? '').toLowerCase().includes(term) ||
-        (b.model ?? '').toLowerCase().includes(term) ||
+        (b.compatible_brands ?? '').toLowerCase().includes(term) ||
+        (b.compatible_models ?? '').toLowerCase().includes(term) ||
         (b.description ?? '').toLowerCase().includes(term) ||
         (product?.name ?? '').toLowerCase().includes(term) ||
         (warehouse?.name ?? '').toLowerCase().includes(term)

@@ -78,6 +78,15 @@
   color: var(--color-status-inactive-text);
 }
 
+.detail-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: -0.25rem;
+}
+
 .detail-section-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -88,6 +97,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.125rem;
+}
+
+.detail-section--full {
+  grid-column: 1 / -1;
 }
 
 .detail-label {

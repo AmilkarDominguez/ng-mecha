@@ -44,23 +44,32 @@
 
     <mat-divider />
 
+    <div class="detail-section-title">Compatibilidad</div>
     <div class="detail-section-group">
-      @if (batch.brand) {
-        <div class="detail-section">
-          <span class="detail-label">Marca (Descripción)</span>
-          <span class="detail-value">{{ batch.brand }}</span>
-        </div>
-      }
-      @if (batch.model) {
-        <div class="detail-section">
-          <span class="detail-label">Modelo / Referencia</span>
-          <span class="detail-value">{{ batch.model }}</span>
-        </div>
-      }
+      <div class="detail-section detail-section--full">
+        <span class="detail-label">Marcas Compatibles</span>
+        <span class="detail-value">{{ batch.compatible_brands || '—' }}</span>
+      </div>
+      <div class="detail-section detail-section--full">
+        <span class="detail-label">Modelos Compatibles</span>
+        <span class="detail-value">{{ batch.compatible_models || '—' }}</span>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section-title">Inventario</div>
+    <div class="detail-section-group">
       <div class="detail-section">
         <span class="detail-label">Stock</span>
         <span class="detail-value" [class.stock-low]="(batch.stock ?? 0) < 10">
           {{ batch.stock !== null ? (batch.stock | number) : '—' }}
+        </span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Costo de Compra</span>
+        <span class="detail-value">
+          {{ batch.cost !== null ? 'Bs. ' + (batch.cost | number:'1.2-2') : '—' }}
         </span>
       </div>
       @if (batch.expiration_date) {
@@ -73,23 +82,12 @@
 
     <mat-divider />
 
-    <div class="detail-prices">
+    <div class="detail-section-title">Precio</div>
+    <div class="detail-section-group">
       <div class="detail-section">
-        <span class="detail-label">Precio Mayorista</span>
-        <span class="detail-value price-value">
-          {{ batch.wholesale_price !== null ? 'Bs. ' + (batch.wholesale_price | number:'1.2-2') : '—' }}
-        </span>
-      </div>
-      <div class="detail-section">
-        <span class="detail-label">Precio Minorista</span>
-        <span class="detail-value price-value">
-          {{ batch.retail_price !== null ? 'Bs. ' + (batch.retail_price | number:'1.2-2') : '—' }}
-        </span>
-      </div>
-      <div class="detail-section">
-        <span class="detail-label">Precio Final</span>
+        <span class="detail-label">Precio de Venta</span>
         <span class="detail-value price-final">
-          {{ batch.final_price !== null ? 'Bs. ' + (batch.final_price | number:'1.2-2') : '—' }}
+          {{ batch.price !== null ? 'Bs. ' + (batch.price | number:'1.2-2') : '—' }}
         </span>
       </div>
     </div>

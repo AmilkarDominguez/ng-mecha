@@ -7,14 +7,13 @@ export interface Batch {
   supplier_id: string;
   industry_id: string;
   brand_id: string | null;
-  wholesale_price: number | null;
-  retail_price: number | null;
-  final_price: number | null;
+  cost: number | null;
+  price: number | null;
   code: string | null;
   stock: number | null;
   description: string | null;
-  brand: string | null;
-  model: string | null;
+  compatible_brands: string | null;
+  compatible_models: string | null;
   expiration_date: string | Date | null;
   state: EntityState;
   created_at?: string | Date;

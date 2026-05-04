@@ -27,7 +27,7 @@ export class SupplierTable implements AfterViewInit {
   view = output<Supplier>();
   delete = output<Supplier>();
 
-  readonly displayedColumns = ['name', 'email', 'address', 'state', 'actions'];
+  readonly displayedColumns = ['name', 'phone', 'email', 'address', 'state', 'actions'];
 
   dataSource = new MatTableDataSource<Supplier>([]);
 
@@ -47,6 +47,7 @@ export class SupplierTable implements AfterViewInit {
     this.dataSource.sortingDataAccessor = (item, property) => {
       switch (property) {
         case 'name': return item.name.toLowerCase();
+        case 'phone': return (item.phone ?? '').toLowerCase();
         case 'email': return (item.email ?? '').toLowerCase();
         case 'address': return (item.address ?? '').toLowerCase();
         case 'state': return item.state;

@@ -92,9 +92,11 @@
 |-------------|---------------|------------------|
 | id          | String (UUID) | PK, auto-increment |
 | name        | String        | not null         |
+| nit          | String        | nullable        |
 | description | String        | nullable         |
 | email       | String        | nullable         |
 | address     | String        | nullable         |
+| phone         | String        | nullable       |
 | state       | State (enum)  | default: ACTIVE  |
 | created_at   | LocalDateTime | auto             |
 | updated_at   | LocalDateTime | auto             |
@@ -171,14 +173,13 @@
 | supplier_id     | Long (FK)       | not null → suppliers.id       |
 | industry_id     | Long (FK)       | not null → industries.id      |
 | brand_id        | Long (FK)       | nullable → brands.id          |
-| wholesale_price | BigDecimal(8,2) | nullable                      |
-| retail_price    | BigDecimal(8,2) | nullable                      |
-| final_price     | BigDecimal(8,2) | nullable                      |
-| code           | String          | nullable                      |
-| stock          | BigDecimal      | nullable                      |
-| description    | String          | nullable                      |
-| brand          | String          | nullable                      |
-| model          | String          | nullable                      |
+| price           | BigDecimal(8,2) | nullable                      |
+| cost            | BigDecimal(8,2) | nullable                      |
+| code            | String          | nullable                      |
+| stock           | BigDecimal      | nullable                      |
+| description     | String          | nullable                      |
+| compatible_brands | String          | nullable                      |
+| compatible_models | String          | nullable                      |
 | expiration_date | LocalDate       | nullable                      |
 | state          | State (enum)    | default: ACTIVE               |
 | created_at      | LocalDateTime   | auto                          |

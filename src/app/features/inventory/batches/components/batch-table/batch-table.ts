@@ -33,7 +33,7 @@ export class BatchTable implements AfterViewInit {
   view = output<Batch>();
   delete = output<Batch>();
 
-  readonly displayedColumns = ['code', 'product', 'warehouse', 'stock', 'finalPrice', 'state', 'actions'];
+  readonly displayedColumns = ['code', 'product', 'warehouse', 'stock', 'price', 'state', 'actions'];
 
   dataSource = new MatTableDataSource<Batch>([]);
 
@@ -56,7 +56,7 @@ export class BatchTable implements AfterViewInit {
         case 'product': return this.getProductName(item.product_id).toLowerCase();
         case 'warehouse': return this.getWarehouseName(item.warehouse_id).toLowerCase();
         case 'stock': return item.stock ?? 0;
-        case 'finalPrice': return item.final_price ?? 0;
+        case 'price': return item.price ?? 0;
         case 'state': return item.state;
         default: return '';
       }

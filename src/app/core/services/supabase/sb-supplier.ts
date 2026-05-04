@@ -1,13 +1,16 @@
-import { Injectable } from '@angular/core';
-import { from, Observable, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { inject, Injectable } from '@angular/core';
+import { from, Observable, BehaviorSubject, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Supplier } from '../../models/supplier.model';
+import { Contact } from '../../models/contact.model';
+import { SPContact } from './sb-contact';
 
 @Injectable({ providedIn: 'root' })
 export class SPSupplier {
   private supabase: SupabaseClient;
+  private contactService = inject(SPContact);
   private data$ = new BehaviorSubject<Supplier[]>([]);
   private listening = false;
 
@@ -19,49 +22,73 @@ export class SPSupplier {
 
   public get(): Observable<Supplier[]> {
     return from(this.supabase.from(this.TABLE_NAME).select('*')).pipe(
-      map(({ data, error }) => {
+      switchMap(({ data, error }) => {
         if (error) throw error;
-        return data ?? [];
+        const suppliers: Supplier[] = data ?? [];
+        if (!suppliers.length) return of([]);
+
+        const ids = suppliers.map((s) => s.id);
+        return from(
+          this.supabase.from('contacts').select('*').in('reference_id', ids),
+        ).pipe(
+          map(({ data: contactsData }) => {
+            const contacts: Contact[] = contactsData ?? [];
+            return suppliers.map((s) => ({
+              ...s,
+              contacts: contacts.filter((ct) => ct.reference_id === s.id),
+            }));
+          }),
+        );
       }),
     );
   }
 
   public add(item: Supplier): Observable<Supplier[]> {
-    const { id, created_at, updated_at, ...payload } = item;
+    const { id, created_at, updated_at, contacts, ...payload } = item;
     return from(this.supabase.from(this.TABLE_NAME).insert([payload]).select()).pipe(
-      map(({ data, error }) => {
+      switchMap(({ data, error }) => {
         if (error) throw error;
-        return data;
+        const created: Supplier = data?.[0];
+        if (!contacts?.length) return of([created]);
+
+        return this.contactService.upsertForReference(created.id, contacts).pipe(
+          map((savedContacts) => [{ ...created, contacts: savedContacts }]),
+        );
       }),
     );
   }
 
   public update(item: Supplier): Observable<Supplier[]> {
-    const { created_at, updated_at, ...payload } = item;
+    const { created_at, updated_at, contacts, ...payload } = item;
     return from(
       this.supabase.from(this.TABLE_NAME).update(payload).eq('id', item.id).select(),
     ).pipe(
-      map(({ data, error }) => {
+      switchMap(({ data, error }) => {
         if (error) {
           console.error('Error en Supabase:', error.message);
           throw error;
         }
-        return data;
+        const updated: Supplier = data?.[0];
+        return this.contactService.upsertForReference(item.id, contacts ?? []).pipe(
+          map((savedContacts) => [{ ...updated, contacts: savedContacts }]),
+        );
       }),
     );
   }
 
   public delete(id: string): Observable<Supplier[]> {
-    return from(
-      this.supabase.from(this.TABLE_NAME).delete().eq('id', id).select(),
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) {
-          console.error('Error en Supabase:', error.message);
-          throw error;
-        }
-        return data;
-      }),
+    return this.contactService.deleteByReference(id).pipe(
+      switchMap(() =>
+        from(this.supabase.from(this.TABLE_NAME).delete().eq('id', id).select()).pipe(
+          map(({ data, error }) => {
+            if (error) {
+              console.error('Error en Supabase:', error.message);
+              throw error;
+            }
+            return data ?? [];
+          }),
+        ),
+      ),
     );
   }
 
