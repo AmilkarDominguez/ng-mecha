@@ -54,8 +54,8 @@ export class SupplierDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(SupplierFormModal, {
-      width: '44rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {} satisfies SupplierFormData,
     });
 
@@ -75,8 +75,8 @@ export class SupplierDashboard {
 
   onEdit(supplier: Supplier): void {
     const ref = this.dialog.open(SupplierFormModal, {
-      width: '44rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: { supplier } satisfies SupplierFormData,
     });
 

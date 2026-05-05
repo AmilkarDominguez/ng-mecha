@@ -2,7 +2,8 @@ import { Component, computed, effect, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -20,7 +21,7 @@ export interface VehicleFormData {
   selector: 'app-vehicle-form-modal',
   imports: [
     ReactiveFormsModule,
-    MatDialogModule,
+    DialogFrame,
     MatFormFieldModule,
     MatInputModule,
     MatAutocompleteModule,

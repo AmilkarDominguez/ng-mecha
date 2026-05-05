@@ -56,8 +56,8 @@ export class MechanicDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(MechanicFormModal, {
-      width: '48rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {} satisfies MechanicFormData,
     });
 
@@ -77,8 +77,8 @@ export class MechanicDashboard {
 
   onEdit(mechanic: Mechanic): void {
     const ref = this.dialog.open(MechanicFormModal, {
-      width: '48rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: { mechanic } satisfies MechanicFormData,
     });
 

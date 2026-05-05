@@ -55,8 +55,8 @@ export class VehicleDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(VehicleFormModal, {
-      width: '48rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {} satisfies VehicleFormData,
     });
 
@@ -76,8 +76,8 @@ export class VehicleDashboard {
 
   onEdit(vehicle: Vehicle): void {
     const ref = this.dialog.open(VehicleFormModal, {
-      width: '48rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: { vehicle } satisfies VehicleFormData,
     });
 

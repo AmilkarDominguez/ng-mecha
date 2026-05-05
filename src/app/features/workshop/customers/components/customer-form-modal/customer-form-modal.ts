@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Contact } from '../../../../../core/models/contact.model';
 import { Customer, CustomerRating } from '../../../../../core/models/customer.model';
+import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
 
 export interface CustomerFormData {
   customer?: Customer;
@@ -18,8 +19,8 @@ export interface CustomerFormData {
 @Component({
   selector: 'app-customer-form-modal',
   imports: [
+    DialogFrame,
     ReactiveFormsModule,
-    MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,

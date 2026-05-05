@@ -51,8 +51,8 @@ export class BrandDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(BrandFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {} satisfies BrandFormData,
     });
 
@@ -72,8 +72,8 @@ export class BrandDashboard {
 
   onEdit(brand: Brand): void {
     const ref = this.dialog.open(BrandFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: { brand } satisfies BrandFormData,
     });
 

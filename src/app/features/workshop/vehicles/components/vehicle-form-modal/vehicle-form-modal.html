@@ -1,9 +1,8 @@
-<h2 mat-dialog-title class="modal-title">
-  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'add_circle' }}</mat-icon>
-  {{ isEditMode ? 'Editar Vehículo' : 'Nuevo Vehículo' }}
-</h2>
+<app-dialog-frame
+  [title]="isEditMode ? 'Editar Vehículo' : 'Nuevo Vehículo'"
+  [icon]="isEditMode ? 'edit' : 'directions_car'"
+  initialSize="md">
 
-<mat-dialog-content class="modal-content">
   <form [formGroup]="form" class="form-grid">
 
     <mat-form-field appearance="outline" class="field-full">
@@ -86,12 +85,13 @@
     </div>
 
   </form>
-</mat-dialog-content>
 
-<mat-dialog-actions class="modal-actions" align="end">
-  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
-  <button mat-flat-button color="primary" (click)="onSave()">
-    <mat-icon>save</mat-icon>
-    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
-  </button>
-</mat-dialog-actions>
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSave()">
+      <mat-icon>save</mat-icon>
+      {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+    </button>
+  </ng-container>
+
+</app-dialog-frame>

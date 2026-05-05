@@ -1,16 +1,15 @@
-<h2 mat-dialog-title class="modal-title">
-  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'branding_watermark' }}</mat-icon>
-  {{ isEditMode ? 'Editar Marca' : 'Nueva Marca' }}
-</h2>
+<app-dialog-frame
+  [title]="isEditMode ? 'Editar Marca' : 'Nueva Marca'"
+  [icon]="isEditMode ? 'edit' : 'branding_watermark'"
+  initialSize="sm">
 
-<mat-dialog-content class="modal-content">
   <form [formGroup]="form" class="form-grid">
 
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Nombre de la Marca</mat-label>
       <input matInput formControlName="name" placeholder="Ej. Bosch, NGK, Castrol" />
       @if (getFieldError('name')) {
-      <mat-error>{{ getFieldError('name') }}</mat-error>
+        <mat-error>{{ getFieldError('name') }}</mat-error>
       }
     </mat-form-field>
 
@@ -19,7 +18,7 @@
       <mat-select formControlName="score">
         <mat-option [value]="null">Sin calificación</mat-option>
         @for (s of scoreOptions; track s) {
-        <mat-option [value]="s">{{ s }}</mat-option>
+          <mat-option [value]="s">{{ s }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -29,7 +28,7 @@
       <textarea matInput formControlName="description" rows="3"
         placeholder="Ej. Marca alemana especializada en repuestos eléctricos y herramientas automotrices."></textarea>
       @if (getFieldError('description')) {
-      <mat-error>{{ getFieldError('description') }}</mat-error>
+        <mat-error>{{ getFieldError('description') }}</mat-error>
       }
     </mat-form-field>
 
@@ -41,12 +40,13 @@
     </div>
 
   </form>
-</mat-dialog-content>
 
-<mat-dialog-actions class="modal-actions" align="end">
-  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
-  <button mat-flat-button color="primary" (click)="onSave()">
-    <mat-icon>save</mat-icon>
-    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
-  </button>
-</mat-dialog-actions>
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSave()">
+      <mat-icon>save</mat-icon>
+      {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+    </button>
+  </ng-container>
+
+</app-dialog-frame>

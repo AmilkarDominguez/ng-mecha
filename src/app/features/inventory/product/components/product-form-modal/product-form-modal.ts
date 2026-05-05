@@ -1,7 +1,8 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -21,7 +22,7 @@ export interface ProductFormData {
   selector: 'app-product-form-modal',
   imports: [
     ReactiveFormsModule,
-    MatDialogModule,
+    DialogFrame,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,

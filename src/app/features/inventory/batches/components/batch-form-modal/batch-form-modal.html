@@ -1,9 +1,8 @@
-<h2 mat-dialog-title class="modal-title">
-  <mat-icon class="modal-title-icon">{{ isEditMode ? 'edit' : 'add_box' }}</mat-icon>
-  {{ isEditMode ? 'Editar Lote' : 'Nuevo Lote de Inventario' }}
-</h2>
+<app-dialog-frame
+  [title]="isEditMode ? 'Editar Lote' : 'Nuevo Lote de Inventario'"
+  [icon]="isEditMode ? 'edit' : 'add_box'"
+  initialSize="lg">
 
-<mat-dialog-content class="modal-content">
   <form [formGroup]="form" class="form-grid">
 
     <div class="form-section-title">Identificación</div>
@@ -12,11 +11,11 @@
       <mat-label>Producto *</mat-label>
       <mat-select formControlName="product_id">
         @for (product of data.products; track product.id) {
-        <mat-option [value]="product.id">{{ product.name }}</mat-option>
+          <mat-option [value]="product.id">{{ product.name }}</mat-option>
         }
       </mat-select>
       @if (getFieldError('product_id')) {
-      <mat-error>{{ getFieldError('product_id') }}</mat-error>
+        <mat-error>{{ getFieldError('product_id') }}</mat-error>
       }
     </mat-form-field>
 
@@ -24,11 +23,11 @@
       <mat-label>Almacén *</mat-label>
       <mat-select formControlName="warehouse_id">
         @for (warehouse of data.warehouses; track warehouse.id) {
-        <mat-option [value]="warehouse.id">{{ warehouse.name }}</mat-option>
+          <mat-option [value]="warehouse.id">{{ warehouse.name }}</mat-option>
         }
       </mat-select>
       @if (getFieldError('warehouse_id')) {
-      <mat-error>{{ getFieldError('warehouse_id') }}</mat-error>
+        <mat-error>{{ getFieldError('warehouse_id') }}</mat-error>
       }
     </mat-form-field>
 
@@ -36,11 +35,11 @@
       <mat-label>Proveedor *</mat-label>
       <mat-select formControlName="supplier_id">
         @for (supplier of data.suppliers; track supplier.id) {
-        <mat-option [value]="supplier.id">{{ supplier.name }}</mat-option>
+          <mat-option [value]="supplier.id">{{ supplier.name }}</mat-option>
         }
       </mat-select>
       @if (getFieldError('supplier_id')) {
-      <mat-error>{{ getFieldError('supplier_id') }}</mat-error>
+        <mat-error>{{ getFieldError('supplier_id') }}</mat-error>
       }
     </mat-form-field>
 
@@ -48,11 +47,11 @@
       <mat-label>Industria / Procedencia *</mat-label>
       <mat-select formControlName="industry_id">
         @for (industry of data.industries; track industry.id) {
-        <mat-option [value]="industry.id">{{ industry.name }}</mat-option>
+          <mat-option [value]="industry.id">{{ industry.name }}</mat-option>
         }
       </mat-select>
       @if (getFieldError('industry_id')) {
-      <mat-error>{{ getFieldError('industry_id') }}</mat-error>
+        <mat-error>{{ getFieldError('industry_id') }}</mat-error>
       }
     </mat-form-field>
 
@@ -61,7 +60,7 @@
       <mat-select formControlName="brand_id">
         <mat-option [value]="null">Sin marca</mat-option>
         @for (brand of data.brands; track brand.id) {
-        <mat-option [value]="brand.id">{{ brand.name }}</mat-option>
+          <mat-option [value]="brand.id">{{ brand.name }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -70,7 +69,7 @@
       <mat-label>Código de Lote</mat-label>
       <input matInput formControlName="code" placeholder="Ej. LOTE-LUB-001" />
       @if (getFieldError('code')) {
-      <mat-error>{{ getFieldError('code') }}</mat-error>
+        <mat-error>{{ getFieldError('code') }}</mat-error>
       }
     </mat-form-field>
 
@@ -80,7 +79,7 @@
       <mat-label>Marcas compatibles</mat-label>
       <input matInput formControlName="compatible_brands" placeholder="Ej. Suzuki, Toyota, BMW" />
       @if (getFieldError('compatible_brands')) {
-      <mat-error>{{ getFieldError('compatible_brands') }}</mat-error>
+        <mat-error>{{ getFieldError('compatible_brands') }}</mat-error>
       }
     </mat-form-field>
 
@@ -89,16 +88,17 @@
       <input matInput formControlName="compatible_models"
         placeholder="Ej. Suzuki Alto 2010 - 2015, Toyota Corolla 2005" />
       @if (getFieldError('compatible_models')) {
-      <mat-error>{{ getFieldError('compatible_models') }}</mat-error>
+        <mat-error>{{ getFieldError('compatible_models') }}</mat-error>
       }
     </mat-form-field>
 
     <div class="form-section-title">Inventario</div>
+
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Stock</mat-label>
       <input matInput type="number" formControlName="stock" placeholder="0" min="0" />
       @if (getFieldError('stock')) {
-      <mat-error>{{ getFieldError('stock') }}</mat-error>
+        <mat-error>{{ getFieldError('stock') }}</mat-error>
       }
     </mat-form-field>
 
@@ -112,7 +112,7 @@
       <input matInput type="number" formControlName="cost" placeholder="0.00" min="0" step="0.01" />
       <span matTextPrefix>Bs.&nbsp;</span>
       @if (getFieldError('cost')) {
-      <mat-error>{{ getFieldError('cost') }}</mat-error>
+        <mat-error>{{ getFieldError('cost') }}</mat-error>
       }
     </mat-form-field>
 
@@ -123,7 +123,7 @@
       <input matInput type="number" formControlName="price" placeholder="0.00" min="0" step="0.01" />
       <span matTextPrefix>Bs.&nbsp;</span>
       @if (getFieldError('price')) {
-      <mat-error>{{ getFieldError('price') }}</mat-error>
+        <mat-error>{{ getFieldError('price') }}</mat-error>
       }
     </mat-form-field>
 
@@ -132,7 +132,7 @@
       <textarea matInput formControlName="description" rows="3"
         placeholder="Descripción adicional del lote..."></textarea>
       @if (getFieldError('description')) {
-      <mat-error>{{ getFieldError('description') }}</mat-error>
+        <mat-error>{{ getFieldError('description') }}</mat-error>
       }
     </mat-form-field>
 
@@ -144,12 +144,13 @@
     </div>
 
   </form>
-</mat-dialog-content>
 
-<mat-dialog-actions class="modal-actions" align="end">
-  <button mat-stroked-button (click)="onCancel()">Cancelar</button>
-  <button mat-flat-button color="primary" (click)="onSave()">
-    <mat-icon>save</mat-icon>
-    {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
-  </button>
-</mat-dialog-actions>
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSave()">
+      <mat-icon>save</mat-icon>
+      {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+    </button>
+  </ng-container>
+
+</app-dialog-frame>

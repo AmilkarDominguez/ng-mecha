@@ -50,8 +50,8 @@ export class IndustryDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(IndustryFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {} satisfies IndustryFormData,
     });
 
@@ -71,8 +71,8 @@ export class IndustryDashboard {
 
   onEdit(industry: Industry): void {
     const ref = this.dialog.open(IndustryFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: { industry } satisfies IndustryFormData,
     });
 

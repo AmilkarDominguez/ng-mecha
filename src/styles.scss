@@ -1,5 +1,28 @@
 @use './styles/variables';
 
+// ============================================================
+// Floating dialog panel — usado por los formularios flotantes
+// Elimina el estilo base de Material y cede el control a DialogFrame
+// ============================================================
+.floating-dialog-panel {
+  max-width: 100vw !important;
+
+  .mat-mdc-dialog-container {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .mdc-dialog__surface,
+  .mat-mdc-dialog-surface {
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+    padding: 0;
+  }
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-scrollbar-thumb) transparent;

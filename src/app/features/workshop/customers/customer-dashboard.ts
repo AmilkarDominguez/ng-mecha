@@ -56,8 +56,9 @@ export class CustomerDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(CustomerFormModal, {
-      width: '48rem',
       maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {} satisfies CustomerFormData,
     });
 
@@ -77,8 +78,9 @@ export class CustomerDashboard {
 
   onEdit(customer: Customer): void {
     const ref = this.dialog.open(CustomerFormModal, {
-      width: '48rem',
       maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: { customer } satisfies CustomerFormData,
     });
 

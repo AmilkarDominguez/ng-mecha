@@ -1,0 +1,75 @@
+<div
+  class="frame"
+  [class.frame-minimized]="isMinimized()"
+  [class.frame-fullscreen]="isFullscreen()"
+  cdkDrag
+  [cdkDragDisabled]="!isDraggable()"
+  cdkDragBoundary=".cdk-overlay-container">
+
+  <!-- Barra de título (drag handle) -->
+  <div class="frame-titlebar" cdkDragHandle>
+    <mat-icon class="frame-titlebar-icon">{{ icon() }}</mat-icon>
+    <span class="frame-titlebar-title">{{ title() }}</span>
+
+    <!-- Controles — el mousedown no propaga para no activar el drag -->
+    <div class="frame-controls" (mousedown)="$event.stopPropagation()">
+
+      @if (!isMinimized()) {
+        <!-- Menú de tamaños -->
+        <button mat-icon-button
+          [matMenuTriggerFor]="sizeMenu"
+          matTooltip="Cambiar tamaño"
+          class="frame-btn">
+          <mat-icon>aspect_ratio</mat-icon>
+        </button>
+        <mat-menu #sizeMenu="matMenu" class="size-menu">
+          @for (opt of sizeOptions; track opt.key) {
+            <button mat-menu-item (click)="setSize(opt.key)" class="size-menu-item">
+              <mat-icon>{{ opt.icon }}</mat-icon>
+              <span>{{ opt.label }}</span>
+              @if (currentSize() === opt.key && !isFullscreen()) {
+                <mat-icon class="size-check">check</mat-icon>
+              }
+            </button>
+          }
+        </mat-menu>
+
+        <!-- Pantalla completa -->
+        <button mat-icon-button
+          (click)="toggleFullscreen()"
+          [matTooltip]="isFullscreen() ? 'Restaurar tamaño' : 'Pantalla completa'"
+          class="frame-btn">
+          <mat-icon>{{ isFullscreen() ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+        </button>
+      }
+
+      <!-- Minimizar / Restaurar -->
+      <button mat-icon-button
+        (click)="toggleMinimize()"
+        [matTooltip]="isMinimized() ? 'Restaurar' : 'Minimizar'"
+        class="frame-btn">
+        <mat-icon>{{ isMinimized() ? 'keyboard_arrow_up' : 'remove' }}</mat-icon>
+      </button>
+
+      <!-- Cerrar -->
+      <button mat-icon-button
+        (click)="close()"
+        matTooltip="Cerrar"
+        class="frame-btn frame-btn-close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Cuerpo + acciones (ocultos al minimizar) -->
+  @if (!isMinimized()) {
+    <div class="frame-body">
+      <ng-content />
+    </div>
+
+    <div class="frame-footer">
+      <ng-content select="[dialog-actions]" />
+    </div>
+  }
+
+</div>

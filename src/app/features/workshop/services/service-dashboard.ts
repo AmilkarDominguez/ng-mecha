@@ -54,8 +54,8 @@ export class ServiceDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(ServiceFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {} satisfies ServiceFormData,
     });
 
@@ -75,8 +75,8 @@ export class ServiceDashboard {
 
   onEdit(item: Service): void {
     const ref = this.dialog.open(ServiceFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: { service: item } satisfies ServiceFormData,
     });
 

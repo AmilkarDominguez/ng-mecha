@@ -71,8 +71,8 @@ export class BatchDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(BatchFormModal, {
-      width: '52rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {
         products: this.products(),
         warehouses: this.warehouses(),
@@ -98,8 +98,8 @@ export class BatchDashboard {
 
   onEdit(batch: Batch): void {
     const ref = this.dialog.open(BatchFormModal, {
-      width: '52rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {
         batch,
         products: this.products(),

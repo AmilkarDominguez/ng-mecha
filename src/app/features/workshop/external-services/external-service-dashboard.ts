@@ -53,8 +53,8 @@ export class ExternalServiceDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(ExternalServiceFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {} satisfies ExternalServiceFormData,
     });
 
@@ -74,8 +74,8 @@ export class ExternalServiceDashboard {
 
   onEdit(item: ExternalService): void {
     const ref = this.dialog.open(ExternalServiceFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: { externalService: item } satisfies ExternalServiceFormData,
     });
 

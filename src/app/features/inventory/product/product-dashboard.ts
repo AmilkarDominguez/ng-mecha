@@ -56,8 +56,8 @@ export class ProductDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(ProductFormModal, {
-      width: '44rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {
         categories: this.categories(),
         presentations: this.presentations(),
@@ -80,8 +80,8 @@ export class ProductDashboard {
 
   onEdit(product: Product): void {
     const ref = this.dialog.open(ProductFormModal, {
-      width: '44rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {
         product,
         categories: this.categories(),

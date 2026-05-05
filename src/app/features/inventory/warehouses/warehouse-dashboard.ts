@@ -53,8 +53,8 @@ export class WarehouseDashboard {
 
   openCreateModal(): void {
     const ref = this.dialog.open(WarehouseFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {} satisfies WarehouseFormData,
     });
 
@@ -74,8 +74,8 @@ export class WarehouseDashboard {
 
   onEdit(warehouse: Warehouse): void {
     const ref = this.dialog.open(WarehouseFormModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: { warehouse } satisfies WarehouseFormData,
     });
 
