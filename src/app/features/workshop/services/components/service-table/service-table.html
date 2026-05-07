@@ -13,6 +13,12 @@
       <td mat-cell *matCellDef="let row" class="cell-code">{{ row.code ?? '—' }}</td>
     </ng-container>
 
+    <!-- Column: description -->
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef>Descripción</th>
+      <td mat-cell *matCellDef="let row" class="cell-description">{{ row.description ?? '—' }}</td>
+    </ng-container>
+
     <!-- Column: price -->
     <ng-container matColumnDef="price">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Precio base</th>

@@ -13,12 +13,31 @@
           <mat-icon matChipAvatar>{{ externalService.state === 'ACTIVE' ? 'check_circle' : 'cancel' }}</mat-icon>
           {{ externalService.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
         </mat-chip>
+        @if (externalService.rating) {
+          <mat-chip [class]="'chip-rating-' + externalService.rating.toLowerCase()">
+            {{ externalService.rating === 'GOOD' ? 'Bueno' : externalService.rating === 'REGULAR' ? 'Regular' : 'Malo' }}
+          </mat-chip>
+        }
       </mat-chip-set>
     </div>
+
+    @if (externalService.company_name) {
+      <div class="detail-section">
+        <span class="detail-label">Empresa / Proveedor</span>
+        <span class="detail-value">{{ externalService.company_name }}</span>
+      </div>
+    }
 
     <mat-divider />
 
     <div class="detail-columns">
+
+      @if (externalService.phone) {
+        <div class="detail-section">
+          <span class="detail-label">Teléfono</span>
+          <span class="detail-value">{{ externalService.phone }}</span>
+        </div>
+      }
 
       @if (externalService.cost !== null && externalService.cost !== undefined) {
         <div class="detail-section">
@@ -39,6 +58,13 @@
       }
 
     </div>
+
+    @if (externalService.address) {
+      <div class="detail-section">
+        <span class="detail-label">Dirección</span>
+        <span class="detail-value">{{ externalService.address }}</span>
+      </div>
+    }
 
     @if (externalService.description) {
       <div class="detail-section">

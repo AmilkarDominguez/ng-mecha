@@ -243,13 +243,13 @@
 | Columna       | Tipo          | Restricciones           |
 | ------------- | ------------- | ----------------------- |
 | id            | String UUID   | PK, auto-generated      |
-| customer_id    | UUID (FK)     | nullable → customers.id |
-| license_plate  | String        | nullable                |
+| customer_id    | UUID (FK)     | nullable → customers.id|
+| license_plate  | String        | nullable               |
 | brand         | String        | nullable                |
 | model         | String        | nullable                |
 | displacement  | String        | nullable                |
 | year          | String        | nullable                |
-| chassis_number | String        | nullable                |
+| chassis_number | String        | nullable               |
 | description   | String        | nullable                |
 | state         | State (enum)  | default: ACTIVE         |
 | created_at     | LocalDateTime | auto                    |
@@ -302,8 +302,8 @@
 | description | String          | nullable           |
 | price       | BigDecimal(8,2) | nullable           |
 | state       | State (enum)    | default: ACTIVE    |
-| created_at   | LocalDateTime | auto                 |
-| updated_at   | LocalDateTime | auto                 |
+| created_at   | LocalDateTime | auto                |
+| updated_at   | LocalDateTime | auto                |
 
 **Relaciones:**
 
@@ -316,13 +316,19 @@
 
 **Tabla:** `external_services`
 
-| Columna     | Tipo            | Restricciones      |
-| ----------- | --------------- | ------------------ |
-| id          | String UUID     | PK, auto-generated |
-| name        | String          | nullable           |
-| description | String          | nullable           |
-| cost        | BigDecimal(8,2) | nullable           |
-| price       | BigDecimal(8,2) | nullable           |
-| state       | State (enum)    | default: ACTIVE    |
-| created_at  | LocalDateTime | auto                 |
-| updated_at  | LocalDateTime | auto                 |
+| Columna     | Tipo                                 | Restricciones        |
+| ----------- | -------------------------------------| ------------------   |
+| id          | String UUID                          | PK, auto-generated   |
+| name        | String                               | nullable             |
+| company_name| String                               | nullable             |
+| description | String                               | nullable             |
+| address     | LocalDate                            | nullable             |
+| phone       | String                               | nullable             |
+| rating      | ExternalServicesRating (enum)        | nullable             |
+| cost        | BigDecimal(8,2)                      | nullable             |
+| price       | BigDecimal(8,2)                      | nullable             |
+| state       | State (enum)                         | default: ACTIVE      |
+| created_at  | LocalDateTime | auto                 | LocalDateTime | auto |
+| updated_at  | LocalDateTime | auto                 | LocalDateTime | auto |
+
+**Enum ExternalServicesRating:** `GOOD` (Bueno) · `REGULAR` (Regular) · `BAD` (Malo)

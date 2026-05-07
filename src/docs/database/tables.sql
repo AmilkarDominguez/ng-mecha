@@ -27,6 +27,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE external_services_rating_enum AS ENUM ('GOOD', 'REGULAR', 'BAD');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 
 -- ============================================================
 -- TABLES
@@ -209,14 +214,18 @@ CREATE TABLE IF NOT EXISTS services (
 
 -- 14. external_services
 CREATE TABLE IF NOT EXISTS external_services (
-  id          UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
-  name        TEXT,
-  description TEXT,
+  id           UUID                          PRIMARY KEY DEFAULT gen_random_uuid(),
+  name         TEXT,
+  company_name TEXT,
+  description  TEXT,
+  address      TEXT,
+  phone        TEXT,
+  rating       external_services_rating_enum,
   cost        NUMERIC(8,2),
   price       NUMERIC(8,2),
-  state       state_enum     NOT NULL DEFAULT 'ACTIVE',
-  created_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+  state       state_enum                    NOT NULL DEFAULT 'ACTIVE',
+  created_at  TIMESTAMPTZ                   NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ                   NOT NULL DEFAULT NOW()
 );
 
 

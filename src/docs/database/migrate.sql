@@ -43,3 +43,22 @@ ALTER TABLE customers DROP COLUMN IF EXISTS expedition_ci;
 ALTER TABLE customers DROP COLUMN IF EXISTS code_ci;
 ALTER TABLE customers DROP COLUMN IF EXISTS email;
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS rating customer_rating_enum;
+
+
+-- ============================================================
+-- v5 — external_services: agregar address, phone, rating
+-- ============================================================
+DO $$ BEGIN
+  CREATE TYPE external_services_rating_enum AS ENUM ('GOOD', 'REGULAR', 'BAD');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+ALTER TABLE external_services ADD COLUMN IF NOT EXISTS address      TEXT;
+ALTER TABLE external_services ADD COLUMN IF NOT EXISTS phone        TEXT;
+ALTER TABLE external_services ADD COLUMN IF NOT EXISTS rating       external_services_rating_enum;
+
+
+-- ============================================================
+-- v6 — external_services: agregar company_name
+-- ============================================================
+ALTER TABLE external_services ADD COLUMN IF NOT EXISTS company_name TEXT;

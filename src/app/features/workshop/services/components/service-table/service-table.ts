@@ -29,7 +29,7 @@ export class ServiceTable implements AfterViewInit {
   view = output<Service>();
   delete = output<Service>();
 
-  readonly displayedColumns = ['name', 'code', 'price', 'state', 'actions'];
+  readonly displayedColumns = ['name', 'code', 'description', 'price', 'state', 'actions'];
 
   dataSource = new MatTableDataSource<Service>([]);
 

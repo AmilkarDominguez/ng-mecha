@@ -6,7 +6,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ExternalService } from '../../../../../core/models/external-service.model';
+import { ExternalService, ExternalServicesRating } from '../../../../../core/models/external-service.model';
 
 @Component({
   selector: 'app-external-service-table',
@@ -29,7 +29,18 @@ export class ExternalServiceTable implements AfterViewInit {
   view = output<ExternalService>();
   delete = output<ExternalService>();
 
-  readonly displayedColumns = ['name', 'cost', 'price', 'state', 'actions'];
+  readonly displayedColumns = ['name', 'company_name', 'description', 'phone', 'rating', 'cost', 'price', 'state', 'actions'];
+
+  private readonly ratingLabel: Record<ExternalServicesRating, string> = {
+    GOOD: 'Bueno',
+    REGULAR: 'Regular',
+    BAD: 'Malo',
+  };
+
+  getRatingLabel(rating: ExternalServicesRating | null): string {
+    if (!rating) return '—';
+    return this.ratingLabel[rating];
+  }
 
   dataSource = new MatTableDataSource<ExternalService>([]);
 

@@ -42,7 +42,10 @@ export class ExternalServiceDashboard {
     return this.externalServices().filter(
       (s) =>
         (s.name ?? '').toLowerCase().includes(term) ||
-        (s.description ?? '').toLowerCase().includes(term),
+        (s.description ?? '').toLowerCase().includes(term) ||
+        (s.phone ?? '').toLowerCase().includes(term) ||
+        (s.address ?? '').toLowerCase().includes(term) ||
+        (s.company_name ?? '').toLowerCase().includes(term),
     );
   });
 

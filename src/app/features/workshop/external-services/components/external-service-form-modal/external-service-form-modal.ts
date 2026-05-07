@@ -6,8 +6,9 @@ import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialo
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { ExternalService } from '../../../../../core/models/external-service.model';
+import { ExternalService, ExternalServicesRating } from '../../../../../core/models/external-service.model';
 
 export interface ExternalServiceFormData {
   externalService?: ExternalService;
@@ -20,6 +21,7 @@ export interface ExternalServiceFormData {
     DialogFrame,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     MatButtonModule,
     MatSlideToggleModule,
     MatIconModule,
@@ -36,11 +38,21 @@ export class ExternalServiceFormModal implements OnInit {
     return !!this.data?.externalService;
   }
 
+  readonly ratingOptions: { value: ExternalServicesRating; label: string }[] = [
+    { value: 'GOOD', label: 'Bueno' },
+    { value: 'REGULAR', label: 'Regular' },
+    { value: 'BAD', label: 'Malo' },
+  ];
+
   form = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(150)]],
+    company_name: ['', [Validators.maxLength(200)]],
+    phone: ['', [Validators.maxLength(20)]],
+    rating: [null as ExternalServicesRating | null],
     cost: [null as number | null, [Validators.min(0)]],
     price: [null as number | null, [Validators.min(0)]],
     description: ['', [Validators.maxLength(500)]],
+    address: ['', [Validators.maxLength(300)]],
     active: [true],
   });
 
@@ -49,9 +61,13 @@ export class ExternalServiceFormModal implements OnInit {
       const s = this.data.externalService;
       this.form.patchValue({
         name: s.name ?? '',
+        company_name: s.company_name ?? '',
+        phone: s.phone ?? '',
+        rating: s.rating ?? null,
         cost: s.cost ?? null,
         price: s.price ?? null,
         description: s.description ?? '',
+        address: s.address ?? '',
         active: s.state === 'ACTIVE',
       });
     }
@@ -66,9 +82,13 @@ export class ExternalServiceFormModal implements OnInit {
     this.dialogRef.close({
       id: this.data.externalService?.id || null,
       name: raw.name || null,
+      company_name: raw.company_name || null,
+      phone: raw.phone || null,
+      rating: raw.rating || null,
       cost: raw.cost ?? null,
       price: raw.price ?? null,
       description: raw.description || null,
+      address: raw.address || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }

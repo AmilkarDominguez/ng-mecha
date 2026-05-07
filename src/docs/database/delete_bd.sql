@@ -36,5 +36,7 @@ DROP FUNCTION IF EXISTS set_updated_at() CASCADE;
 -- ============================================================
 -- TIPOS (enums)
 -- ============================================================
-DROP TYPE IF EXISTS contact_type_enum CASCADE;
-DROP TYPE IF EXISTS state_enum        CASCADE;
+DROP TYPE IF EXISTS external_services_rating_enum CASCADE;
+DROP TYPE IF EXISTS contact_type_enum             CASCADE;
+DROP TYPE IF EXISTS customer_rating_enum          CASCADE;
+DROP TYPE IF EXISTS state_enum                    CASCADE;

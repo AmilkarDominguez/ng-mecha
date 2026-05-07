@@ -13,6 +13,32 @@
       }
     </mat-form-field>
 
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Empresa / Proveedor</mat-label>
+      <input matInput formControlName="company_name" placeholder="Ej. Taller ABC S.R.L." />
+      @if (getFieldError('company_name')) {
+        <mat-error>{{ getFieldError('company_name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Teléfono</mat-label>
+      <input matInput formControlName="phone" placeholder="Ej. 71234567" />
+      @if (getFieldError('phone')) {
+        <mat-error>{{ getFieldError('phone') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Calificación</mat-label>
+      <mat-select formControlName="rating">
+        <mat-option [value]="null">Sin calificación</mat-option>
+        @for (opt of ratingOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Costo (Bs.)</mat-label>
       <input matInput formControlName="cost" type="number" min="0" step="0.01"
@@ -28,6 +54,15 @@
         placeholder="Ej. 180.00" />
       @if (getFieldError('price')) {
         <mat-error>{{ getFieldError('price') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Dirección</mat-label>
+      <textarea matInput formControlName="address" rows="2"
+        placeholder="Ej. Av. Arce #123, La Paz"></textarea>
+      @if (getFieldError('address')) {
+        <mat-error>{{ getFieldError('address') }}</mat-error>
       }
     </mat-form-field>
 
