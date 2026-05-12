@@ -21,27 +21,11 @@
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="field-third">
+    <mat-form-field appearance="outline" class="field-half">
       <mat-label>CI</mat-label>
       <input matInput formControlName="ci" placeholder="Ej. 7654321" />
       @if (getFieldError('ci')) {
         <mat-error>{{ getFieldError('ci') }}</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="field-third">
-      <mat-label>Expedición CI</mat-label>
-      <input matInput formControlName="expedition_ci" placeholder="Ej. LP" />
-      @if (getFieldError('expedition_ci')) {
-        <mat-error>{{ getFieldError('expedition_ci') }}</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="field-third">
-      <mat-label>Código CI</mat-label>
-      <input matInput formControlName="code_ci" placeholder="Ej. 1A" />
-      @if (getFieldError('code_ci')) {
-        <mat-error>{{ getFieldError('code_ci') }}</mat-error>
       }
     </mat-form-field>
 

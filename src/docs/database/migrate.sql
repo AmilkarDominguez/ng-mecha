@@ -65,7 +65,14 @@ ALTER TABLE external_services ADD COLUMN IF NOT EXISTS company_name TEXT;
 
 
 -- ============================================================
--- v7 — Accounts Module: crear tabla bank_transaction_types
+-- v7 — mechanics: eliminar expedition_ci y code_ci
+-- ============================================================
+ALTER TABLE mechanics DROP COLUMN IF EXISTS expedition_ci;
+ALTER TABLE mechanics DROP COLUMN IF EXISTS code_ci;
+
+
+-- ============================================================
+-- v8 — Accounts Module: crear tabla bank_transaction_types
 -- ============================================================
 DO $$ BEGIN
   CREATE TYPE bank_transaction_kind AS ENUM ('INCOME', 'EXPENSE');

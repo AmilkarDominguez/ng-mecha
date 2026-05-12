@@ -23,15 +23,7 @@
       @if (mechanic.ci) {
         <div class="detail-section">
           <span class="detail-label">CI</span>
-          <span class="detail-value">
-            {{ mechanic.ci }}
-            @if (mechanic.expedition_ci) {
-              <span class="detail-sub"> - {{ mechanic.expedition_ci }}</span>
-            }
-            @if (mechanic.code_ci) {
-              <span class="detail-sub"> ({{ mechanic.code_ci }})</span>
-            }
-          </span>
+          <span class="detail-value">{{ mechanic.ci }}</span>
         </div>
       }
 

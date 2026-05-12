@@ -6,8 +6,6 @@ export interface Mechanic {
   name: string | null;
   lastname: string | null;
   ci: string | null;
-  expedition_ci: string | null;
-  code_ci: string | null;
   nit: string | null;
   address: string | null;
   email: string | null;

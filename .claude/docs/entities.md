@@ -273,8 +273,6 @@
 | name        | String        | nullable             |
 | lastname        | String        | nullable             |
 | ci          | String        | nullable             |
-| expedition_ci| String        | nullable             |
-| code_ci      | String        | nullable             |
 | nit          | String        | nullable             |
 | address    | LocalDate     | nullable             |
 | email    | LocalDate     | nullable             |

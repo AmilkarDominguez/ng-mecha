@@ -191,8 +191,6 @@ CREATE TABLE IF NOT EXISTS mechanics (
   name           TEXT,
   lastname       TEXT,
   ci             TEXT,
-  expedition_ci  TEXT,
-  code_ci        TEXT,
   nit            TEXT,
   address        TEXT,
   email          TEXT,
