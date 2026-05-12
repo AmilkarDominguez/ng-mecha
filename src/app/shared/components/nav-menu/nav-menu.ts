@@ -56,6 +56,14 @@ export class NavMenu {
       ],
     },
     {
+      title: 'Cuentas',
+      icon: 'account_balance',
+      items: [
+        { label: 'Cuentas Bancarias', icon: 'account_balance', route: '/dashboard/cuentas/cuentas-bancarias' },
+        { label: 'Tipos de Transacción', icon: 'swap_horiz', route: '/dashboard/cuentas/tipos-transaccion' },
+      ],
+    },
+    {
       title: 'Taller',
       icon: 'build',
       items: [

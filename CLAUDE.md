@@ -158,7 +158,50 @@ Las rutas protegidas con `authGuard` estan comentadas (pendiente activar cuando 
 
 ## Informacion del Sistema
 
-# Sistema de taller mecanico
+# Rutas del sistema
+
+```
+
+├── Dashboard/                  # Dshboard widget cards
+│
+├── Inventario/                 # Modulos de Inventario
+│   ├── Categorias/
+│   ├── Presentaciones/
+│   ├── Productos/
+│   ├── Almacenes/
+│   ├── Marcas/
+│   ├── Industrias/
+│   ├── Proveedores/
+│   └── Lotes/
+│
+├── Taller/                     # Modulos de Taller
+│   ├── Clientes/
+│   ├── Mecanicos/
+│   ├── Servicios/
+│   ├── Servicios Externos/
+│   └── Vehiculos/
+│
+├── Cotizaciones/              # Modulos de Cotizaciones
+│   ├── Cotizaciones/
+│   └──  Anuladas/
+├── Ordenes de Servicio/       # Modulos de Ordenes de Servicio
+│   ├── En curso/
+│   ├── Completados/
+│   └── Canceladas/
+│
+├── Contabilidad/              # Modulos de Contabilidad
+│   ├── Cuentas bancarias/
+│   └── Tipos de transacciones/
+│   └── Ingresos/
+│   └── Egresos/
+│
+├── Reportes/                  # Modulos de Reportes
+│   ├── Utilidades/
+│   ├── Productos/
+│   ├── Cumpleaneros/
+│   ├── Stock/
+│   └── Servicios por tenico/
+```
 
 ## Resumen del Proyecto
 

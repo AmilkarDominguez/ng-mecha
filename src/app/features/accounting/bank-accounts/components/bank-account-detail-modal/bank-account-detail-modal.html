@@ -1,0 +1,75 @@
+<h2 mat-dialog-title class="modal-title">
+  <mat-icon class="modal-title-icon">account_balance</mat-icon>
+  Detalle de Cuenta Bancaria
+</h2>
+
+<mat-dialog-content class="modal-content">
+  <div class="detail-grid print-area">
+
+    <div class="detail-header">
+      <div class="detail-name">
+        {{ account.name ?? '—' }}
+      </div>
+      <mat-chip-set>
+        <mat-chip [class]="account.state === 'ACTIVE' ? 'chip-active' : 'chip-inactive'">
+          <mat-icon matChipAvatar>{{ account.state === 'ACTIVE' ? 'check_circle' : 'cancel' }}</mat-icon>
+          {{ account.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+        </mat-chip>
+      </mat-chip-set>
+    </div>
+
+    <mat-divider />
+
+    <div class="detail-section-row">
+      <div class="detail-section">
+        <span class="detail-label">Número de Cuenta</span>
+        <span class="detail-value detail-number">{{ account.number ?? '—' }}</span>
+      </div>
+
+      <div class="detail-section">
+        <span class="detail-label">Saldo</span>
+        <span class="detail-value detail-balance">
+          @if (account.balance !== null && account.balance !== undefined) {
+            {{ account.balance | currency:'BOB':'symbol':'1.2-2' }}
+          } @else {
+            —
+          }
+        </span>
+      </div>
+    </div>
+
+    @if (account.description) {
+      <div class="detail-section">
+        <span class="detail-label">Descripción</span>
+        <span class="detail-value">{{ account.description }}</span>
+      </div>
+    }
+
+    <mat-divider />
+
+    <div class="detail-dates">
+      <div class="detail-section">
+        <span class="detail-label">Fecha de Registro</span>
+        <span class="detail-value">{{ account.created_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Última Actualización</span>
+        <span class="detail-value">{{ account.updated_at | date: 'dd/MM/yyyy HH:mm' }}</span>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <span class="detail-label">ID del Registro</span>
+      <span class="detail-value detail-id">{{ account.id }}</span>
+    </div>
+
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions class="modal-actions" align="end">
+  <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  <button mat-stroked-button (click)="onPrint()">
+    <mat-icon>print</mat-icon>
+    Imprimir
+  </button>
+</mat-dialog-actions>

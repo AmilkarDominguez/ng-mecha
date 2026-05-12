@@ -70,6 +70,14 @@ export const routes: Routes = [
         path: 'taller/servicios-externos',
         loadComponent: () => import('./features/workshop/external-services/external-service-dashboard').then(m => m.ExternalServiceDashboard),
       },
+      {
+        path: 'cuentas/cuentas-bancarias',
+        loadComponent: () => import('./features/accounting/bank-accounts/bank-account-dashboard').then(m => m.BankAccountDashboard),
+      },
+      {
+        path: 'cuentas/tipos-transaccion',
+        loadComponent: () => import('./features/accounting/bank-transaction-types/bank-transaction-type-dashboard').then(m => m.BankTransactionTypeDashboard),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }

@@ -32,6 +32,11 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE bank_transaction_kind AS ENUM ('INCOME', 'EXPENSE');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 
 -- ============================================================
 -- TABLES
@@ -247,6 +252,45 @@ CREATE TABLE IF NOT EXISTS vehicles (
 
 
 -- ============================================================
+-- Accounts Module
+-- ============================================================
+
+-- 16. bank_transaction_types
+CREATE TABLE IF NOT EXISTS bank_transaction_types (
+  id             UUID                    PRIMARY KEY DEFAULT gen_random_uuid(),
+  name           TEXT,
+  description    TEXT,
+  type           bank_transaction_kind,
+  allow_deletion BOOLEAN                 NOT NULL DEFAULT true,
+  state          state_enum              NOT NULL DEFAULT 'ACTIVE',
+  created_at     TIMESTAMPTZ             NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ             NOT NULL DEFAULT NOW()
+);
+
+-- Seed: registros por defecto
+INSERT INTO bank_transaction_types (name, description, type, allow_deletion, state) VALUES
+  ('Creación de cuenta bancaria',  'Creación de cuenta bancaria.',  'INCOME',  false, 'ACTIVE'),
+  ('Depósito a cuenta bancaria',   'Depósito a cuenta bancaria.',   'INCOME',  false, 'ACTIVE'),
+  ('Retiro de cuenta bancaria',    'Retiro de cuenta bancaria.',    'EXPENSE', false, 'ACTIVE'),
+  ('Compra lote de productos',     'Compra lote de productos.',     'EXPENSE', false, 'ACTIVE'),
+  ('Pago de orden de servicio',    'Pago de orden de servicio.',    'INCOME',  false, 'ACTIVE'),
+  ('Pago servicio externo',        'Pago servicio externo.',        'EXPENSE', false, 'ACTIVE')
+ON CONFLICT DO NOTHING;
+
+-- 17. bank_accounts
+CREATE TABLE IF NOT EXISTS bank_accounts (
+  id          UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
+  name        TEXT,
+  description TEXT,
+  number      TEXT,
+  balance     NUMERIC(8,2),
+  state       state_enum     NOT NULL DEFAULT 'ACTIVE',
+  created_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+);
+
+
+-- ============================================================
 -- INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_products_category_id     ON products(category_id);
@@ -295,7 +339,9 @@ BEGIN
     'mechanics',
     'services',
     'external_services',
-    'vehicles'
+    'vehicles',
+    'bank_transaction_types',
+    'bank_accounts'
   ] LOOP
     EXECUTE format(
       'DROP TRIGGER IF EXISTS trg_set_updated_at ON %I;
@@ -326,6 +372,8 @@ ALTER TABLE mechanics             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE services              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE external_services     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vehicles              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bank_transaction_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bank_accounts         ENABLE ROW LEVEL SECURITY;
 
 
 -- ============================================================
@@ -484,6 +532,27 @@ CREATE POLICY "auth_delete_vehicles"
   ON vehicles FOR DELETE TO authenticated USING (true);
 
 
+-- bank_transaction_types
+CREATE POLICY "auth_select_bank_transaction_types"
+  ON bank_transaction_types FOR SELECT TO authenticated USING (true);
+CREATE POLICY "auth_insert_bank_transaction_types"
+  ON bank_transaction_types FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "auth_update_bank_transaction_types"
+  ON bank_transaction_types FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_delete_bank_transaction_types"
+  ON bank_transaction_types FOR DELETE TO authenticated USING (true);
+
+-- bank_accounts
+CREATE POLICY "auth_select_bank_accounts"
+  ON bank_accounts FOR SELECT TO authenticated USING (true);
+CREATE POLICY "auth_insert_bank_accounts"
+  ON bank_accounts FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "auth_update_bank_accounts"
+  ON bank_accounts FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_delete_bank_accounts"
+  ON bank_accounts FOR DELETE TO authenticated USING (true);
+
+
 -- ============================================================
 -- RLS POLICIES — anon role (desarrollo sin auth activo)
 -- Permite acceso completo al rol anon mientras no hay sesión.
@@ -640,6 +709,26 @@ CREATE POLICY "anon_update_vehicles"
 CREATE POLICY "anon_delete_vehicles"
   ON vehicles FOR DELETE TO anon USING (true);
 
+-- bank_transaction_types
+CREATE POLICY "anon_select_bank_transaction_types"
+  ON bank_transaction_types FOR SELECT TO anon USING (true);
+CREATE POLICY "anon_insert_bank_transaction_types"
+  ON bank_transaction_types FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "anon_update_bank_transaction_types"
+  ON bank_transaction_types FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_delete_bank_transaction_types"
+  ON bank_transaction_types FOR DELETE TO anon USING (true);
+
+-- bank_accounts
+CREATE POLICY "anon_select_bank_accounts"
+  ON bank_accounts FOR SELECT TO anon USING (true);
+CREATE POLICY "anon_insert_bank_accounts"
+  ON bank_accounts FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "anon_update_bank_accounts"
+  ON bank_accounts FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_delete_bank_accounts"
+  ON bank_accounts FOR DELETE TO anon USING (true);
+
 
 -- ============================================================
 -- REALTIME — enable publications for live listening
@@ -663,7 +752,9 @@ BEGIN
     'mechanics',
     'services',
     'external_services',
-    'vehicles'
+    'vehicles',
+    'bank_transaction_types',
+    'bank_accounts'
   ] LOOP
     -- Add table to the supabase_realtime publication if not already present
     IF NOT EXISTS (

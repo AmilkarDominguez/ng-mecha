@@ -332,3 +332,52 @@
 | updated_at  | LocalDateTime | auto                 | LocalDateTime | auto |
 
 **Enum ExternalServicesRating:** `GOOD` (Bueno) · `REGULAR` (Regular) · `BAD` (Malo)
+
+# Accounting Module
+
+---
+
+## 1. BankAccount
+
+**Tabla:** `bank_accounts`
+
+| Columna       | Tipo                                  | Restricciones        |
+| -----------   | ------------------------------------- | ------------------   |
+| id            | String UUID                           | PK, auto-generated   |
+| name          | String                                | nullable             |
+| description   | String                                | nullable             |
+| number        | String                                | nullable             |
+| balance       | BigDecimal(8,2)                       | nullable             |
+| state         | State (enum)                          | default: ACTIVE      |
+| created_at    | LocalDateTime | auto                  | LocalDateTime | auto |
+| updated_at    | LocalDateTime | auto                  | LocalDateTime | auto |
+
+---
+
+## 2. BankTransactionType
+
+**Tabla:** `bank_transaction_types`
+
+| Columna      | Tipo                            | Restricciones      |
+| ------------ | ------------------------------- | ------------------ |
+| id           | String UUID                     | PK, auto-generated |
+| name         | String                          | nullable           |
+| description  | String                          | nullable           |
+| type         | BankTransactionType (enum)      | nullable           |
+| state        | State (enum)                    | default: ACTIVE    |
+| allow_deletion | Boolean                       | default: true      |
+| created_at   | LocalDateTime                   | auto               |
+| updated_at   | LocalDateTime                   | auto               |
+
+Mandatory records with allow_deletion = false
+
+```
+'Creación de cuenta bancaria.'[INGRESO] ,
+'Deposito a cuenta bancaria.'[INGRESO],
+'Retiro de cuenta bancaria.'[EGRESO],
+'Compra lote de productos.'[EGRESO],
+'Pago de orden de servicio.'[INGRESO],
+'Pago servicio externo.'[EGRESO],
+```
+
+**Enum BankTransactionType:** `INCOME` (Ingreso) · `EXPENSE` (Egreso)

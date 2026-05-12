@@ -1,0 +1,51 @@
+<app-dialog-frame
+  [title]="isEditMode ? 'Editar Tipo de Transacción' : 'Nuevo Tipo de Transacción'"
+  [icon]="isEditMode ? 'edit' : 'swap_horiz'"
+  initialSize="sm">
+
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Nombre *</mat-label>
+      <input matInput formControlName="name" placeholder="Ej. Depósito bancario" />
+      @if (getFieldError('name')) {
+        <mat-error>{{ getFieldError('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Tipo de Movimiento</mat-label>
+      <mat-select formControlName="type">
+        <mat-option [value]="null">Sin clasificar</mat-option>
+        <mat-option value="INCOME">Ingreso</mat-option>
+        <mat-option value="EXPENSE">Egreso</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Descripción</mat-label>
+      <textarea matInput formControlName="description" rows="2"
+        placeholder="Ej. Movimiento de entrada de dinero a la cuenta bancaria."></textarea>
+      @if (getFieldError('description')) {
+        <mat-error>{{ getFieldError('description') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-half field-toggle">
+      <span class="toggle-label">Estado</span>
+      <mat-slide-toggle formControlName="active" color="primary">
+        {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </div>
+
+  </form>
+
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSave()">
+      <mat-icon>save</mat-icon>
+      {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+    </button>
+  </ng-container>
+
+</app-dialog-frame>
