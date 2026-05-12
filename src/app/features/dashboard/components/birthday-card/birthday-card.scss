@@ -1,0 +1,157 @@
+.birthday-card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+
+  .birthday-card-icon {
+    color: #e65100;
+    font-size: 1.75rem;
+    height: 1.75rem;
+    width: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .birthday-card-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: capitalize;
+  }
+
+  .birthday-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #e65100;
+    color: #fff;
+    border-radius: 1rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 1.25rem;
+    height: 1.25rem;
+    padding: 0 0.35rem;
+    line-height: 1;
+  }
+}
+
+.birthday-card-content {
+  padding: 0 0 0.5rem;
+}
+
+.birthday-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+
+  .birthday-empty-icon {
+    font-size: 2.5rem;
+    height: 2.5rem;
+    width: 2.5rem;
+    opacity: 0.4;
+  }
+}
+
+.birthday-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.birthday-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  width: 100%;
+
+  &:hover {
+    background: var(--color-row-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #e65100;
+    outline-offset: -2px;
+  }
+}
+
+.birthday-item-today {
+  background: rgba(230, 81, 0, 0.1);
+
+  .birthday-day-number {
+    background: #e65100;
+    color: #fff;
+  }
+
+  &:hover {
+    background: rgba(230, 81, 0, 0.16);
+  }
+}
+
+.birthday-item-day {
+  flex-shrink: 0;
+  width: 2.25rem;
+  display: flex;
+  justify-content: center;
+}
+
+.birthday-day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.18);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.birthday-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.birthday-item-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.birthday-today-icon {
+  font-size: 1rem;
+  height: 1rem;
+  width: 1rem;
+  color: #e65100;
+}
+
+.birthday-item-meta {
+  font-size: 0.775rem;
+  color: var(--color-text-muted);
+}
+
+.birthday-item-arrow {
+  flex-shrink: 0;
+  color: var(--color-text-faint);
+  font-size: 1.25rem;
+  height: 1.25rem;
+  width: 1.25rem;
+}

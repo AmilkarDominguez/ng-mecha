@@ -1,0 +1,48 @@
+<mat-card class="birthday-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar class="birthday-card-icon">cake</mat-icon>
+    <mat-card-title>Cumpleañeros del mes</mat-card-title>
+    <mat-card-subtitle class="birthday-card-subtitle">
+      {{ currentMonthName | titlecase }}
+      <span class="birthday-badge">{{ birthdayCustomers().length }}</span>
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="birthday-card-content">
+    @if (birthdayCustomers().length === 0) {
+      <div class="birthday-empty">
+        <mat-icon class="birthday-empty-icon">sentiment_neutral</mat-icon>
+        <span>No hay clientes con cumpleaños este mes</span>
+      </div>
+    } @else {
+      <div class="birthday-list">
+        @for (customer of birthdayCustomers(); track customer.id) {
+          <button
+            class="birthday-item"
+            [class.birthday-item-today]="isTodayBirthday(customer.birthdate!)"
+            (click)="openDetail(customer)"
+            [matTooltip]="'Ver detalle de ' + (customer.name ?? '') + ' ' + (customer.lastname ?? '')"
+            matTooltipPosition="right"
+          >
+            <div class="birthday-item-day">
+              <span class="birthday-day-number">{{ getBirthdayDay(customer.birthdate!) }}</span>
+            </div>
+            <mat-divider vertical />
+            <div class="birthday-item-info">
+              <span class="birthday-item-name">
+                {{ customer.name }} {{ customer.lastname }}
+                @if (isTodayBirthday(customer.birthdate!)) {
+                  <mat-icon class="birthday-today-icon" matTooltip="¡Hoy es su cumpleaños!">celebration</mat-icon>
+                }
+              </span>
+              <span class="birthday-item-meta">
+                {{ customer.phone ?? 'Sin teléfono' }}
+              </span>
+            </div>
+            <mat-icon class="birthday-item-arrow">chevron_right</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  </mat-card-content>
+</mat-card>
