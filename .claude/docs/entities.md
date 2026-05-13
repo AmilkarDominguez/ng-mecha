@@ -1,6 +1,30 @@
-# Entidades del Sistema de Trazabilidad — CRUDs por Módulo
+# Entidades del Sistema — CRUDs por Módulo
 
-> Cada entidad usa un nombre en inglés (`PascalCase`) listo para usar como **interface** en TypeScript o **modelo** en el backend. Las propiedades usan `camelCase`. Las descripciones se mantienen en español.
+> Cada entidad usa un nombre en inglés (`snake_case`) listo para usar como **interface** en TypeScript o **modelo** en el backend. Las descripciones se mantienen en español.
+
+
+---
+# Admin Module
+
+## 1. User
+
+**Tabla:** `users`
+
+| Columna         | Tipo            | Restricciones      |
+|-----------------|-----------------|--------------------|
+| id              | String (UUID)   | PK, auto-increment |
+| name            | String          | nullable           |
+| lastname        | String          | nullable           |
+| email           | String          | unique, not null   |
+| password        | String          | not null           |
+| allow_deletion  | Boolean         | default: true      |
+| rol             | UserRole (enum) | default: INVENTORY |
+| state           | State (enum)    | default: ACTIVE    |
+| created_at      | LocalDateTime   | auto               |
+| updated_at      | LocalDateTime   | auto               |
+
+**Enum UserRole:** `ADMIN` (Admin) · `SALES` (Ventas) · `INVENTORY` (Inventario) · `MECHANIC` (Mecanico)
+---
 
 ---
 # Inventory Module
@@ -379,3 +403,30 @@ Mandatory records with allow_deletion = false
 ```
 
 **Enum BankTransactionType:** `INCOME` (Ingreso) · `EXPENSE` (Egreso)
+
+---
+
+## 3. BankAccountHistory
+
+**Tabla:** `bank_account_histories`
+
+| Columna                 | Tipo            | Restricciones                   |
+| --------------------    | --------------- | ------------------------------- |
+| id                      | String UUID     | PK, auto-generated              |
+| bank_account_id         | UUID (FK)       | nullable → bank_accounts.id     |
+| user_id                 | UUID (FK)       | nullable → users.id             |
+| transaction_type_id     | UUID (FK)       | nullable → transaction_types.id |
+| amount                  | BigDecimal(8,2) | nullable                        |
+| balance                 | BigDecimal(8,2) | nullable                        |
+| transactionReference    | String          | nullable                        |
+| concept                 | String          | nullable                        |
+| createdAt               | LocalDateTime   | auto                            |
+| updatedAt               | LocalDateTime   | auto                            |
+
+**Relaciones:**
+
+- Many-to-One → `bank_accounts`
+- Many-to-One → `users`
+- Many-to-One → `transaction_types`
+
+---

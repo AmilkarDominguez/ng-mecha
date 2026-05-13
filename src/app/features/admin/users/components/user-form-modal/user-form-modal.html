@@ -1,0 +1,74 @@
+<app-dialog-frame
+  [title]="isEditMode ? 'Editar Usuario' : 'Nuevo Usuario'"
+  [icon]="isEditMode ? 'edit' : 'person_add'"
+  initialSize="md">
+
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Nombre</mat-label>
+      <input matInput formControlName="name" placeholder="Ej. Juan" />
+      @if (getFieldError('name')) {
+        <mat-error>{{ getFieldError('name') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Apellido</mat-label>
+      <input matInput formControlName="lastname" placeholder="Ej. Pérez" />
+      @if (getFieldError('lastname')) {
+        <mat-error>{{ getFieldError('lastname') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Correo electrónico *</mat-label>
+      <input matInput formControlName="email" type="email" placeholder="correo@ejemplo.com" />
+      @if (getFieldError('email')) {
+        <mat-error>{{ getFieldError('email') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>{{ isEditMode ? 'Nueva contraseña (opcional)' : 'Contraseña *' }}</mat-label>
+      <input matInput formControlName="password"
+        [type]="showPassword ? 'text' : 'password'"
+        [placeholder]="isEditMode ? 'Dejar vacío para no cambiar' : 'Mínimo 6 caracteres'" />
+      <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword">
+        <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      </button>
+      @if (getFieldError('password')) {
+        <mat-error>{{ getFieldError('password') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Rol *</mat-label>
+      <mat-select formControlName="rol">
+        @for (option of roleOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+      @if (getFieldError('rol')) {
+        <mat-error>{{ getFieldError('rol') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="field-half field-toggle">
+      <span class="toggle-label">Estado</span>
+      <mat-slide-toggle formControlName="active" color="primary">
+        {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
+      </mat-slide-toggle>
+    </div>
+
+  </form>
+
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSave()">
+      <mat-icon>save</mat-icon>
+      {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+    </button>
+  </ng-container>
+
+</app-dialog-frame>

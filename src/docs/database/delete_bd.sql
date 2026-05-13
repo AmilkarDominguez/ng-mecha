@@ -10,6 +10,7 @@
 -- TABLAS — en orden de dependencia (hijos primero)
 -- CASCADE elimina FK constraints y políticas asociadas
 -- ============================================================
+DROP TABLE IF EXISTS users                  CASCADE;
 DROP TABLE IF EXISTS bank_transaction_types CASCADE;
 DROP TABLE IF EXISTS bank_accounts         CASCADE;
 DROP TABLE IF EXISTS vehicles              CASCADE;
@@ -38,6 +39,7 @@ DROP FUNCTION IF EXISTS set_updated_at() CASCADE;
 -- ============================================================
 -- TIPOS (enums)
 -- ============================================================
+DROP TYPE IF EXISTS user_role_enum                 CASCADE;
 DROP TYPE IF EXISTS bank_transaction_kind          CASCADE;
 DROP TYPE IF EXISTS external_services_rating_enum CASCADE;
 DROP TYPE IF EXISTS contact_type_enum             CASCADE;

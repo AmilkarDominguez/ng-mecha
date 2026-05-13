@@ -33,6 +33,11 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
+  CREATE TYPE user_role_enum AS ENUM ('ADMIN', 'SALES', 'INVENTORY', 'MECHANIC');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
   CREATE TYPE bank_transaction_kind AS ENUM ('INCOME', 'EXPENSE');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
@@ -41,6 +46,20 @@ END $$;
 -- ============================================================
 -- TABLES
 -- ============================================================
+
+-- 0. users (Admin Module)
+CREATE TABLE IF NOT EXISTS users (
+  id             UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
+  name           TEXT,
+  lastname       TEXT,
+  email          TEXT            NOT NULL UNIQUE,
+  password       TEXT            NOT NULL,
+  allow_deletion BOOLEAN         NOT NULL DEFAULT true,
+  rol            user_role_enum  NOT NULL DEFAULT 'INVENTORY',
+  state          state_enum      NOT NULL DEFAULT 'ACTIVE',
+  created_at     TIMESTAMPTZ     NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ     NOT NULL DEFAULT NOW()
+);
 
 -- 1. product_categories
 CREATE TABLE IF NOT EXISTS product_categories (
@@ -291,6 +310,8 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
 -- ============================================================
 -- INDEXES
 -- ============================================================
+CREATE INDEX IF NOT EXISTS idx_users_email              ON users(email);
+CREATE INDEX IF NOT EXISTS idx_users_state              ON users(state);
 CREATE INDEX IF NOT EXISTS idx_products_category_id     ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_presentation_id ON products(presentation_id);
 CREATE INDEX IF NOT EXISTS idx_multimedia_product_id    ON multimedia(product_id);
@@ -323,6 +344,7 @@ DO $$ DECLARE
   tbl TEXT;
 BEGIN
   FOREACH tbl IN ARRAY ARRAY[
+    'users',
     'product_categories',
     'product_presentations',
     'products',
@@ -355,6 +377,7 @@ END $$;
 -- ============================================================
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================================
+ALTER TABLE users                  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_categories    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_presentations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products              ENABLE ROW LEVEL SECURITY;
@@ -378,6 +401,16 @@ ALTER TABLE bank_accounts         ENABLE ROW LEVEL SECURITY;
 -- RLS POLICIES — authenticated role
 -- SELECT / INSERT / UPDATE / DELETE
 -- ============================================================
+
+-- users
+CREATE POLICY "auth_select_users"
+  ON users FOR SELECT TO authenticated USING (true);
+CREATE POLICY "auth_insert_users"
+  ON users FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "auth_update_users"
+  ON users FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_delete_users"
+  ON users FOR DELETE TO authenticated USING (true);
 
 -- product_categories
 CREATE POLICY "auth_select_product_categories"
@@ -556,6 +589,16 @@ CREATE POLICY "auth_delete_bank_accounts"
 -- Permite acceso completo al rol anon mientras no hay sesión.
 -- Remover estas políticas cuando se active el sistema de auth.
 -- ============================================================
+
+-- users
+CREATE POLICY "anon_select_users"
+  ON users FOR SELECT TO anon USING (true);
+CREATE POLICY "anon_insert_users"
+  ON users FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "anon_update_users"
+  ON users FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_delete_users"
+  ON users FOR DELETE TO anon USING (true);
 
 -- product_categories
 CREATE POLICY "anon_select_product_categories"
@@ -736,6 +779,7 @@ DECLARE
   tbl TEXT;
 BEGIN
   FOREACH tbl IN ARRAY ARRAY[
+    'users',
     'product_categories',
     'product_presentations',
     'products',

@@ -42,6 +42,13 @@ export class NavMenu {
 
   readonly modules: NavModule[] = [
     {
+      title: 'Admin',
+      icon: 'admin_panel_settings',
+      items: [
+        { label: 'Usuarios', icon: 'people', route: '/dashboard/admin/usuarios' },
+      ],
+    },
+    {
       title: 'Inventario',
       icon: 'inventory',
       items: [

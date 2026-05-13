@@ -1,0 +1,85 @@
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.user-table {
+  width: 100%;
+}
+
+.cell-name {
+  font-weight: 500;
+}
+
+.cell-email {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.col-actions {
+  width: 12rem;
+  text-align: center;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.status-active {
+  background-color: var(--color-status-active-bg);
+  color: var(--color-status-active-text);
+}
+
+.status-inactive {
+  background-color: var(--color-status-inactive-bg);
+  color: var(--color-status-inactive-text);
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: var(--mat-sys-surface-variant);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.role-admin {
+  background-color: color-mix(in srgb, var(--mat-sys-primary) 15%, transparent);
+  color: var(--mat-sys-primary);
+}
+
+.role-sales {
+  background-color: color-mix(in srgb, var(--color-status-active-text, #2e7d32) 15%, transparent);
+  color: var(--color-status-active-text, #2e7d32);
+}
+
+.role-inventory {
+  background-color: color-mix(in srgb, var(--mat-sys-tertiary, #7b5800) 15%, transparent);
+  color: var(--mat-sys-tertiary, #7b5800);
+}
+
+.role-mechanic {
+  background-color: color-mix(in srgb, var(--mat-sys-secondary) 15%, transparent);
+  color: var(--mat-sys-secondary);
+}
+
+.table-row:hover {
+  background-color: var(--color-row-hover-bg);
+}
+
+.no-data-cell {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-text-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}

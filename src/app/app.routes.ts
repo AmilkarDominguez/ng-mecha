@@ -78,6 +78,10 @@ export const routes: Routes = [
         path: 'cuentas/tipos-transaccion',
         loadComponent: () => import('./features/accounting/bank-transaction-types/bank-transaction-type-dashboard').then(m => m.BankTransactionTypeDashboard),
       },
+      {
+        path: 'admin/usuarios',
+        loadComponent: () => import('./features/admin/users/user-dashboard').then(m => m.UserDashboard),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }

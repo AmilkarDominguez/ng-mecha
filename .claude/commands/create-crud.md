@@ -18,10 +18,10 @@ Con la siguientes consideraciones
      - Boton para agregar un nuevo registro, un boton notorio en la parte superior que permite desplegar un modal para agregar un nuevo registro
    - modal para crear o editar : componente que se presenta como modal con el boton del dashboard que permite registrar o editar mediante un fomulario con las validaciones correspondientes y los labels en ES considerando la funcionalidad de poder maximizar, cambiar de tamano y minizar como los formularios de features existentes.
    - modal informativo : compoente que se presenta como modal con el boton de mostrar de ver en la tabla que muestra toda la informacion del registro que no se muestra en las columnas de la tabla, esta vista debe tener un boton para poder imprimir la informacion.
-7. Ajustar el menu de navegacion para coincidir con modulos y categorias definidos en `docs/entities.md` y en #Rutas del sistema del sistema en CLAUDE.md
-8. La ruta lazy en `app.routes.ts` bajo AdminLayout
-9. Agrega el servicio correspondiente `sb-$ARGUMENTS.ts` en `core/services/supabase/` para poder registrar el crud correspondiente
-10. Realiza los ajutes necesarios si es pertinente en otros componentes compatidos en `src/app/shared/components/`, directivas en  `src/app/shared/directives/` y pipes en `src/app/shared/pipes/`
-11. Comprueba que todo esta funcionando correntamente con las versiones de angular 21
-12. Sigue las convenciones del CLAUDE.md: signals, sin HTTP, Angular Material.
-13. Estos datos deben estar en el modulo de Inventario
+7. Crea los componentes necesarios en las rutas correspondientes considerando los modulos definidos en `.claude\docs\features.md` para crear cada feature en su carpeta correspondiente en `src\app\features`
+8. Ajustar el menu de navegacion para coincidir con modulos y categorias definidos en `.claude\docs\features.md`
+9. La ruta lazy en `app.routes.ts` bajo AdminLayout
+10. Agrega el servicio correspondiente `sb-$ARGUMENTS.ts` en `core/services/supabase/` para poder registrar el crud correspondiente
+11. Realiza los ajutes necesarios si es pertinente en otros componentes compatidos en `src/app/shared/components/`, directivas en  `src/app/shared/directives/` y pipes en `src/app/shared/pipes/`
+12. Comprueba que todo esta funcionando correntamente con las versiones de angular 21
+13. Sigue las convenciones del CLAUDE.md: signals, sin HTTP, Angular Material.
