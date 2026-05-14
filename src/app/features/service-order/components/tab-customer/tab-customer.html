@@ -1,0 +1,156 @@
+<div class="tab-customer">
+
+  <div class="section-title">Datos del Cliente</div>
+
+  <div class="search-row">
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Buscar cliente</mat-label>
+      <input matInput [formControl]="customerCtrl" [matAutocomplete]="autoCustomer"
+             placeholder="Nombre o apellido..." />
+      <mat-autocomplete #autoCustomer="matAutocomplete" [displayWith]="displayCustomer">
+        @for (c of filteredCustomers(); track c.id) {
+          <mat-option [value]="c">
+            <span class="option-main">{{ customerLabel(c) }}</span>
+            @if (c.ci) {
+              <span class="option-sub">CI: {{ c.ci }}</span>
+            }
+            @if (c.phone) {
+              <span class="option-sub">Tel: {{ c.phone }}</span>
+            }
+          </mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
+  @if (selectedCustomer(); as customer) {
+    <div class="customer-card">
+      <div class="customer-card-header">
+        <span class="customer-name">{{ customerLabel(customer) }}</span>
+        <span class="customer-state" [class.state-active]="customer.state === 'ACTIVE'">
+          {{ customer.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+        </span>
+      </div>
+      <div class="customer-card-body">
+        @if (customer.ci) {
+          <div class="customer-field">
+            <span class="field-label">CI</span>
+            <span class="field-value">{{ customer.ci }}</span>
+          </div>
+        }
+        @if (customer.nit) {
+          <div class="customer-field">
+            <span class="field-label">NIT</span>
+            <span class="field-value">{{ customer.nit }}</span>
+          </div>
+        }
+        @if (customer.phone) {
+          <div class="customer-field">
+            <span class="field-label">Teléfono</span>
+            <span class="field-value">{{ customer.phone }}</span>
+          </div>
+        }
+        @if (customer.address) {
+          <div class="customer-field">
+            <span class="field-label">Dirección</span>
+            <span class="field-value">{{ customer.address }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <mat-divider class="section-divider" />
+
+  <div class="section-title">Vehículo</div>
+
+  <div class="search-row">
+    <mat-form-field appearance="outline" class="field-full" [class.disabled]="!selectedCustomer()">
+      <mat-label>Buscar vehículo del cliente</mat-label>
+      <input matInput [formControl]="vehicleCtrl" [matAutocomplete]="autoVehicle"
+             [disabled]="!selectedCustomer()"
+             placeholder="Marca, modelo o placa..." />
+      <mat-autocomplete #autoVehicle="matAutocomplete" [displayWith]="displayVehicle">
+        @for (v of filteredVehicles(); track v.id) {
+          <mat-option [value]="v">
+            <span class="option-main">{{ vehicleLabel(v) }}</span>
+            @if (v.year) {
+              <span class="option-sub">Año: {{ v.year }}</span>
+            }
+          </mat-option>
+        }
+        @if (filteredVehicles().length === 0 && selectedCustomer()) {
+          <mat-option disabled>Sin vehículos registrados</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
+  @if (selectedVehicle(); as vehicle) {
+    <div class="vehicle-card">
+      <div class="vehicle-card-body">
+        @if (vehicle.license_plate) {
+          <div class="customer-field">
+            <span class="field-label">Placa</span>
+            <span class="field-value">{{ vehicle.license_plate }}</span>
+          </div>
+        }
+        @if (vehicle.brand) {
+          <div class="customer-field">
+            <span class="field-label">Marca</span>
+            <span class="field-value">{{ vehicle.brand }}</span>
+          </div>
+        }
+        @if (vehicle.model) {
+          <div class="customer-field">
+            <span class="field-label">Modelo</span>
+            <span class="field-value">{{ vehicle.model }}</span>
+          </div>
+        }
+        @if (vehicle.year) {
+          <div class="customer-field">
+            <span class="field-label">Año</span>
+            <span class="field-value">{{ vehicle.year }}</span>
+          </div>
+        }
+        @if (vehicle.displacement) {
+          <div class="customer-field">
+            <span class="field-label">Cilindrada</span>
+            <span class="field-value">{{ vehicle.displacement }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <mat-divider class="section-divider" />
+
+  <div class="section-title">Datos de la Orden</div>
+
+  <form [formGroup]="form" class="order-fields">
+    <mat-form-field appearance="outline">
+      <mat-label>Número de Orden</mat-label>
+      <input matInput formControlName="number" placeholder="Ej: ORD-001" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Kilometraje</mat-label>
+      <input matInput formControlName="mileage" placeholder="Ej: 45000 km" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de Ingreso</mat-label>
+      <input matInput [matDatepicker]="pickerStart" formControlName="started_date" />
+      <mat-datepicker-toggle matSuffix [for]="pickerStart" />
+      <mat-datepicker #pickerStart />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Fecha de Salida</mat-label>
+      <input matInput [matDatepicker]="pickerEnd" formControlName="ended_date" />
+      <mat-datepicker-toggle matSuffix [for]="pickerEnd" />
+      <mat-datepicker #pickerEnd />
+    </mat-form-field>
+  </form>
+
+</div>

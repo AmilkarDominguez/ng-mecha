@@ -1,0 +1,88 @@
+import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatTableModule } from '@angular/material/table';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { DecimalPipe } from '@angular/common';
+import { ServiceOrder, OrderState } from '../../../core/models/service-order.model';
+import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+
+@Component({
+  selector: 'app-service-order-dashboard',
+  imports: [
+    MatButtonModule,
+    MatFormFieldModule,
+    MatIconModule,
+    MatInputModule,
+    MatTableModule,
+    MatChipsModule,
+    MatTooltipModule,
+    DecimalPipe,
+  ],
+  templateUrl: './service-order-dashboard.html',
+  styleUrl: './service-order-dashboard.scss',
+})
+export class ServiceOrderDashboard {
+  private orderService = inject(SPServiceOrder);
+  private router = inject(Router);
+  private snackBar = inject(MatSnackBar);
+
+  readonly orders = toSignal(this.orderService.listen(), { initialValue: [] });
+  readonly searchTerm = signal('');
+
+  readonly filteredOrders = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    if (!term) return this.orders();
+    return this.orders().filter((o) =>
+      (o.number ?? '').toLowerCase().includes(term) ||
+      this.customerLabel(o).toLowerCase().includes(term),
+    );
+  });
+
+  readonly columns = ['number', 'customer', 'vehicle', 'total', 'state', 'payment_type', 'started_date', 'actions'];
+
+  onSearch(event: Event): void {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
+  }
+
+  onNew(): void {
+    this.router.navigate(['/dashboard/ordenes/nueva']);
+  }
+
+  customerLabel(o: ServiceOrder): string {
+    const c = o.customer;
+    if (!c) return '—';
+    return [c.name, c.lastname].filter(Boolean).join(' ') || '—';
+  }
+
+  vehicleLabel(o: ServiceOrder): string {
+    const v = o.vehicle;
+    if (!v) return '—';
+    return [v.brand, v.model, v.license_plate].filter(Boolean).join(' ') || '—';
+  }
+
+  stateLabel(state: OrderState): string {
+    const map: Record<OrderState, string> = {
+      IN_PROGRESS: 'En Curso',
+      COMPLETED: 'Completado',
+      CANCELED: 'Cancelado',
+    };
+    return map[state];
+  }
+
+  stateColor(state: OrderState): string {
+    const map: Record<OrderState, string> = {
+      IN_PROGRESS: 'primary',
+      COMPLETED: 'accent',
+      CANCELED: 'warn',
+    };
+    return map[state];
+  }
+}

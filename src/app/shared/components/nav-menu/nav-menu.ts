@@ -82,6 +82,13 @@ export class NavMenu {
       ],
     },
     {
+      title: 'Órdenes de Servicio',
+      icon: 'receipt_long',
+      items: [
+        { label: 'En Curso', icon: 'pending_actions', route: '/dashboard/ordenes/en-curso' },
+      ],
+    },
+    {
       title: 'Auditoría y Reportes',
       icon: 'fact_check',
       items: [],

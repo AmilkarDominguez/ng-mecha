@@ -293,18 +293,18 @@
 
 | Columna     | Tipo          | Restricciones        |
 | ----------- | ------------- | -------------------- |
-| id          | String UUID    | PK, auto-generated   |
+| id          | String UUID   | PK, auto-generated   |
 | name        | String        | nullable             |
-| lastname        | String        | nullable             |
+| lastname    | String        | nullable             |
 | ci          | String        | nullable             |
-| nit          | String        | nullable             |
-| address    | LocalDate     | nullable             |
-| email    | LocalDate     | nullable             |
-| birthdate    | LocalDate     | nullable             |
-| phone         | String        | nullable             |
+| nit         | String        | nullable             |
+| address     | LocalDate     | nullable             |
+| email       | LocalDate     | nullable             |
+| birthdate   | LocalDate     | nullable             |
+| phone       | String        | nullable             |
 | state       | State (enum)  | default: ACTIVE      |
-| created_at   | LocalDateTime | auto                 |
-| updated_at   | LocalDateTime | auto                 |
+| created_at  | LocalDateTime | auto                 |
+| updated_at  | LocalDateTime | auto                 |
 
 **Relaciones:**
 
@@ -428,5 +428,101 @@ Mandatory records with allow_deletion = false
 - Many-to-One → `bank_accounts`
 - Many-to-One → `users`
 - Many-to-One → `transaction_types`
+
+---
+
+# Service Orders Module
+
+---
+
+## 1. ServiceOrder
+
+**Tabla:** `service_orders`
+
+| Columna               | Tipo               | Restricciones           |
+| --------------------- | ------------------ | ----------------------- |
+| id                    | UUID               | PK, auto-generated      |
+| customer_id           | UUID (FK)          | not null → customers.id |
+| vehicle_id            | UUID (FK)          | nullable → vehicles.id  |
+| user_id               | UUID (FK)          | nullable → users.id     |
+| number                | String             | nullable                |
+| description           | String             | nullable                |
+| total                 | BigDecimal(8,2)    | nullable                |
+| have                  | BigDecimal(8,2)    | nullable, default: 0    |
+| must                  | BigDecimal(8,2)    | nullable                |
+| iva                   | BigDecimal(8,2)    | nullable                |
+| total_iva             | BigDecimal(8,2)    | nullable                |
+| with_iva              | Boolean            | default: false          |
+| mileage               | String             | nullable                |
+| draft_expiration_date | LocalDate          | nullable                |
+| started_date          | LocalDate          | nullable                |
+| ended_date            | LocalDate          | nullable                |
+| return_date           | LocalDate          | nullable                |
+| state                 | OrderState (enum)  | default: IN_PROGRESS    |
+| payment_type          | PaymentType (enum) | default: CASH           |
+| created_at            | LocalDateTime      | auto                    |
+| updated_at            | LocalDateTime      | auto                    |
+
+**Enum OrderState:** `IN_PROGRESS` (EN_CURSO) · `COMPLETED` (COMPLETADO) · `CANCELED` (CANCELADO)
+**Enum PaymentType:** `CASH` (CONTADO) · `CREDIT` (CREDITO)
+
+
+---
+
+## 2. ServiceOrderBatch
+
+**Tabla:** `service_order_batches`
+
+| Columna          | Tipo                | Restricciones                |
+| ---------------- | ------------------- | ---------------------------- |
+| id               | UUID                | PK, auto-generated           |
+| batch_id         | UUID (FK)           | nullable → batches.id        |
+| service_order_id | UUID (FK)           | nullable → service_orders.id |
+| quantity         | BigDecimal          | nullable                     |
+| delivery_time    | DeliveryTime (enum) | default: IMMEDIATE           |
+| price            | BigDecimal(8,2)     | nullable                     |
+| discount         | BigDecimal(8,2)     | nullable                     |
+| subtotal         | BigDecimal(8,2)     | nullable                     |
+| created_at       | LocalDateTime       | auto                         |
+| updated_at       | LocalDateTime       | auto                         |
+
+**Enum DeliveryTime:** `ORDER` (PEDIDO) · `IMMEDIATE` (INMEDIATO)
+---
+
+## 3. ServiceOrderService
+
+**Tabla:** `service_order_services`
+
+| Columna          | Tipo            | Restricciones                |
+| ---------------- | --------------- | ---------------------------- |
+| id               | UUID            | PK, auto-generated           |
+| mechanic_id      | UUID (FK)       | nullable → mechanics.id      |
+| service_id       | UUID (FK)       | nullable → services.id       |
+| service_order_id | UUID (FK)       | nullable → service_orders.id |
+| discount         | BigDecimal(8,2) | nullable                     |
+| price            | BigDecimal(8,2) | nullable                     |
+| quantity         | BigDecimal      | nullable                     |
+| subtotal         | BigDecimal(8,2) | nullable                     |
+| created_at       | LocalDateTime   | auto                         |
+| updated_at       | LocalDateTime   | auto                         |
+
+---
+
+## 4. ServiceOrderExternalService
+
+**Tabla:** `service_order_external_services`
+
+| Columna                 | Tipo            | Restricciones                      |
+| ----------------------- | --------------- | ---------------------------------- |
+| id                      | UUID            | PK, auto-generated                 |
+| external_service_id     | UUID (FK)       | nullable → external_services.id    |
+| service_order_id        | UUID (FK)       | nullable → service_orders.id       |
+| bank_account_id         | UUID (FK)       | nullable → bank_accounts.id        |
+| cost                    | BigDecimal(8,2) | nullable                           |
+| price                   | BigDecimal(8,2) | nullable                           |
+| quantity                | BigDecimal      | nullable                           |
+| subtotal                | BigDecimal(8,2) | nullable                           |
+| created_at              | LocalDateTime   | auto                               |
+| updated_at              | LocalDateTime   | auto                               |
 
 ---

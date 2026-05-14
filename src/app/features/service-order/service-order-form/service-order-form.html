@@ -1,0 +1,144 @@
+<div class="form-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Nueva Orden de Servicio</h1>
+      <span class="page-subtitle">Complete los datos para registrar una orden de servicio</span>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="form-layout">
+
+    <div class="main-panel">
+
+      <div class="tabs-card">
+        <mat-tab-group animationDuration="200ms" color="primary">
+
+          <mat-tab label="Cliente">
+            <app-tab-customer (valueChange)="onCustomerTabChange($event)" />
+          </mat-tab>
+
+          <mat-tab label="Mano de Obra">
+            <app-tab-labor (addItem)="onAddService($event)" />
+          </mat-tab>
+
+          <mat-tab label="Repuestos e Insumos">
+            <app-tab-parts (addItem)="onAddBatch($event)" />
+          </mat-tab>
+
+          <mat-tab label="Trabajos Adicionales">
+            <app-tab-external (addItem)="onAddExternal($event)" />
+          </mat-tab>
+
+        </mat-tab-group>
+      </div>
+
+      <div class="tables-section">
+
+        <app-service-order-services-table
+          [items]="serviceRows()"
+          (removeItem)="onRemoveService($event)"
+        />
+
+        <app-service-order-batches-table
+          [items]="batchRows()"
+          (removeItem)="onRemoveBatch($event)"
+        />
+
+        <app-service-order-external-services-table
+          [items]="externalRows()"
+          (removeItem)="onRemoveExternal($event)"
+        />
+
+      </div>
+
+    </div>
+
+    <div class="summary-panel">
+
+      <div class="summary-card">
+
+        <div class="summary-section-title">Configuración</div>
+
+        <form [formGroup]="summaryForm" class="summary-form">
+
+          <div class="radio-group-field">
+            <span class="radio-label">Tipo de Pago</span>
+            <mat-radio-group formControlName="payment_type" class="radio-group">
+              <mat-radio-button value="CASH">Contado</mat-radio-button>
+              <mat-radio-button value="CREDIT">Crédito</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <div class="radio-group-field">
+            <span class="radio-label">IVA</span>
+            <mat-radio-group formControlName="with_iva" class="radio-group">
+              <mat-radio-button [value]="false">Sin IVA</mat-radio-button>
+              <mat-radio-button [value]="true">Con IVA (13%)</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Fecha de Retorno Sugerida</mat-label>
+            <input matInput [matDatepicker]="pickerReturn" formControlName="return_date" />
+            <mat-datepicker-toggle matSuffix [for]="pickerReturn" />
+            <mat-datepicker #pickerReturn />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Recomendaciones / Observaciones</mat-label>
+            <textarea matInput formControlName="description" rows="4"
+                      placeholder="Notas para el cliente..."></textarea>
+          </mat-form-field>
+
+        </form>
+
+        <mat-divider />
+
+        <div class="totals-section">
+          <div class="total-row">
+            <span class="total-label">Mano de obra</span>
+            <span class="total-value">Bs. {{ subtotalServices() | number:'1.2-2' }}</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Repuestos</span>
+            <span class="total-value">Bs. {{ subtotalBatches() | number:'1.2-2' }}</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Trabajos adicionales</span>
+            <span class="total-value">Bs. {{ subtotalExternal() | number:'1.2-2' }}</span>
+          </div>
+
+          <mat-divider />
+
+          <div class="total-row total-row--main">
+            <span class="total-label">TOTAL</span>
+            <span class="total-value">Bs. {{ total() | number:'1.2-2' }}</span>
+          </div>
+
+          @if (summaryForm.value.with_iva) {
+            <div class="total-row">
+              <span class="total-label">IVA (13%)</span>
+              <span class="total-value">Bs. {{ ivaAmount() | number:'1.2-2' }}</span>
+            </div>
+            <div class="total-row total-row--grand">
+              <span class="total-label">TOTAL + IVA</span>
+              <span class="total-value">Bs. {{ totalWithIva() | number:'1.2-2' }}</span>
+            </div>
+          }
+        </div>
+
+        <button mat-flat-button color="primary" class="save-btn" (click)="onSave()">
+          Registrar Orden
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

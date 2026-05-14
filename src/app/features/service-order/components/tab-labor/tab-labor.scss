@@ -1,0 +1,52 @@
+.tab-labor {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field-full {
+  width: 100%;
+}
+
+.add-fields {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    width: 10rem;
+  }
+}
+
+.add-btn {
+  height: 3.5rem;
+  margin-top: 0.25rem;
+}
+
+.option-main {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.option-sub {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #757575);
+  margin-right: 0.75rem;
+}
+
+.option-price {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+}

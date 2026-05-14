@@ -10,7 +10,11 @@
 -- TABLAS — en orden de dependencia (hijos primero)
 -- CASCADE elimina FK constraints y políticas asociadas
 -- ============================================================
-DROP TABLE IF EXISTS users                  CASCADE;
+DROP TABLE IF EXISTS service_order_external_services CASCADE;
+DROP TABLE IF EXISTS service_order_batches           CASCADE;
+DROP TABLE IF EXISTS service_order_services          CASCADE;
+DROP TABLE IF EXISTS service_orders                  CASCADE;
+DROP TABLE IF EXISTS users                           CASCADE;
 DROP TABLE IF EXISTS bank_transaction_types CASCADE;
 DROP TABLE IF EXISTS bank_accounts         CASCADE;
 DROP TABLE IF EXISTS vehicles              CASCADE;
@@ -44,4 +48,7 @@ DROP TYPE IF EXISTS bank_transaction_kind          CASCADE;
 DROP TYPE IF EXISTS external_services_rating_enum CASCADE;
 DROP TYPE IF EXISTS contact_type_enum             CASCADE;
 DROP TYPE IF EXISTS customer_rating_enum          CASCADE;
-DROP TYPE IF EXISTS state_enum                    CASCADE;
+DROP TYPE IF EXISTS delivery_time_enum             CASCADE;
+DROP TYPE IF EXISTS payment_type_enum              CASCADE;
+DROP TYPE IF EXISTS order_state_enum               CASCADE;
+DROP TYPE IF EXISTS state_enum                     CASCADE;

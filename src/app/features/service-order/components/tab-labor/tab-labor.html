@@ -1,0 +1,57 @@
+<div class="tab-labor">
+
+  <div class="section-title">Mano de Obra</div>
+
+  <mat-form-field appearance="outline" class="field-full">
+    <mat-label>Servicio</mat-label>
+    <input matInput [formControl]="serviceCtrl" [matAutocomplete]="autoService"
+           (input)="onServiceInputChange()" placeholder="Buscar servicio..." />
+    <mat-autocomplete #autoService="matAutocomplete" [displayWith]="displayService"
+                      (optionSelected)="onServiceSelected($event.option.value)">
+      @for (s of filteredServices(); track s.id) {
+        <mat-option [value]="s">
+          <span class="option-main">{{ s.name }}</span>
+          @if (s.code) {
+            <span class="option-sub">{{ s.code }}</span>
+          }
+          @if (s.price != null) {
+            <span class="option-price">Bs. {{ s.price | number:'1.2-2' }}</span>
+          }
+        </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="field-full">
+    <mat-label>Técnico / Mecánico</mat-label>
+    <input matInput [formControl]="mechanicCtrl" [matAutocomplete]="autoMechanic"
+           placeholder="Buscar técnico..." />
+    <mat-autocomplete #autoMechanic="matAutocomplete" [displayWith]="displayMechanic">
+      @for (m of filteredMechanics(); track m.id) {
+        <mat-option [value]="m">
+          <span class="option-main">{{ mechanicLabel(m) }}</span>
+          @if (m.phone) {
+            <span class="option-sub">{{ m.phone }}</span>
+          }
+        </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  <form [formGroup]="form" class="add-fields">
+    <mat-form-field appearance="outline">
+      <mat-label>Precio (Bs.)</mat-label>
+      <input matInput type="number" formControlName="price" min="0" step="1" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Cantidad</mat-label>
+      <input matInput type="number" formControlName="quantity" min="1" step="1" />
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" class="add-btn" (click)="onAdd()">
+      Agregar
+    </button>
+  </form>
+
+</div>

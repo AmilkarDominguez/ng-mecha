@@ -247,3 +247,136 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE users;
   END IF;
 END $$;
+
+
+-- ============================================================
+-- v10 — Service Orders Module: crear tablas service_orders y tablas pivote
+-- ============================================================
+
+DO $$ BEGIN
+  CREATE TYPE order_state_enum AS ENUM ('IN_PROGRESS', 'COMPLETED', 'CANCELED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE payment_type_enum AS ENUM ('CASH', 'CREDIT');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE delivery_time_enum AS ENUM ('ORDER', 'IMMEDIATE');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS service_orders (
+  id                    UUID                 PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id           UUID                 NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,
+  vehicle_id            UUID                 REFERENCES vehicles(id)           ON DELETE SET NULL,
+  user_id               UUID                 REFERENCES users(id)              ON DELETE SET NULL,
+  number                TEXT,
+  description           TEXT,
+  total                 NUMERIC(10,2),
+  have                  NUMERIC(10,2)        DEFAULT 0,
+  must                  NUMERIC(10,2),
+  iva                   NUMERIC(10,2),
+  total_iva             NUMERIC(10,2),
+  with_iva              BOOLEAN              NOT NULL DEFAULT false,
+  mileage               TEXT,
+  draft_expiration_date DATE,
+  started_date          DATE,
+  ended_date            DATE,
+  return_date           DATE,
+  state                 order_state_enum     NOT NULL DEFAULT 'IN_PROGRESS',
+  payment_type          payment_type_enum    NOT NULL DEFAULT 'CASH',
+  created_at            TIMESTAMPTZ          NOT NULL DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ          NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS service_order_services (
+  id                UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
+  mechanic_id       UUID             REFERENCES mechanics(id)       ON DELETE SET NULL,
+  service_id        UUID             REFERENCES services(id)        ON DELETE SET NULL,
+  service_order_id  UUID             REFERENCES service_orders(id)  ON DELETE CASCADE,
+  discount          NUMERIC(8,2),
+  price             NUMERIC(8,2),
+  quantity          NUMERIC,
+  subtotal          NUMERIC(8,2),
+  created_at        TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ      NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS service_order_batches (
+  id                UUID                 PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_id          UUID                 REFERENCES batches(id)        ON DELETE SET NULL,
+  service_order_id  UUID                 REFERENCES service_orders(id) ON DELETE CASCADE,
+  quantity          NUMERIC,
+  delivery_time     delivery_time_enum   NOT NULL DEFAULT 'IMMEDIATE',
+  price             NUMERIC(8,2),
+  discount          NUMERIC(8,2),
+  subtotal          NUMERIC(8,2),
+  created_at        TIMESTAMPTZ          NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ          NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS service_order_external_services (
+  id                   UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
+  external_service_id  UUID             REFERENCES external_services(id) ON DELETE SET NULL,
+  service_order_id     UUID             REFERENCES service_orders(id)    ON DELETE CASCADE,
+  bank_account_id      UUID             REFERENCES bank_accounts(id)     ON DELETE SET NULL,
+  cost                 NUMERIC(8,2),
+  price                NUMERIC(8,2),
+  quantity             NUMERIC,
+  subtotal             NUMERIC(8,2),
+  created_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
+  updated_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW()
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_service_orders_customer_id      ON service_orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_service_orders_vehicle_id       ON service_orders(vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_service_orders_state            ON service_orders(state);
+CREATE INDEX IF NOT EXISTS idx_so_services_order_id            ON service_order_services(service_order_id);
+CREATE INDEX IF NOT EXISTS idx_so_batches_order_id             ON service_order_batches(service_order_id);
+CREATE INDEX IF NOT EXISTS idx_so_external_order_id            ON service_order_external_services(service_order_id);
+
+-- Triggers
+DROP TRIGGER IF EXISTS trg_set_updated_at ON service_orders;
+CREATE TRIGGER trg_set_updated_at BEFORE UPDATE ON service_orders
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_set_updated_at ON service_order_services;
+CREATE TRIGGER trg_set_updated_at BEFORE UPDATE ON service_order_services
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_set_updated_at ON service_order_batches;
+CREATE TRIGGER trg_set_updated_at BEFORE UPDATE ON service_order_batches
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_set_updated_at ON service_order_external_services;
+CREATE TRIGGER trg_set_updated_at BEFORE UPDATE ON service_order_external_services
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- RLS
+ALTER TABLE service_orders                  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_order_services          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_order_batches           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_order_external_services ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "auth_all_service_orders" ON service_orders FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_service_orders" ON service_orders FOR ALL TO anon USING (true) WITH CHECK (true);
+
+CREATE POLICY "auth_all_so_services" ON service_order_services FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_so_services" ON service_order_services FOR ALL TO anon USING (true) WITH CHECK (true);
+
+CREATE POLICY "auth_all_so_batches" ON service_order_batches FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_so_batches" ON service_order_batches FOR ALL TO anon USING (true) WITH CHECK (true);
+
+CREATE POLICY "auth_all_so_external" ON service_order_external_services FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_so_external" ON service_order_external_services FOR ALL TO anon USING (true) WITH CHECK (true);
+
+-- Realtime
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'service_orders') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE service_orders;
+  END IF;
+END $$;

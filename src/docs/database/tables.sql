@@ -308,6 +308,93 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
 
 
 -- ============================================================
+-- Service Orders Module
+-- ============================================================
+
+DO $$ BEGIN
+  CREATE TYPE order_state_enum AS ENUM ('IN_PROGRESS', 'COMPLETED', 'CANCELED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE payment_type_enum AS ENUM ('CASH', 'CREDIT');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE delivery_time_enum AS ENUM ('ORDER', 'IMMEDIATE');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+-- 18. service_orders
+CREATE TABLE IF NOT EXISTS service_orders (
+  id                    UUID                 PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id           UUID                 NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,
+  vehicle_id            UUID                 REFERENCES vehicles(id)           ON DELETE SET NULL,
+  user_id               UUID                 REFERENCES users(id)              ON DELETE SET NULL,
+  number                TEXT,
+  description           TEXT,
+  total                 NUMERIC(10,2),
+  have                  NUMERIC(10,2)        DEFAULT 0,
+  must                  NUMERIC(10,2),
+  iva                   NUMERIC(10,2),
+  total_iva             NUMERIC(10,2),
+  with_iva              BOOLEAN              NOT NULL DEFAULT false,
+  mileage               TEXT,
+  draft_expiration_date DATE,
+  started_date          DATE,
+  ended_date            DATE,
+  return_date           DATE,
+  state                 order_state_enum     NOT NULL DEFAULT 'IN_PROGRESS',
+  payment_type          payment_type_enum    NOT NULL DEFAULT 'CASH',
+  created_at            TIMESTAMPTZ          NOT NULL DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ          NOT NULL DEFAULT NOW()
+);
+
+-- 19. service_order_services
+CREATE TABLE IF NOT EXISTS service_order_services (
+  id                UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
+  mechanic_id       UUID             REFERENCES mechanics(id)       ON DELETE SET NULL,
+  service_id        UUID             REFERENCES services(id)        ON DELETE SET NULL,
+  service_order_id  UUID             REFERENCES service_orders(id)  ON DELETE CASCADE,
+  discount          NUMERIC(8,2),
+  price             NUMERIC(8,2),
+  quantity          NUMERIC,
+  subtotal          NUMERIC(8,2),
+  created_at        TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ      NOT NULL DEFAULT NOW()
+);
+
+-- 20. service_order_batches
+CREATE TABLE IF NOT EXISTS service_order_batches (
+  id                UUID                 PRIMARY KEY DEFAULT gen_random_uuid(),
+  batch_id          UUID                 REFERENCES batches(id)        ON DELETE SET NULL,
+  service_order_id  UUID                 REFERENCES service_orders(id) ON DELETE CASCADE,
+  quantity          NUMERIC,
+  delivery_time     delivery_time_enum   NOT NULL DEFAULT 'IMMEDIATE',
+  price             NUMERIC(8,2),
+  discount          NUMERIC(8,2),
+  subtotal          NUMERIC(8,2),
+  created_at        TIMESTAMPTZ          NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ          NOT NULL DEFAULT NOW()
+);
+
+-- 21. service_order_external_services
+CREATE TABLE IF NOT EXISTS service_order_external_services (
+  id                   UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
+  external_service_id  UUID             REFERENCES external_services(id) ON DELETE SET NULL,
+  service_order_id     UUID             REFERENCES service_orders(id)    ON DELETE CASCADE,
+  bank_account_id      UUID             REFERENCES bank_accounts(id)     ON DELETE SET NULL,
+  cost                 NUMERIC(8,2),
+  price                NUMERIC(8,2),
+  quantity             NUMERIC,
+  subtotal             NUMERIC(8,2),
+  created_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
+  updated_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW()
+);
+
+
+-- ============================================================
 -- INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_users_email              ON users(email);
@@ -326,7 +413,13 @@ CREATE INDEX IF NOT EXISTS idx_services_state            ON services(state);
 CREATE INDEX IF NOT EXISTS idx_external_services_state   ON external_services(state);
 CREATE INDEX IF NOT EXISTS idx_vehicles_customer_id     ON vehicles(customer_id);
 CREATE INDEX IF NOT EXISTS idx_vehicles_state           ON vehicles(state);
-CREATE INDEX IF NOT EXISTS idx_customers_state          ON customers(state);
+CREATE INDEX IF NOT EXISTS idx_customers_state                      ON customers(state);
+CREATE INDEX IF NOT EXISTS idx_service_orders_customer_id           ON service_orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_service_orders_vehicle_id            ON service_orders(vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_service_orders_state                 ON service_orders(state);
+CREATE INDEX IF NOT EXISTS idx_service_order_services_order_id      ON service_order_services(service_order_id);
+CREATE INDEX IF NOT EXISTS idx_service_order_batches_order_id       ON service_order_batches(service_order_id);
+CREATE INDEX IF NOT EXISTS idx_service_order_external_order_id      ON service_order_external_services(service_order_id);
 
 
 -- ============================================================
@@ -361,7 +454,11 @@ BEGIN
     'external_services',
     'vehicles',
     'bank_transaction_types',
-    'bank_accounts'
+    'bank_accounts',
+    'service_orders',
+    'service_order_services',
+    'service_order_batches',
+    'service_order_external_services'
   ] LOOP
     EXECUTE format(
       'DROP TRIGGER IF EXISTS trg_set_updated_at ON %I;
@@ -394,7 +491,11 @@ ALTER TABLE services              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE external_services     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vehicles              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bank_transaction_types ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bank_accounts         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bank_accounts                      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_orders                     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_order_services             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_order_batches              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_order_external_services    ENABLE ROW LEVEL SECURITY;
 
 
 -- ============================================================

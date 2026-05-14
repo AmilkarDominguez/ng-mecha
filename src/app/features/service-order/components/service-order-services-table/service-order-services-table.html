@@ -1,0 +1,73 @@
+<div class="table-wrapper">
+  <div class="table-header">
+    <span class="table-title">Mano de Obra</span>
+    <span class="table-count">{{ items().length }} item(s)</span>
+  </div>
+
+  @if (items().length > 0) {
+    <div class="table-scroll">
+      <table mat-table [dataSource]="items()" class="detail-table">
+
+        <ng-container matColumnDef="item">
+          <th mat-header-cell *matHeaderCellDef>#</th>
+          <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>Descripción</th>
+          <td mat-cell *matCellDef="let row">{{ row.service_name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="mechanic">
+          <th mat-header-cell *matHeaderCellDef>Técnico</th>
+          <td mat-cell *matCellDef="let row">{{ row.mechanic_name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef>Precio</th>
+          <td mat-cell *matCellDef="let row">
+            <input class="cell-input" type="number" min="0" step="1"
+                   [value]="row.price" (change)="onPriceChange(row, $any($event.target).value)" />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>Cant.</th>
+          <td mat-cell *matCellDef="let row">
+            <input class="cell-input cell-input--sm" type="number" min="1" step="1"
+                   [value]="row.quantity" (change)="onQuantityChange(row, $any($event.target).value)" />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="discount">
+          <th mat-header-cell *matHeaderCellDef>Desc. %</th>
+          <td mat-cell *matCellDef="let row">
+            <input class="cell-input cell-input--sm" type="number" min="0" max="100" step="1"
+                   [value]="row.discount" (change)="onDiscountChange(row, $any($event.target).value)" />
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="subtotal">
+          <th mat-header-cell *matHeaderCellDef>Subtotal</th>
+          <td mat-cell *matCellDef="let row" class="cell-amount">
+            Bs. {{ getSubtotal(row) | number:'1.2-2' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button color="warn" (click)="onRemove(row.id)" title="Quitar">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">Sin servicios de mano de obra agregados</div>
+  }
+</div>

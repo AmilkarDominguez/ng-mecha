@@ -82,6 +82,14 @@ export const routes: Routes = [
         path: 'admin/usuarios',
         loadComponent: () => import('./features/admin/users/user-dashboard').then(m => m.UserDashboard),
       },
+      {
+        path: 'ordenes/en-curso',
+        loadComponent: () => import('./features/service-order/service-order-dashboard/service-order-dashboard').then(m => m.ServiceOrderDashboard),
+      },
+      {
+        path: 'ordenes/nueva',
+        loadComponent: () => import('./features/service-order/service-order-form/service-order-form').then(m => m.ServiceOrderForm),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }
