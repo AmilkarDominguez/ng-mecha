@@ -1,15 +1,14 @@
 import {
   Component,
   computed,
-  effect,
   inject,
   input,
   OnInit,
   output,
   signal,
 } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -91,28 +90,23 @@ export class TabCustomer implements OnInit {
     ended_date: new FormControl<Date | null>(null),
   });
 
-  constructor() {
-    effect(() => {
-      const customer = typeof this.customerCtrl.value === 'object' && this.customerCtrl.value !== null
-        ? this.customerCtrl.value as Customer
-        : null;
+  ngOnInit(): void {
+    this.form.valueChanges.subscribe(() => this.emitValue());
+
+    this.customerCtrl.valueChanges.subscribe((val) => {
+      const customer = typeof val === 'object' && val !== null ? (val as Customer) : null;
       this.selectedCustomer.set(customer);
       this.vehicleCtrl.setValue(null, { emitEvent: false });
       this.selectedVehicle.set(null);
       this.emitValue();
     });
 
-    effect(() => {
-      const vehicle = typeof this.vehicleCtrl.value === 'object' && this.vehicleCtrl.value !== null
-        ? this.vehicleCtrl.value as Vehicle
-        : null;
-      this.selectedVehicle.set(vehicle);
-      this.emitValue();
+    this.vehicleCtrl.valueChanges.subscribe((val) => {
+      if (typeof val === 'string') {
+        this.selectedVehicle.set(null);
+        this.emitValue();
+      }
     });
-  }
-
-  ngOnInit(): void {
-    this.form.valueChanges.subscribe(() => this.emitValue());
   }
 
   displayCustomer = (value: Customer | string | null): string => {
@@ -120,6 +114,11 @@ export class TabCustomer implements OnInit {
     if (typeof value === 'string') return value;
     return this.customerLabel(value);
   };
+
+  onVehicleSelected(event: MatAutocompleteSelectedEvent): void {
+    this.selectedVehicle.set(event.option.value as Vehicle);
+    this.emitValue();
+  }
 
   displayVehicle = (value: Vehicle | string | null): string => {
     if (!value) return '';

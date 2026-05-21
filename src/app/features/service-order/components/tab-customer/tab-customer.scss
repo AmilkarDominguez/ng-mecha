@@ -83,6 +83,38 @@
   font-size: 0.875rem;
 }
 
+.vehicle-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: var(--mat-sys-surface-container);
+}
+
+.vehicle-name {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.vehicle-state {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 1rem;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+
+  &.state-active {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+}
+
+.vehicle-hint {
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #757575);
+  margin: 0;
+}
+
 .order-fields {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
