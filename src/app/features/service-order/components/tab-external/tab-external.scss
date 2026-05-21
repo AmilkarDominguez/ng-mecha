@@ -36,6 +36,25 @@
   justify-content: flex-end;
 }
 
+@media (max-width: 36rem) {
+  .extra-fields {
+    flex-direction: column;
+
+    mat-form-field,
+    .field-bank {
+      width: 100%;
+    }
+  }
+
+  .add-action {
+    justify-content: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+}
+
 .option-main {
   display: block;
   font-size: 0.875rem;

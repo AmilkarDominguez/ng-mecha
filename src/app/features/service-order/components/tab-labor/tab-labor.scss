@@ -33,6 +33,21 @@
   margin-top: 0.25rem;
 }
 
+@media (max-width: 36rem) {
+  .add-fields {
+    flex-direction: column;
+
+    mat-form-field {
+      width: 100%;
+    }
+  }
+
+  .add-btn {
+    width: 100%;
+    margin-top: 0;
+  }
+}
+
 .option-main {
   display: block;
   font-size: 0.875rem;

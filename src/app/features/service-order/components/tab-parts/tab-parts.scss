@@ -139,3 +139,28 @@
   height: 3.5rem;
   margin-top: 0.25rem;
 }
+
+@media (max-width: 36rem) {
+  .result-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    button {
+      align-self: stretch;
+    }
+  }
+
+  .add-fields {
+    flex-direction: column;
+
+    mat-form-field {
+      width: 100%;
+    }
+  }
+
+  .add-btn {
+    width: 100%;
+    margin-top: 0;
+  }
+}

@@ -109,3 +109,27 @@
   padding: 2rem;
   color: var(--color-text-muted, #757575);
 }
+
+@media (max-width: 48rem) {
+  .page-title {
+    font-size: 1.375rem;
+  }
+}
+
+@media (max-width: 36rem) {
+  .toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .search-field {
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+  }
+
+  .result-count {
+    text-align: right;
+  }
+}

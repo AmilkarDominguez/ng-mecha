@@ -132,3 +132,14 @@
   color: var(--color-text-muted, #757575);
   margin-right: 0.5rem;
 }
+
+@media (max-width: 36rem) {
+  .order-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .customer-card-body,
+  .vehicle-card-body {
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  }
+}
