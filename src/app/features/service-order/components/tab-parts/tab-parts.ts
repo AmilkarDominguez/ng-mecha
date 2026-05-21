@@ -49,11 +49,13 @@ export class TabParts {
       .filter((b) => {
         const productName = (b.product?.name ?? '').toLowerCase();
         const desc = (b.description ?? '').toLowerCase();
+        const code = (b.code ?? '').toLowerCase();
         const brands = (b.compatible_brands ?? '').toLowerCase();
         const models = (b.compatible_models ?? '').toLowerCase();
         return (
           productName.includes(term) ||
           desc.includes(term) ||
+          code.includes(term) ||
           brands.includes(term) ||
           models.includes(term)
         );
@@ -62,35 +64,24 @@ export class TabParts {
   });
 
   readonly form = new FormGroup({
-    price: new FormControl<number | null>({ value: null, disabled: true }, [Validators.required, Validators.min(0)]),
-    quantity: new FormControl<number | null>({ value: 1, disabled: true }, [Validators.required, Validators.min(1)]),
+    price: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    quantity: new FormControl<number | null>(1, [Validators.required, Validators.min(1)]),
   });
 
   onSearch(event: Event): void {
-    const val = (event.target as HTMLInputElement).value;
-    this.searchTerm.set(val);
-    if (!val) {
-      this.selectedBatch.set(null);
-      this.form.controls.price.disable();
-      this.form.controls.quantity.disable();
-      this.form.patchValue({ price: null, quantity: 1 });
-    }
+    this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
   selectBatch(batch: BatchWithRelations): void {
+    this.form.patchValue({ price: batch.price ?? null, quantity: 1 });
     this.selectedBatch.set(batch);
     this.searchTerm.set('');
-    this.form.controls.price.enable();
-    this.form.controls.quantity.enable();
-    this.form.patchValue({ price: batch.price ?? null, quantity: 1 });
   }
 
   clearSelection(): void {
+    this.form.patchValue({ price: null, quantity: 1 });
     this.selectedBatch.set(null);
     this.searchTerm.set('');
-    this.form.controls.price.disable();
-    this.form.controls.quantity.disable();
-    this.form.patchValue({ price: null, quantity: 1 });
   }
 
   onAdd(): void {

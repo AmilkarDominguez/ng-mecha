@@ -18,7 +18,11 @@ export class SPBatch {
   }
 
   public get(): Observable<Batch[]> {
-    return from(this.supabase.from(this.TABLE_NAME).select('*')).pipe(
+    return from(
+      this.supabase
+        .from(this.TABLE_NAME)
+        .select('*, product:products(name), industry:industries(name), warehouse:warehouses(name)'),
+    ).pipe(
       map(({ data, error }) => {
         if (error) throw error;
         return data ?? [];
