@@ -90,8 +90,8 @@ export class WarehouseDashboard {
 
   onView(warehouse: Warehouse): void {
     this.dialog.open(WarehouseDetailModal, {
-      width: '38rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: warehouse,
     });
   }

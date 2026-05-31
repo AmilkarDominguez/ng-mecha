@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
+import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
 import { Batch } from '../../../../../core/models/batch.model';
 import { Product } from '../../../../../core/models/product.model';
 import { Warehouse } from '../../../../../core/models/warehouse.model';
@@ -25,7 +26,7 @@ export interface BatchDetailData {
   imports: [
     DatePipe,
     DecimalPipe,
-    MatDialogModule,
+    DialogFrame,
     MatButtonModule,
     MatIconModule,
     MatDividerModule,

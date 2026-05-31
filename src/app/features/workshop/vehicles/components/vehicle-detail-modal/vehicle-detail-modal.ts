@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
+import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { Vehicle } from '../../../../../core/models/vehicle.model';
@@ -14,7 +15,7 @@ import { SPCustomer } from '../../../../../core/services/supabase/sb-customer';
   selector: 'app-vehicle-detail-modal',
   imports: [
     DatePipe,
-    MatDialogModule,
+    DialogFrame,
     MatButtonModule,
     MatIconModule,
     MatDividerModule,

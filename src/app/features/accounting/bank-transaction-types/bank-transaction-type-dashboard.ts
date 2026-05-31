@@ -90,8 +90,8 @@ export class BankTransactionTypeDashboard {
 
   onView(item: BankTransactionType): void {
     this.dialog.open(BankTransactionTypeDetailModal, {
-      width: '38rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: item,
     });
   }

@@ -121,8 +121,8 @@ export class BatchDashboard {
 
   onView(batch: Batch): void {
     this.dialog.open(BatchDetailModal, {
-      width: '48rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {
         batch,
         products: this.products(),

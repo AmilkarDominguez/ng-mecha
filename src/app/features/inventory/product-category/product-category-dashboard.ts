@@ -91,8 +91,8 @@ export class ProductCategoryDashboard {
 
   onView(category: ProductCategory): void {
     this.dialog.open(ProductCategoryDetailModal, {
-      width: '38rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: category,
     });
   }

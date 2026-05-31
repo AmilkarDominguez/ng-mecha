@@ -91,8 +91,8 @@ export class BankAccountDashboard {
 
   onView(account: BankAccount): void {
     this.dialog.open(BankAccountDetailModal, {
-      width: '38rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: account,
     });
   }

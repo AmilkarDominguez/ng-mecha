@@ -95,8 +95,8 @@ export class CustomerDashboard {
 
   onView(customer: Customer): void {
     this.dialog.open(CustomerDetailModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: customer,
     });
   }

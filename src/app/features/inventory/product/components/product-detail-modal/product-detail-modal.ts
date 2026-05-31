@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
+import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
 import { Product } from '../../../../../core/models/product.model';
 import { ProductCategory } from '../../../../../core/models/product-category.model';
 import { ProductPresentation } from '../../../../../core/models/product-presentation.model';
@@ -18,7 +19,7 @@ export interface ProductDetailData {
   selector: 'app-product-detail-modal',
   imports: [
     DatePipe,
-    MatDialogModule,
+    DialogFrame,
     MatButtonModule,
     MatIconModule,
     MatDividerModule,

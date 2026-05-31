@@ -95,8 +95,8 @@ export class UserDashboard {
 
   onView(user: User): void {
     this.dialog.open(UserDetailModal, {
-      width: '38rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: user,
     });
   }

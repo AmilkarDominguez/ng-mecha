@@ -100,8 +100,8 @@ export class ProductDashboard {
 
   onView(product: Product): void {
     this.dialog.open(ProductDetailModal, {
-      width: '40rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {
         product,
         categories: this.categories(),

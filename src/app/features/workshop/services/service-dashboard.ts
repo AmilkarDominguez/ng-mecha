@@ -91,8 +91,8 @@ export class ServiceDashboard {
 
   onView(item: Service): void {
     this.dialog.open(ServiceDetailModal, {
-      width: '38rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: item,
     });
   }

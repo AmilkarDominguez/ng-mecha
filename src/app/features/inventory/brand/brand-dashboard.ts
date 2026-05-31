@@ -88,8 +88,8 @@ export class BrandDashboard {
 
   onView(brand: Brand): void {
     this.dialog.open(BrandDetailModal, {
-      width: '38rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: brand,
     });
   }

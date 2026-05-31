@@ -1,16 +1,17 @@
 import { Component, inject } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { Warehouse } from '../../../../../core/models/warehouse.model';
+import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
 
 @Component({
   selector: 'app-warehouse-detail-modal',
   imports: [
     DatePipe,
-    MatDialogModule,
+    DialogFrame,
     MatButtonModule,
     MatIconModule,
     MatDividerModule,

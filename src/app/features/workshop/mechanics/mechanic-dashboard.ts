@@ -93,8 +93,8 @@ export class MechanicDashboard {
 
   onView(mechanic: Mechanic): void {
     this.dialog.open(MechanicDetailModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: mechanic,
     });
   }

@@ -87,8 +87,8 @@ export class IndustryDashboard {
 
   onView(industry: Industry): void {
     this.dialog.open(IndustryDetailModal, {
-      width: '38rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: industry,
     });
   }

@@ -91,8 +91,8 @@ export class ProductPresentationDashboard {
 
   onView(presentation: ProductPresentation): void {
     this.dialog.open(ProductPresentationDetailModal, {
-      width: '38rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: presentation,
     });
   }

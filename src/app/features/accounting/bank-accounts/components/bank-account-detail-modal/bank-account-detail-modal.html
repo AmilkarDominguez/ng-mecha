@@ -1,9 +1,5 @@
-<h2 mat-dialog-title class="modal-title">
-  <mat-icon class="modal-title-icon">account_balance</mat-icon>
-  Detalle de Cuenta Bancaria
-</h2>
+<app-dialog-frame title="Detalle de Cuenta Bancaria" icon="account_balance" initialSize="md">
 
-<mat-dialog-content class="modal-content">
   <div class="detail-grid print-area">
 
     <div class="detail-header">
@@ -64,12 +60,13 @@
     </div>
 
   </div>
-</mat-dialog-content>
 
-<mat-dialog-actions class="modal-actions" align="end">
-  <button mat-stroked-button (click)="onClose()">Cerrar</button>
-  <button mat-stroked-button (click)="onPrint()">
-    <mat-icon>print</mat-icon>
-    Imprimir
-  </button>
-</mat-dialog-actions>
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onClose()">Cerrar</button>
+    <button mat-stroked-button (click)="onPrint()">
+      <mat-icon>print</mat-icon>
+      Imprimir
+    </button>
+  </ng-container>
+
+</app-dialog-frame>

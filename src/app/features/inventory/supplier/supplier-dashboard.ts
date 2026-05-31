@@ -91,8 +91,8 @@ export class SupplierDashboard {
 
   onView(supplier: Supplier): void {
     this.dialog.open(SupplierDetailModal, {
-      width: '40rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: supplier,
     });
   }

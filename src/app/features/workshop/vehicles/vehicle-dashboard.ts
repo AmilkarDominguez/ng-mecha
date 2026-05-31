@@ -91,8 +91,8 @@ export class VehicleDashboard {
 
   onView(vehicle: Vehicle): void {
     this.dialog.open(VehicleDetailModal, {
-      width: '42rem',
-      maxWidth: '95vw',
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: vehicle,
     });
   }
