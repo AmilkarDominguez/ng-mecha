@@ -47,6 +47,8 @@ export class MechanicFormModal implements OnInit {
     phone: ['', [Validators.maxLength(20)]],
     email: ['', [Validators.email, Validators.maxLength(150)]],
     birthdate: [''],
+    incorporated_at: [''],
+    retired_at: [''],
     address: ['', [Validators.maxLength(300)]],
     active: [true],
     contacts: this.fb.group({
@@ -75,6 +77,8 @@ export class MechanicFormModal implements OnInit {
         phone: m.phone ?? '',
         email: m.email ?? '',
         birthdate: m.birthdate ?? '',
+        incorporated_at: m.incorporated_at ?? '',
+        retired_at: m.retired_at ?? '',
         address: m.address ?? '',
         active: m.state === 'ACTIVE',
         contacts: {
@@ -112,6 +116,8 @@ export class MechanicFormModal implements OnInit {
       phone: raw.phone || null,
       email: raw.email || null,
       birthdate: raw.birthdate || null,
+      incorporated_at: raw.incorporated_at || null,
+      retired_at: raw.retired_at || null,
       address: raw.address || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
       contacts,

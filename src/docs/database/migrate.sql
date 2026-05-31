@@ -380,3 +380,10 @@ DO $$ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE service_orders;
   END IF;
 END $$;
+
+
+-- ============================================================
+-- v11 — mechanics: agregar incorporated_at y retired_at
+-- ============================================================
+ALTER TABLE mechanics ADD COLUMN IF NOT EXISTS incorporated_at TIMESTAMPTZ;
+ALTER TABLE mechanics ADD COLUMN IF NOT EXISTS retired_at      TIMESTAMPTZ;

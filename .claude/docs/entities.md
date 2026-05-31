@@ -291,20 +291,22 @@
 
 **Tabla:** `mechanics`
 
-| Columna     | Tipo          | Restricciones        |
-| ----------- | ------------- | -------------------- |
-| id          | String UUID   | PK, auto-generated   |
-| name        | String        | nullable             |
-| lastname    | String        | nullable             |
-| ci          | String        | nullable             |
-| nit         | String        | nullable             |
-| address     | LocalDate     | nullable             |
-| email       | LocalDate     | nullable             |
-| birthdate   | LocalDate     | nullable             |
-| phone       | String        | nullable             |
-| state       | State (enum)  | default: ACTIVE      |
-| created_at  | LocalDateTime | auto                 |
-| updated_at  | LocalDateTime | auto                 |
+| Columna          | Tipo          | Restricciones        |
+| ---------------- | ------------- | -------------------- |
+| id               | String UUID   | PK, auto-generated   |
+| name             | String        | nullable             |
+| lastname         | String        | nullable             |
+| ci               | String        | nullable             |
+| nit              | String        | nullable             |
+| address          | LocalDate     | nullable             |
+| email            | LocalDate     | nullable             |
+| birthdate        | LocalDate     | nullable             |
+| phone            | String        | nullable             |
+| incorporated_at  | LocalDateTime | nullable             |
+| retired_at       | LocalDateTime | nullable             |
+| state            | State (enum)  | default: ACTIVE      |
+| created_at       | LocalDateTime | auto                 |
+| updated_at       | LocalDateTime | auto                 |
 
 **Relaciones:**
 

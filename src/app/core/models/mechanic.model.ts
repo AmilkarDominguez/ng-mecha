@@ -11,6 +11,8 @@ export interface Mechanic {
   email: string | null;
   birthdate: string | null;
   phone: string | null;
+  incorporated_at: string | null;
+  retired_at: string | null;
   state: EntityState;
   contacts?: Contact[];
   created_at?: string | Date;

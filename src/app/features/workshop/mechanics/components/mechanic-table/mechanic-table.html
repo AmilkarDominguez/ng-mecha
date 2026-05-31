@@ -34,12 +34,12 @@
       <td mat-cell *matCellDef="let row" class="cell-email">{{ row.email ?? '—' }}</td>
     </ng-container>
 
-    <!-- Column: birthdate -->
-    <ng-container matColumnDef="birthdate">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha nac.</th>
+    <!-- Column: incorporated_at -->
+    <ng-container matColumnDef="incorporated_at">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Incorporación</th>
       <td mat-cell *matCellDef="let row">
-        @if (row.birthdate) {
-          {{ row.birthdate | date:'dd/MM/yyyy' }}
+        @if (row.incorporated_at) {
+          {{ row.incorporated_at | date:'dd/MM/yyyy' }}
         } @else {
           <span class="cell-empty">—</span>
         }

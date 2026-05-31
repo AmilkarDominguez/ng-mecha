@@ -61,6 +61,22 @@
       }
     </mat-form-field>
 
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Fecha de incorporación</mat-label>
+      <input matInput formControlName="incorporated_at" type="date" />
+      @if (getFieldError('incorporated_at')) {
+        <mat-error>{{ getFieldError('incorporated_at') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Fecha de retiro</mat-label>
+      <input matInput formControlName="retired_at" type="date" />
+      @if (getFieldError('retired_at')) {
+        <mat-error>{{ getFieldError('retired_at') }}</mat-error>
+      }
+    </mat-form-field>
+
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Dirección</mat-label>
       <textarea matInput formControlName="address" rows="2"

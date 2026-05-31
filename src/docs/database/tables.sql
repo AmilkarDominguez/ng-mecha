@@ -215,6 +215,8 @@ CREATE TABLE IF NOT EXISTS mechanics (
   email          TEXT,
   birthdate      DATE,
   phone          TEXT,
+  incorporated_at TIMESTAMPTZ,
+  retired_at      TIMESTAMPTZ,
   state          state_enum  NOT NULL DEFAULT 'ACTIVE',
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
