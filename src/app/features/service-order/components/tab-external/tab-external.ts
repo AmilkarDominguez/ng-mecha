@@ -3,8 +3,11 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DecimalPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -13,6 +16,7 @@ import { BankAccount } from '../../../../core/models/bank-account.model';
 import { ServiceOrderExternalServiceRow } from '../../../../core/models/service-order.model';
 import { SPExternalService } from '../../../../core/services/supabase/sb-external-service';
 import { SPBankAccount } from '../../../../core/services/supabase/sb-bank-account';
+import { ExternalServiceFormModal } from '../../../workshop/external-services/components/external-service-form-modal/external-service-form-modal';
 
 @Component({
   selector: 'app-tab-external',
@@ -22,7 +26,9 @@ import { SPBankAccount } from '../../../../core/services/supabase/sb-bank-accoun
     MatInputModule,
     MatAutocompleteModule,
     MatButtonModule,
+    MatIconModule,
     MatSelectModule,
+    MatTooltipModule,
     DecimalPipe,
   ],
   templateUrl: './tab-external.html',
@@ -31,6 +37,7 @@ import { SPBankAccount } from '../../../../core/services/supabase/sb-bank-accoun
 export class TabExternal {
   private externalServiceProvider = inject(SPExternalService);
   private bankAccountProvider = inject(SPBankAccount);
+  private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
   addItem = output<ServiceOrderExternalServiceRow>();
@@ -75,6 +82,26 @@ export class TabExternal {
       price: service.price ?? null,
       quantity: 1,
       bank_account_id: null,
+    });
+  }
+
+  openNewExternalServiceDialog(): void {
+    const ref = this.dialog.open(ExternalServiceFormModal, {
+      data: {},
+      width: '40rem',
+      maxWidth: '95vw',
+    });
+    ref.afterClosed().subscribe((result: ExternalService | null) => {
+      if (!result) return;
+      this.externalServiceProvider.add(result).subscribe({
+        next: (saved) => {
+          const newService = saved[0];
+          if (newService) {
+            this.externalServiceCtrl.setValue(newService);
+            this.onExternalServiceSelected(newService);
+          }
+        },
+      });
     });
   }
 

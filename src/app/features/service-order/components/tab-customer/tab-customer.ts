@@ -9,11 +9,15 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Customer } from '../../../../core/models/customer.model';
 import { Vehicle } from '../../../../core/models/vehicle.model';
@@ -21,6 +25,7 @@ import { Mechanic } from '../../../../core/models/mechanic.model';
 import { SPCustomer } from '../../../../core/services/supabase/sb-customer';
 import { SPVehicle } from '../../../../core/services/supabase/sb-vehicles';
 import { SPMechanic } from '../../../../core/services/supabase/sb-mechanic';
+import { CustomerFormModal } from '../../../workshop/customers/components/customer-form-modal/customer-form-modal';
 
 export interface CustomerTabValue {
   customer_id: string | null;
@@ -39,9 +44,12 @@ export interface CustomerTabValue {
     MatFormFieldModule,
     MatInputModule,
     MatAutocompleteModule,
+    MatButtonModule,
+    MatIconModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatDividerModule,
+    MatTooltipModule,
   ],
   templateUrl: './tab-customer.html',
   styleUrl: './tab-customer.scss',
@@ -50,6 +58,7 @@ export class TabCustomer implements OnInit {
   private customerService = inject(SPCustomer);
   private vehicleService = inject(SPVehicle);
   private mechanicService = inject(SPMechanic);
+  private dialog = inject(MatDialog);
 
   initialValue = input<CustomerTabValue | null>(null);
   valueChange = output<CustomerTabValue>();
@@ -178,6 +187,25 @@ export class TabCustomer implements OnInit {
       mileage: raw.mileage || null,
       started_date: raw.started_date ? this.toIsoDate(raw.started_date) : null,
       ended_date: raw.ended_date ? this.toIsoDate(raw.ended_date) : null,
+    });
+  }
+
+  openNewCustomerDialog(): void {
+    const ref = this.dialog.open(CustomerFormModal, {
+      data: {},
+      width: '48rem',
+      maxWidth: '95vw',
+    });
+    ref.afterClosed().subscribe((result: Customer | null) => {
+      if (!result) return;
+      this.customerService.add(result).subscribe({
+        next: (saved) => {
+          const newCustomer = saved[0];
+          if (newCustomer) {
+            this.customerCtrl.setValue(newCustomer);
+          }
+        },
+      });
     });
   }
 

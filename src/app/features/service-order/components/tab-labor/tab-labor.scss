@@ -17,6 +17,17 @@
   width: 100%;
 }
 
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quick-add-btn {
+  flex-shrink: 0;
+  margin-bottom: 1.25rem;
+}
+
 .add-fields {
   display: flex;
   align-items: flex-start;

@@ -2,14 +2,23 @@ import { Component, computed, inject, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DecimalPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Batch } from '../../../../core/models/batch.model';
 import { ServiceOrderBatchRow } from '../../../../core/models/service-order.model';
 import { SPBatch } from '../../../../core/services/supabase/sb-batch';
+import { SPProduct } from '../../../../core/services/supabase/sb-product';
+import { SPWarehouse } from '../../../../core/services/supabase/sb-warehouse';
+import { SPSupplier } from '../../../../core/services/supabase/sb-supplier';
+import { SPIndustry } from '../../../../core/services/supabase/sb-industry';
+import { SPBrand } from '../../../../core/services/supabase/sb-brand';
+import { BatchFormModal } from '../../../inventory/batches/components/batch-form-modal/batch-form-modal';
 
 interface BatchWithRelations extends Batch {
   product?: { name: string } | null;
@@ -24,6 +33,8 @@ interface BatchWithRelations extends Batch {
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
     MatDividerModule,
     DecimalPipe,
   ],
@@ -32,11 +43,22 @@ interface BatchWithRelations extends Batch {
 })
 export class TabParts {
   private batchService = inject(SPBatch);
+  private productService = inject(SPProduct);
+  private warehouseService = inject(SPWarehouse);
+  private supplierService = inject(SPSupplier);
+  private industryService = inject(SPIndustry);
+  private brandService = inject(SPBrand);
+  private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
   addItem = output<ServiceOrderBatchRow>();
 
   readonly allBatches = toSignal(this.batchService.get(), { initialValue: [] });
+  private readonly allProducts = toSignal(this.productService.get(), { initialValue: [] });
+  private readonly allWarehouses = toSignal(this.warehouseService.get(), { initialValue: [] });
+  private readonly allSuppliers = toSignal(this.supplierService.get(), { initialValue: [] });
+  private readonly allIndustries = toSignal(this.industryService.get(), { initialValue: [] });
+  private readonly allBrands = toSignal(this.brandService.get(), { initialValue: [] });
 
   readonly searchTerm = signal('');
   readonly selectedBatch = signal<BatchWithRelations | null>(null);
@@ -82,6 +104,38 @@ export class TabParts {
     this.form.patchValue({ price: null, quantity: 1 });
     this.selectedBatch.set(null);
     this.searchTerm.set('');
+  }
+
+  openNewBatchDialog(): void {
+    const ref = this.dialog.open(BatchFormModal, {
+      data: {
+        products: this.allProducts(),
+        warehouses: this.allWarehouses(),
+        suppliers: this.allSuppliers(),
+        industries: this.allIndustries(),
+        brands: this.allBrands(),
+      },
+      width: '48rem',
+      maxWidth: '95vw',
+    });
+    ref.afterClosed().subscribe((result: Batch | null) => {
+      if (!result) return;
+      this.batchService.add(result).subscribe({
+        next: (saved) => {
+          const newBatch = saved?.[0];
+          if (!newBatch) return;
+          const product = this.allProducts().find((p) => p.id === newBatch.product_id);
+          const industry = this.allIndustries().find((i) => i.id === newBatch.industry_id);
+          const warehouse = this.allWarehouses().find((w) => w.id === newBatch.warehouse_id);
+          this.selectBatch({
+            ...newBatch,
+            product: product ? { name: product.name ?? '' } : null,
+            industry: industry ? { name: industry.name ?? '' } : null,
+            warehouse: warehouse ? { name: warehouse.name ?? '' } : null,
+          });
+        },
+      });
+    });
   }
 
   onAdd(): void {

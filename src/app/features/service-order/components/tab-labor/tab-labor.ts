@@ -3,13 +3,17 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DecimalPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Service } from '../../../../core/models/service.model';
 import { ServiceOrderServiceRow } from '../../../../core/models/service-order.model';
 import { SPService } from '../../../../core/services/supabase/sb-service';
+import { ServiceFormModal } from '../../../workshop/services/components/service-form-modal/service-form-modal';
 
 @Component({
   selector: 'app-tab-labor',
@@ -19,6 +23,8 @@ import { SPService } from '../../../../core/services/supabase/sb-service';
     MatInputModule,
     MatAutocompleteModule,
     MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
     DecimalPipe,
   ],
   templateUrl: './tab-labor.html',
@@ -27,6 +33,7 @@ import { SPService } from '../../../../core/services/supabase/sb-service';
 export class TabLabor {
   private serviceProvider = inject(SPService);
   private snackBar = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
 
   addItem = output<ServiceOrderServiceRow>();
 
@@ -75,6 +82,26 @@ export class TabLabor {
       this.form.controls.quantity.disable();
       this.form.patchValue({ price: null, quantity: 1 });
     }
+  }
+
+  openNewServiceDialog(): void {
+    const ref = this.dialog.open(ServiceFormModal, {
+      data: {},
+      width: '36rem',
+      maxWidth: '95vw',
+    });
+    ref.afterClosed().subscribe((result: Service | null) => {
+      if (!result) return;
+      this.serviceProvider.add(result).subscribe({
+        next: (saved) => {
+          const newService = saved[0];
+          if (newService) {
+            this.serviceCtrl.setValue(newService);
+            this.onServiceSelected(newService);
+          }
+        },
+      });
+    });
   }
 
   onAdd(): void {

@@ -4,11 +4,18 @@
 
   @if (!selectedBatch()) {
     <div class="search-wrapper">
-      <mat-form-field appearance="outline" class="field-full">
-        <mat-label>Buscar lote</mat-label>
-        <input matInput [value]="searchTerm()" (input)="onSearch($event)"
-               placeholder="Producto, descripción, marca o modelo compatible..." />
-      </mat-form-field>
+      <div class="search-row">
+        <mat-form-field appearance="outline" class="field-full">
+          <mat-label>Buscar lote</mat-label>
+          <input matInput [value]="searchTerm()" (input)="onSearch($event)"
+                 placeholder="Producto, descripción, marca o modelo compatible..." />
+        </mat-form-field>
+        <button mat-icon-button color="primary" class="quick-add-btn"
+                matTooltip="Registrar nuevo repuesto"
+                (click)="openNewBatchDialog()">
+          <mat-icon>add_circle</mat-icon>
+        </button>
+      </div>
 
       @if (searchResults().length > 0) {
         <div class="search-results">

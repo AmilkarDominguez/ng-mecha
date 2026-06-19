@@ -19,7 +19,13 @@
 
 .search-row {
   display: flex;
-  gap: 1rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quick-add-btn {
+  flex-shrink: 0;
+  margin-bottom: 1.25rem;
 }
 
 .field-full {

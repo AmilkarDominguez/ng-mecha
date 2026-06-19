@@ -21,6 +21,11 @@
         }
       </mat-autocomplete>
     </mat-form-field>
+    <button mat-icon-button color="primary" class="quick-add-btn"
+            matTooltip="Registrar nuevo cliente"
+            (click)="openNewCustomerDialog()">
+      <mat-icon>add_circle</mat-icon>
+    </button>
   </div>
 
   @if (selectedCustomer(); as customer) {

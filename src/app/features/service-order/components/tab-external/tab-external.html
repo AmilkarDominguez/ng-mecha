@@ -2,25 +2,32 @@
 
   <div class="section-title">Trabajos Adicionales</div>
 
-  <mat-form-field appearance="outline" class="field-full">
-    <mat-label>Servicio Externo</mat-label>
-    <input matInput [formControl]="externalServiceCtrl" [matAutocomplete]="autoExternal"
-           (input)="onExternalServiceInputChange()" placeholder="Buscar servicio externo..." />
-    <mat-autocomplete #autoExternal="matAutocomplete" [displayWith]="displayExternalService"
-                      (optionSelected)="onExternalServiceSelected($event.option.value)">
-      @for (s of filteredExternalServices(); track s.id) {
-        <mat-option [value]="s">
-          <span class="option-main">{{ s.name }}</span>
-          @if (s.company_name) {
-            <span class="option-sub">{{ s.company_name }}</span>
-          }
-          @if (s.price != null) {
-            <span class="option-price">Bs. {{ s.price | number:'1.2-2' }}</span>
-          }
-        </mat-option>
-      }
-    </mat-autocomplete>
-  </mat-form-field>
+  <div class="search-row">
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Servicio Externo</mat-label>
+      <input matInput [formControl]="externalServiceCtrl" [matAutocomplete]="autoExternal"
+             (input)="onExternalServiceInputChange()" placeholder="Buscar servicio externo..." />
+      <mat-autocomplete #autoExternal="matAutocomplete" [displayWith]="displayExternalService"
+                        (optionSelected)="onExternalServiceSelected($event.option.value)">
+        @for (s of filteredExternalServices(); track s.id) {
+          <mat-option [value]="s">
+            <span class="option-main">{{ s.name }}</span>
+            @if (s.company_name) {
+              <span class="option-sub">{{ s.company_name }}</span>
+            }
+            @if (s.price != null) {
+              <span class="option-price">Bs. {{ s.price | number:'1.2-2' }}</span>
+            }
+          </mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+    <button mat-icon-button color="primary" class="quick-add-btn"
+            matTooltip="Registrar nuevo servicio externo"
+            (click)="openNewExternalServiceDialog()">
+      <mat-icon>add_circle</mat-icon>
+    </button>
+  </div>
 
   <form [formGroup]="form" class="extra-fields">
     <mat-form-field appearance="outline">

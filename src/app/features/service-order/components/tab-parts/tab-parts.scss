@@ -23,6 +23,17 @@
   gap: 0.5rem;
 }
 
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quick-add-btn {
+  flex-shrink: 0;
+  margin-bottom: 1.25rem;
+}
+
 .search-results {
   border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 0.5rem;
