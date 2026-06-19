@@ -86,9 +86,9 @@ export class TabLabor {
 
   openNewServiceDialog(): void {
     const ref = this.dialog.open(ServiceFormModal, {
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {},
-      width: '36rem',
-      maxWidth: '95vw',
     });
     ref.afterClosed().subscribe((result: Service | null) => {
       if (!result) return;

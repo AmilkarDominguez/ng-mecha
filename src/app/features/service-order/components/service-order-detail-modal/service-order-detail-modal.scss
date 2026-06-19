@@ -1,0 +1,247 @@
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 1.5rem;
+  color: var(--color-text-muted, #757575);
+  font-size: 0.875rem;
+}
+
+.error-state mat-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--mat-sys-error);
+}
+
+.detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1rem 1.5rem;
+}
+
+.order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.order-number-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.order-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted, #757575);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.order-value {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--mat-sys-primary);
+}
+
+.order-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.state-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &[data-state="IN_PROGRESS"] {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+
+  &[data-state="COMPLETED"] {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &[data-state="CANCELED"] {
+    background: #ffebee;
+    color: #c62828;
+  }
+}
+
+.payment-chip,
+.iva-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--mat-sys-surface-container);
+  color: var(--color-text-muted, #757575);
+}
+
+.detail-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+
+  &.detail-columns--four {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted, #757575);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.detail-value {
+  font-size: 0.9375rem;
+}
+
+.detail-sub {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, #757575);
+}
+
+.detail-id {
+  font-family: monospace;
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #757575);
+}
+
+.lines-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.lines-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lines-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th {
+    text-align: left;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #757575);
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.375rem 0.5rem;
+    border-bottom: 1px solid var(--mat-sys-surface-container);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.cell-idx {
+  color: var(--color-text-muted, #757575);
+  font-size: 0.75rem;
+  width: 2rem;
+}
+
+.cell-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cell-amount {
+  font-weight: 600;
+}
+
+.financial-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  align-self: flex-end;
+  min-width: 18rem;
+  padding: 0.5rem 0;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  font-size: 0.875rem;
+}
+
+.summary-label {
+  color: var(--color-text-muted, #757575);
+}
+
+.summary-value {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.summary-total {
+  font-size: 1rem;
+  padding-top: 0.375rem;
+  border-top: 2px solid var(--mat-sys-outline-variant);
+
+  .summary-label {
+    font-weight: 600;
+    color: inherit;
+  }
+
+  .summary-value {
+    font-weight: 700;
+    color: var(--mat-sys-primary);
+  }
+}
+
+.summary-debt .summary-value {
+  color: var(--mat-sys-error);
+}
+
+@media print {
+  .no-print {
+    display: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .detail-columns,
+  .detail-columns--four {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .lines-table {
+    font-size: 0.8125rem;
+  }
+}

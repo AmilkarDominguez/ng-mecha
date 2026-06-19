@@ -87,9 +87,9 @@ export class TabExternal {
 
   openNewExternalServiceDialog(): void {
     const ref = this.dialog.open(ExternalServiceFormModal, {
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {},
-      width: '40rem',
-      maxWidth: '95vw',
     });
     ref.afterClosed().subscribe((result: ExternalService | null) => {
       if (!result) return;

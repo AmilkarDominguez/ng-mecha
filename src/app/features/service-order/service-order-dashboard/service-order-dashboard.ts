@@ -13,6 +13,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { ServiceOrder, OrderState } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { ServiceOrderDetailModal } from '../components/service-order-detail-modal/service-order-detail-modal';
 
 @Component({
   selector: 'app-service-order-dashboard',
@@ -32,6 +33,7 @@ import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order
 export class ServiceOrderDashboard {
   private orderService = inject(SPServiceOrder);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
 
   readonly orders = toSignal(this.orderService.listen(), { initialValue: [] });
@@ -54,6 +56,14 @@ export class ServiceOrderDashboard {
 
   onNew(): void {
     this.router.navigate(['/dashboard/ordenes/nueva']);
+  }
+
+  onView(order: ServiceOrder): void {
+    this.dialog.open(ServiceOrderDetailModal, {
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
+      data: order,
+    });
   }
 
   customerLabel(o: ServiceOrder): string {

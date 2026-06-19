@@ -83,3 +83,42 @@ export interface ServiceOrderBatchRow extends ServiceOrderBatch {
 export interface ServiceOrderExternalServiceRow extends ServiceOrderExternalService {
   external_service_name: string;
 }
+
+export interface OrderServiceLine {
+  id: string;
+  service_id: string | null;
+  price: number | null;
+  quantity: number | null;
+  discount: number | null;
+  subtotal: number | null;
+  service: { name: string | null; code: string | null } | null;
+}
+
+export interface OrderBatchLine {
+  id: string;
+  batch_id: string | null;
+  price: number | null;
+  quantity: number | null;
+  discount: number | null;
+  subtotal: number | null;
+  delivery_time: DeliveryTime;
+  batch: { description: string | null; product: { name: string | null } | null } | null;
+}
+
+export interface OrderExternalLine {
+  id: string;
+  external_service_id: string | null;
+  bank_account_id: string | null;
+  cost: number | null;
+  price: number | null;
+  quantity: number | null;
+  subtotal: number | null;
+  external_service: { name: string | null; company_name: string | null } | null;
+}
+
+export interface ServiceOrderWithLines extends ServiceOrder {
+  mechanic: { id: string; name: string | null; lastname: string | null } | null;
+  order_services: OrderServiceLine[];
+  order_batches: OrderBatchLine[];
+  order_externals: OrderExternalLine[];
+}

@@ -108,6 +108,8 @@ export class TabParts {
 
   openNewBatchDialog(): void {
     const ref = this.dialog.open(BatchFormModal, {
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {
         products: this.allProducts(),
         warehouses: this.allWarehouses(),
@@ -115,8 +117,6 @@ export class TabParts {
         industries: this.allIndustries(),
         brands: this.allBrands(),
       },
-      width: '48rem',
-      maxWidth: '95vw',
     });
     ref.afterClosed().subscribe((result: Batch | null) => {
       if (!result) return;

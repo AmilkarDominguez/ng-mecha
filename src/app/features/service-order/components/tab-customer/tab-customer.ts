@@ -192,9 +192,9 @@ export class TabCustomer implements OnInit {
 
   openNewCustomerDialog(): void {
     const ref = this.dialog.open(CustomerFormModal, {
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
       data: {},
-      width: '48rem',
-      maxWidth: '95vw',
     });
     ref.afterClosed().subscribe((result: Customer | null) => {
       if (!result) return;

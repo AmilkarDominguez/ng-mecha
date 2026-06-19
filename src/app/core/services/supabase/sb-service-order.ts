@@ -8,6 +8,7 @@ import {
   ServiceOrderBatch,
   ServiceOrderService,
   ServiceOrderExternalService,
+  ServiceOrderWithLines,
 } from '../../models/service-order.model';
 
 @Injectable({ providedIn: 'root' })
@@ -97,6 +98,43 @@ export class SPServiceOrder {
     }
 
     return this.data$.asObservable();
+  }
+
+  public getWithLines(id: string): Observable<ServiceOrderWithLines> {
+    return forkJoin({
+      order: from(
+        this.supabase
+          .from(this.TABLE)
+          .select('*, customer:customers(id,name,lastname,ci,phone), vehicle:vehicles(id,license_plate,brand,model,year), mechanic:mechanics(id,name,lastname)')
+          .eq('id', id)
+          .single(),
+      ).pipe(map(({ data, error }) => { if (error) throw error; return data; })),
+      services: from(
+        this.supabase
+          .from(this.TABLE_SERVICES)
+          .select('*, service:services(name,code)')
+          .eq('service_order_id', id),
+      ).pipe(map(({ data, error }) => { if (error) throw error; return data ?? []; })),
+      batches: from(
+        this.supabase
+          .from(this.TABLE_BATCHES)
+          .select('*, batch:batches(description, product:products(name))')
+          .eq('service_order_id', id),
+      ).pipe(map(({ data, error }) => { if (error) throw error; return data ?? []; })),
+      externals: from(
+        this.supabase
+          .from(this.TABLE_EXTERNAL)
+          .select('*, external_service:external_services(name,company_name)')
+          .eq('service_order_id', id),
+      ).pipe(map(({ data, error }) => { if (error) throw error; return data ?? []; })),
+    }).pipe(
+      map(({ order, services, batches, externals }) => ({
+        ...order,
+        order_services: services,
+        order_batches: batches,
+        order_externals: externals,
+      })),
+    );
   }
 
   // Service Order Services
