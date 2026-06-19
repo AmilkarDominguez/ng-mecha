@@ -29,7 +29,6 @@ export class UserDetailModal {
     ADMIN: 'Admin',
     SALES: 'Ventas',
     INVENTORY: 'Inventario',
-    MECHANIC: 'Mecánico',
   };
 
   get fullName(): string {

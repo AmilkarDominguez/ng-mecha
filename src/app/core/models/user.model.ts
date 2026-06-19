@@ -1,6 +1,6 @@
 import { EntityState } from './product-category.model';
 
-export type UserRole = 'ADMIN' | 'SALES' | 'INVENTORY' | 'MECHANIC';
+export type UserRole = 'ADMIN' | 'SALES' | 'INVENTORY';
 
 export interface User {
   id: string;

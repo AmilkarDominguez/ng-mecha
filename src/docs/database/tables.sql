@@ -33,7 +33,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
-  CREATE TYPE user_role_enum AS ENUM ('ADMIN', 'SALES', 'INVENTORY', 'MECHANIC');
+  CREATE TYPE user_role_enum AS ENUM ('ADMIN', 'SALES', 'INVENTORY');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
@@ -114,6 +114,7 @@ CREATE TABLE IF NOT EXISTS suppliers (
   email       TEXT,
   address     TEXT,
   phone       TEXT,
+  maps_url    TEXT,
   state       state_enum  NOT NULL DEFAULT 'ACTIVE',
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()

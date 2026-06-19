@@ -49,6 +49,19 @@
       </div>
     }
 
+    <div class="detail-section">
+      <span class="detail-label">Ubicación</span>
+      @if (supplier.maps_url) {
+        <a [href]="supplier.maps_url" target="_blank" rel="noopener noreferrer"
+          mat-stroked-button class="maps-link-btn">
+          <mat-icon>location_on</mat-icon>
+          Ver ubicación en Google Maps
+        </a>
+      } @else {
+        <span class="detail-value detail-empty">Sin ubicación registrada</span>
+      }
+    </div>
+
     @if (supplier.contacts?.length) {
       <mat-divider />
       <div class="detail-contacts">

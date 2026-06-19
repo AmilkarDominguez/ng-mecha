@@ -48,6 +48,7 @@ export class SupplierFormModal implements OnInit {
     phone: ['', [Validators.maxLength(20)]],
     address: ['', [Validators.maxLength(300)]],
     description: ['', [Validators.maxLength(100)]],
+    maps_url: ['', [Validators.pattern(/^https?:\/\/.+/)]],
     active: [true],
     contacts: this.fb.group({
       primary: this.fb.group({
@@ -74,6 +75,7 @@ export class SupplierFormModal implements OnInit {
         phone: s.phone ?? '',
         address: s.address ?? '',
         description: s.description ?? '',
+        maps_url: s.maps_url ?? '',
         active: s.state === 'ACTIVE',
         contacts: {
           primary: { name: primary?.name ?? '', number: primary?.number ?? '' },
@@ -108,6 +110,7 @@ export class SupplierFormModal implements OnInit {
       phone: raw.phone || null,
       address: raw.address || null,
       description: raw.description || null,
+      maps_url: raw.maps_url || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
       contacts,
     });
@@ -124,6 +127,7 @@ export class SupplierFormModal implements OnInit {
     if (control.errors['email']) return 'Ingrese un correo electrónico válido';
     if (control.errors['minlength']) return `Mínimo ${control.errors['minlength'].requiredLength} caracteres`;
     if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+    if (control.errors['pattern']) return 'Ingrese una URL válida (ej. https://maps.google.com/...)';
     return 'Campo inválido';
   }
 

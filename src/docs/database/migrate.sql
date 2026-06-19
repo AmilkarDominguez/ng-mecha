@@ -387,3 +387,26 @@ END $$;
 -- ============================================================
 ALTER TABLE mechanics ADD COLUMN IF NOT EXISTS incorporated_at TIMESTAMPTZ;
 ALTER TABLE mechanics ADD COLUMN IF NOT EXISTS retired_at      TIMESTAMPTZ;
+
+
+-- ============================================================
+-- v12 — Admin Module: eliminar valor MECHANIC de user_role_enum
+-- ============================================================
+-- PostgreSQL no permite eliminar valores de un ENUM directamente.
+-- Se convierte la columna a TEXT, se elimina el tipo antiguo,
+-- se recrea sin MECHANIC y se reconvierte la columna.
+-- Los usuarios con rol MECHANIC pasan a INVENTORY de forma segura.
+UPDATE users SET rol = 'INVENTORY' WHERE rol = 'MECHANIC';
+ALTER TABLE users ALTER COLUMN rol TYPE TEXT;
+DROP TYPE IF EXISTS user_role_enum;
+DO $$ BEGIN
+  CREATE TYPE user_role_enum AS ENUM ('ADMIN', 'SALES', 'INVENTORY');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+ALTER TABLE users ALTER COLUMN rol TYPE user_role_enum USING rol::user_role_enum;
+
+
+-- ============================================================
+-- v13 — Inventory Module: agregar maps_url a suppliers
+-- ============================================================
+ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS maps_url TEXT;

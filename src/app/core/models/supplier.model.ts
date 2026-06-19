@@ -10,6 +10,7 @@ export interface Supplier {
   email: string | null;
   address: string | null;
   phone: string | null;
+  maps_url: string | null;
   state: EntityState;
   contacts?: Contact[];
   created_at?: string | Date;

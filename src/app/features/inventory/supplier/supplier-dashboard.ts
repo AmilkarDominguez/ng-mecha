@@ -97,6 +97,10 @@ export class SupplierDashboard {
     });
   }
 
+  onOpenMap(supplier: Supplier): void {
+    if (supplier.maps_url) window.open(supplier.maps_url, '_blank', 'noopener,noreferrer');
+  }
+
   onDelete(supplier: Supplier): void {
     const ref = this.dialog.open(SupplierDeleteConfirmModal, {
       width: '28rem',

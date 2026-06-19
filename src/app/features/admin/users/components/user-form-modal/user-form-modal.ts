@@ -42,7 +42,6 @@ export class UserFormModal implements OnInit {
     { value: 'ADMIN', label: 'Admin' },
     { value: 'SALES', label: 'Ventas' },
     { value: 'INVENTORY', label: 'Inventario' },
-    { value: 'MECHANIC', label: 'Mecánico' },
   ];
 
   showPassword = false;

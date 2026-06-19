@@ -45,6 +45,22 @@
       }
     </mat-form-field>
 
+    <div class="field-full maps-url-group">
+      <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer"
+        mat-stroked-button class="maps-open-btn">
+        <mat-icon>location_on</mat-icon>
+        Abrir Google Maps para obtener URL
+      </a>
+      <mat-form-field appearance="outline" class="maps-url-field">
+        <mat-label>URL Google Maps</mat-label>
+        <input matInput formControlName="maps_url"
+          placeholder="Pega aquí la URL copiada de Google Maps" />
+        @if (getFieldError('maps_url')) {
+          <mat-error>{{ getFieldError('maps_url') }}</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
     <mat-form-field appearance="outline" class="field-full">
       <mat-label>Descripción</mat-label>
       <textarea matInput formControlName="description" rows="3"

@@ -26,6 +26,7 @@ export class SupplierTable implements AfterViewInit {
   edit = output<Supplier>();
   view = output<Supplier>();
   delete = output<Supplier>();
+  openMap = output<Supplier>();
 
   readonly displayedColumns = ['name', 'phone', 'email', 'address', 'state', 'actions'];
 

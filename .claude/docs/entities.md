@@ -23,7 +23,7 @@
 | created_at      | LocalDateTime   | auto               |
 | updated_at      | LocalDateTime   | auto               |
 
-**Enum UserRole:** `ADMIN` (Admin) · `SALES` (Ventas) · `INVENTORY` (Inventario) · `MECHANIC` (Mecanico)
+**Enum UserRole:** `ADMIN` (Admin) · `SALES` (Ventas) · `INVENTORY` (Inventario)
 ---
 
 ---
@@ -121,6 +121,7 @@
 | email       | String        | nullable         |
 | address     | String        | nullable         |
 | phone         | String        | nullable       |
+| maps_url      | String        | nullable       |
 | state       | State (enum)  | default: ACTIVE  |
 | created_at   | LocalDateTime | auto             |
 | updated_at   | LocalDateTime | auto             |

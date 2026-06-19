@@ -65,6 +65,10 @@
         <button mat-icon-button matTooltip="Editar" (click)="edit.emit(row)">
           <mat-icon>edit</mat-icon>
         </button>
+        <button mat-icon-button color="accent" matTooltip="Ver en Google Maps"
+          [disabled]="!row.maps_url" (click)="openMap.emit(row)">
+          <mat-icon>location_on</mat-icon>
+        </button>
         <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="delete.emit(row)">
           <mat-icon>delete</mat-icon>
         </button>

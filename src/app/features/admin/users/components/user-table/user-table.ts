@@ -35,7 +35,6 @@ export class UserTable implements AfterViewInit {
     ADMIN: 'Admin',
     SALES: 'Ventas',
     INVENTORY: 'Inventario',
-    MECHANIC: 'Mecánico',
   };
 
   dataSource = new MatTableDataSource<User>([]);
