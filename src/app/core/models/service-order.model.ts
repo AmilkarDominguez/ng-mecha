@@ -10,6 +10,7 @@ export interface ServiceOrder {
   id: string;
   customer_id: string;
   vehicle_id: string | null;
+  mechanic_id: string | null;
   user_id: string | null;
   number: string | null;
   description: string | null;
@@ -34,7 +35,6 @@ export interface ServiceOrder {
 
 export interface ServiceOrderService {
   id: string;
-  mechanic_id: string | null;
   service_id: string | null;
   service_order_id: string | null;
   discount: number | null;
@@ -73,7 +73,6 @@ export interface ServiceOrderExternalService {
 
 export interface ServiceOrderServiceRow extends ServiceOrderService {
   service_name: string;
-  mechanic_name: string;
 }
 
 export interface ServiceOrderBatchRow extends ServiceOrderBatch {

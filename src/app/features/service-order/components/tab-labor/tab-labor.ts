@@ -8,10 +8,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DecimalPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Service } from '../../../../core/models/service.model';
-import { Mechanic } from '../../../../core/models/mechanic.model';
 import { ServiceOrderServiceRow } from '../../../../core/models/service-order.model';
 import { SPService } from '../../../../core/services/supabase/sb-service';
-import { SPMechanic } from '../../../../core/services/supabase/sb-mechanic';
 
 @Component({
   selector: 'app-tab-labor',
@@ -28,19 +26,15 @@ import { SPMechanic } from '../../../../core/services/supabase/sb-mechanic';
 })
 export class TabLabor {
   private serviceProvider = inject(SPService);
-  private mechanicProvider = inject(SPMechanic);
   private snackBar = inject(MatSnackBar);
 
   addItem = output<ServiceOrderServiceRow>();
 
   readonly allServices = toSignal(this.serviceProvider.get(), { initialValue: [] });
-  readonly allMechanics = toSignal(this.mechanicProvider.get(), { initialValue: [] });
 
   readonly serviceCtrl = new FormControl<Service | string | null>(null);
-  readonly mechanicCtrl = new FormControl<Mechanic | string | null>(null);
 
   private readonly serviceCtrlValue = toSignal(this.serviceCtrl.valueChanges, { initialValue: null });
-  private readonly mechanicCtrlValue = toSignal(this.mechanicCtrl.valueChanges, { initialValue: null });
 
   readonly selectedService = signal<Service | null>(null);
 
@@ -55,14 +49,6 @@ export class TabLabor {
     );
   });
 
-  readonly filteredMechanics = computed(() => {
-    const val = this.mechanicCtrlValue();
-    const all = this.allMechanics().filter((m) => m.state === 'ACTIVE');
-    if (!val || typeof val !== 'string') return all;
-    const term = val.toLowerCase().trim();
-    return all.filter((m) => this.mechanicLabel(m).toLowerCase().includes(term));
-  });
-
   readonly form = new FormGroup({
     price: new FormControl<number | null>({ value: null, disabled: true }, [Validators.required, Validators.min(0)]),
     quantity: new FormControl<number | null>({ value: 1, disabled: true }, [Validators.required, Validators.min(1)]),
@@ -73,16 +59,6 @@ export class TabLabor {
     if (typeof value === 'string') return value;
     return value.name ?? '';
   };
-
-  displayMechanic = (value: Mechanic | string | null): string => {
-    if (!value) return '';
-    if (typeof value === 'string') return value;
-    return this.mechanicLabel(value);
-  };
-
-  mechanicLabel(m: Mechanic): string {
-    return [m.name, m.lastname].filter(Boolean).join(' ') || m.id;
-  }
 
   onServiceSelected(service: Service): void {
     this.selectedService.set(service);
@@ -112,7 +88,6 @@ export class TabLabor {
       return;
     }
 
-    const mechanic = typeof this.mechanicCtrl.value === 'object' ? this.mechanicCtrl.value as Mechanic : null;
     const raw = this.form.value;
     const price = raw.price ?? 0;
     const quantity = raw.quantity ?? 1;
@@ -120,18 +95,15 @@ export class TabLabor {
     this.addItem.emit({
       id: crypto.randomUUID(),
       service_id: service.id,
-      mechanic_id: mechanic?.id ?? null,
       service_order_id: null,
       price,
       quantity,
       discount: 0,
       subtotal: price * quantity,
       service_name: service.name ?? '',
-      mechanic_name: mechanic ? this.mechanicLabel(mechanic) : '—',
     });
 
     this.serviceCtrl.setValue(null);
-    this.mechanicCtrl.setValue(null);
     this.selectedService.set(null);
     this.form.controls.price.disable();
     this.form.controls.quantity.disable();

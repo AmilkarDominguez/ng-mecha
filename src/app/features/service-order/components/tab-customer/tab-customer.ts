@@ -17,12 +17,15 @@ import { MatDividerModule } from '@angular/material/divider';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Customer } from '../../../../core/models/customer.model';
 import { Vehicle } from '../../../../core/models/vehicle.model';
+import { Mechanic } from '../../../../core/models/mechanic.model';
 import { SPCustomer } from '../../../../core/services/supabase/sb-customer';
 import { SPVehicle } from '../../../../core/services/supabase/sb-vehicles';
+import { SPMechanic } from '../../../../core/services/supabase/sb-mechanic';
 
 export interface CustomerTabValue {
   customer_id: string | null;
   vehicle_id: string | null;
+  mechanic_id: string | null;
   number: string | null;
   mileage: string | null;
   started_date: string | null;
@@ -46,21 +49,26 @@ export interface CustomerTabValue {
 export class TabCustomer implements OnInit {
   private customerService = inject(SPCustomer);
   private vehicleService = inject(SPVehicle);
+  private mechanicService = inject(SPMechanic);
 
   initialValue = input<CustomerTabValue | null>(null);
   valueChange = output<CustomerTabValue>();
 
   readonly allCustomers = toSignal(this.customerService.get(), { initialValue: [] });
   readonly allVehicles = toSignal(this.vehicleService.get(), { initialValue: [] });
+  readonly allMechanics = toSignal(this.mechanicService.get(), { initialValue: [] });
 
   readonly customerCtrl = new FormControl<Customer | string | null>(null);
   readonly vehicleCtrl = new FormControl<Vehicle | string | null>(null);
+  readonly mechanicCtrl = new FormControl<Mechanic | string | null>(null);
 
   private readonly customerCtrlValue = toSignal(this.customerCtrl.valueChanges, { initialValue: null });
   private readonly vehicleCtrlValue = toSignal(this.vehicleCtrl.valueChanges, { initialValue: null });
+  private readonly mechanicCtrlValue = toSignal(this.mechanicCtrl.valueChanges, { initialValue: null });
 
   readonly selectedCustomer = signal<Customer | null>(null);
   readonly selectedVehicle = signal<Vehicle | null>(null);
+  readonly selectedMechanic = signal<Mechanic | null>(null);
 
   readonly filteredCustomers = computed(() => {
     const val = this.customerCtrlValue();
@@ -81,6 +89,14 @@ export class TabCustomer implements OnInit {
     if (!val || typeof val !== 'string') return vehicles;
     const term = val.toLowerCase().trim();
     return vehicles.filter((v) => this.vehicleLabel(v).toLowerCase().includes(term));
+  });
+
+  readonly filteredMechanics = computed(() => {
+    const val = this.mechanicCtrlValue();
+    const all = this.allMechanics().filter((m) => m.state === 'ACTIVE');
+    if (!val || typeof val !== 'string') return all;
+    const term = val.toLowerCase().trim();
+    return all.filter((m) => this.mechanicLabel(m).toLowerCase().includes(term));
   });
 
   readonly form = new FormGroup({
@@ -106,6 +122,12 @@ export class TabCustomer implements OnInit {
         this.selectedVehicle.set(null);
         this.emitValue();
       }
+    });
+
+    this.mechanicCtrl.valueChanges.subscribe((val) => {
+      const mechanic = typeof val === 'object' && val !== null ? (val as Mechanic) : null;
+      this.selectedMechanic.set(mechanic);
+      this.emitValue();
     });
   }
 
@@ -136,11 +158,22 @@ export class TabCustomer implements OnInit {
     return parts.join(' - ') || v.id;
   }
 
+  mechanicLabel(m: Mechanic): string {
+    return [m.name, m.lastname].filter(Boolean).join(' ') || m.id;
+  }
+
+  displayMechanic = (value: Mechanic | string | null): string => {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    return this.mechanicLabel(value);
+  };
+
   private emitValue(): void {
     const raw = this.form.value;
     this.valueChange.emit({
       customer_id: this.selectedCustomer()?.id ?? null,
       vehicle_id: this.selectedVehicle()?.id ?? null,
+      mechanic_id: this.selectedMechanic()?.id ?? null,
       number: raw.number || null,
       mileage: raw.mileage || null,
       started_date: raw.started_date ? this.toIsoDate(raw.started_date) : null,

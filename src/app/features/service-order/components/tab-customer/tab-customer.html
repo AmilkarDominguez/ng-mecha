@@ -140,6 +140,53 @@
 
   <mat-divider class="section-divider" />
 
+  <div class="section-title">Mecánico Responsable</div>
+
+  <div class="search-row">
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Buscar mecánico</mat-label>
+      <input matInput [formControl]="mechanicCtrl" [matAutocomplete]="autoMechanic"
+             placeholder="Nombre o apellido..." />
+      <mat-autocomplete #autoMechanic="matAutocomplete" [displayWith]="displayMechanic">
+        @for (m of filteredMechanics(); track m.id) {
+          <mat-option [value]="m">
+            <span class="option-main">{{ mechanicLabel(m) }}</span>
+            @if (m.phone) {
+              <span class="option-sub">Tel: {{ m.phone }}</span>
+            }
+          </mat-option>
+        }
+        @if (filteredMechanics().length === 0) {
+          <mat-option disabled>Sin mecánicos activos</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+  </div>
+
+  @if (selectedMechanic(); as mechanic) {
+    <div class="mechanic-card">
+      <div class="mechanic-card-header">
+        <span class="mechanic-name">{{ mechanicLabel(mechanic) }}</span>
+      </div>
+      <div class="mechanic-card-body">
+        @if (mechanic.ci) {
+          <div class="customer-field">
+            <span class="field-label">CI</span>
+            <span class="field-value">{{ mechanic.ci }}</span>
+          </div>
+        }
+        @if (mechanic.phone) {
+          <div class="customer-field">
+            <span class="field-label">Teléfono</span>
+            <span class="field-value">{{ mechanic.phone }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <mat-divider class="section-divider" />
+
   <div class="section-title">Datos de la Orden</div>
 
   <form [formGroup]="form" class="order-fields">

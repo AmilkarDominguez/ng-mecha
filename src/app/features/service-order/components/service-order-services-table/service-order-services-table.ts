@@ -31,7 +31,7 @@ export class ServiceOrderServicesTable {
   items = input<ServiceOrderServiceRow[]>([]);
   removeItem = output<string>();
 
-  readonly columns = ['item', 'description', 'mechanic', 'price', 'quantity', 'discount', 'subtotal', 'actions'];
+  readonly columns = ['item', 'description', 'price', 'quantity', 'discount', 'subtotal', 'actions'];
 
   getSubtotal(row: ServiceOrderServiceRow): number {
     const base = (row.price ?? 0) * (row.quantity ?? 1);

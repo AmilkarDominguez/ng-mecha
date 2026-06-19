@@ -410,3 +410,16 @@ ALTER TABLE users ALTER COLUMN rol TYPE user_role_enum USING rol::user_role_enum
 -- v13 — Inventory Module: agregar maps_url a suppliers
 -- ============================================================
 ALTER TABLE suppliers ADD COLUMN IF NOT EXISTS maps_url TEXT;
+
+
+-- ============================================================
+-- v14 — Workshop Module: agregar entry_date a mechanics
+-- ============================================================
+ALTER TABLE mechanics ADD COLUMN IF NOT EXISTS entry_date DATE;
+
+
+-- ============================================================
+-- v15 — Service Orders: mechanic_id pasa de service_order_services a service_orders
+-- ============================================================
+ALTER TABLE service_orders ADD COLUMN IF NOT EXISTS mechanic_id UUID REFERENCES mechanics(id) ON DELETE SET NULL;
+ALTER TABLE service_order_services DROP COLUMN IF EXISTS mechanic_id;

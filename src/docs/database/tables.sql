@@ -334,6 +334,7 @@ CREATE TABLE IF NOT EXISTS service_orders (
   id                    UUID                 PRIMARY KEY DEFAULT gen_random_uuid(),
   customer_id           UUID                 NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,
   vehicle_id            UUID                 REFERENCES vehicles(id)           ON DELETE SET NULL,
+  mechanic_id           UUID                 REFERENCES mechanics(id)          ON DELETE SET NULL,
   user_id               UUID                 REFERENCES users(id)              ON DELETE SET NULL,
   number                TEXT,
   description           TEXT,
@@ -357,7 +358,6 @@ CREATE TABLE IF NOT EXISTS service_orders (
 -- 19. service_order_services
 CREATE TABLE IF NOT EXISTS service_order_services (
   id                UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
-  mechanic_id       UUID             REFERENCES mechanics(id)       ON DELETE SET NULL,
   service_id        UUID             REFERENCES services(id)        ON DELETE SET NULL,
   service_order_id  UUID             REFERENCES service_orders(id)  ON DELETE CASCADE,
   discount          NUMERIC(8,2),

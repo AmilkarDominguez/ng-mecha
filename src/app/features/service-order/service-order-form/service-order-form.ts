@@ -142,6 +142,7 @@ export class ServiceOrderForm {
     const payload = {
       customer_id: tab.customer_id,
       vehicle_id: tab.vehicle_id,
+      mechanic_id: tab.mechanic_id,
       user_id: null,
       number: tab.number,
       description: raw.description || null,
@@ -166,7 +167,6 @@ export class ServiceOrderForm {
 
         const servicesToSave = this.serviceRows().map((r) => ({
           service_id: r.service_id,
-          mechanic_id: r.mechanic_id,
           service_order_id: orderId,
           price: r.price,
           quantity: r.quantity,

@@ -447,6 +447,7 @@ Mandatory records with allow_deletion = false
 | id                    | UUID               | PK, auto-generated      |
 | customer_id           | UUID (FK)          | not null → customers.id |
 | vehicle_id            | UUID (FK)          | nullable → vehicles.id  |
+| mechanic_id           | UUID (FK)          | nullable → mechanics.id |
 | user_id               | UUID (FK)          | nullable → users.id     |
 | number                | String             | nullable                |
 | description           | String             | nullable                |
@@ -499,7 +500,6 @@ Mandatory records with allow_deletion = false
 | Columna          | Tipo            | Restricciones                |
 | ---------------- | --------------- | ---------------------------- |
 | id               | UUID            | PK, auto-generated           |
-| mechanic_id      | UUID (FK)       | nullable → mechanics.id      |
 | service_id       | UUID (FK)       | nullable → services.id       |
 | service_order_id | UUID (FK)       | nullable → service_orders.id |
 | discount         | BigDecimal(8,2) | nullable                     |

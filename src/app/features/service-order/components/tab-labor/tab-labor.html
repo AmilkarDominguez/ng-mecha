@@ -22,22 +22,6 @@
     </mat-autocomplete>
   </mat-form-field>
 
-  <mat-form-field appearance="outline" class="field-full">
-    <mat-label>Técnico / Mecánico</mat-label>
-    <input matInput [formControl]="mechanicCtrl" [matAutocomplete]="autoMechanic"
-           placeholder="Buscar técnico..." />
-    <mat-autocomplete #autoMechanic="matAutocomplete" [displayWith]="displayMechanic">
-      @for (m of filteredMechanics(); track m.id) {
-        <mat-option [value]="m">
-          <span class="option-main">{{ mechanicLabel(m) }}</span>
-          @if (m.phone) {
-            <span class="option-sub">{{ m.phone }}</span>
-          }
-        </mat-option>
-      }
-    </mat-autocomplete>
-  </mat-form-field>
-
   <form [formGroup]="form" class="add-fields">
     <mat-form-field appearance="outline">
       <mat-label>Precio (Bs.)</mat-label>
