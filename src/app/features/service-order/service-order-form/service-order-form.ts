@@ -64,6 +64,7 @@ export class ServiceOrderForm {
   readonly externalRows = signal<ServiceOrderExternalServiceRow[]>([]);
 
   readonly summaryForm = new FormGroup({
+    number: new FormControl<string>(''),
     payment_type: new FormControl<'CASH' | 'CREDIT'>('CASH'),
     with_iva: new FormControl<boolean>(false),
     description: new FormControl<string>(''),
@@ -144,7 +145,7 @@ export class ServiceOrderForm {
       vehicle_id: tab.vehicle_id,
       mechanic_id: tab.mechanic_id,
       user_id: null,
-      number: tab.number,
+      number: raw.number || null,
       description: raw.description || null,
       total: this.total(),
       have: 0,

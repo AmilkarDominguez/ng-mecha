@@ -31,7 +31,6 @@ export interface CustomerTabValue {
   customer_id: string | null;
   vehicle_id: string | null;
   mechanic_id: string | null;
-  number: string | null;
   mileage: string | null;
   started_date: string | null;
   ended_date: string | null;
@@ -109,7 +108,6 @@ export class TabCustomer implements OnInit {
   });
 
   readonly form = new FormGroup({
-    number: new FormControl<string>(''),
     mileage: new FormControl<string>(''),
     started_date: new FormControl<Date | null>(null),
     ended_date: new FormControl<Date | null>(null),
@@ -183,7 +181,6 @@ export class TabCustomer implements OnInit {
       customer_id: this.selectedCustomer()?.id ?? null,
       vehicle_id: this.selectedVehicle()?.id ?? null,
       mechanic_id: this.selectedMechanic()?.id ?? null,
-      number: raw.number || null,
       mileage: raw.mileage || null,
       started_date: raw.started_date ? this.toIsoDate(raw.started_date) : null,
       ended_date: raw.ended_date ? this.toIsoDate(raw.ended_date) : null,

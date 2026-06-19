@@ -65,6 +65,11 @@
 
         <form [formGroup]="summaryForm" class="summary-form">
 
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Número de Orden</mat-label>
+            <input matInput formControlName="number" placeholder="Ej: ORD-001" />
+          </mat-form-field>
+
           <div class="radio-group-field">
             <span class="radio-label">Tipo de Pago</span>
             <mat-radio-group formControlName="payment_type" class="radio-group">
