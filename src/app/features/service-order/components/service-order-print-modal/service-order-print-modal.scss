@@ -1,0 +1,361 @@
+$print-red:         #c62828;
+$print-navy:        #1a237e;
+$print-navy-text:   #ffffff;
+$print-green:       #2e7d32;
+$print-green-text:  #ffffff;
+$print-border:      #999999;
+$print-border-dark: #333333;
+$doc-font:          'Arial', sans-serif;
+
+// ── Modal wrapper ──────────────────────────────────────────────────
+
+.print-modal-wrapper {
+  padding: 0;
+  background: #e0e0e0;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modal-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  background: #e0e0e0;
+}
+
+// ── Separador entre copias ─────────────────────────────────────────
+
+.page-break {
+  width: 210mm;
+  margin: 0 auto;
+  border-top: 2px dashed #aaa;
+}
+
+// ── Documento ─────────────────────────────────────────────────────
+
+.print-document {
+  width: 210mm;
+  min-height: 148mm;
+  margin: 1rem auto;
+  padding: 8mm 10mm;
+  background: #fff;
+  font-family: $doc-font;
+  font-size: 8pt;
+  color: #000;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+// ── Título ────────────────────────────────────────────────────────
+
+.doc-title {
+  text-align: center;
+  font-size: 14pt;
+  font-weight: 700;
+  color: $print-red;
+  text-decoration: underline;
+  margin: 0 0 4mm;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+// ── Encabezado ────────────────────────────────────────────────────
+
+.header-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 3mm;
+
+  td {
+    padding: 1mm 2mm;
+    vertical-align: middle;
+  }
+}
+
+.header-label {
+  font-weight: 700;
+  font-size: 8pt;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.header-value {
+  border-bottom: 1px solid $print-border-dark;
+  font-size: 8pt;
+  min-width: 30mm;
+  padding-bottom: 0.5mm;
+}
+
+.logo-cell {
+  text-align: right;
+  vertical-align: middle;
+  width: 42mm;
+  padding-left: 3mm;
+}
+
+.company-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1mm;
+}
+
+.logo-icon {
+  width: 13mm;
+  height: 13mm;
+  background: $print-red;
+  border-radius: 2mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .logo-letters {
+    color: #fff;
+    font-size: 11pt;
+    font-weight: 900;
+    font-family: $doc-font;
+  }
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.logo-name {
+  font-size: 10pt;
+  font-weight: 900;
+  color: $print-red;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+}
+
+.logo-sub {
+  font-size: 6pt;
+  color: #555;
+}
+
+// ── Eslogan ───────────────────────────────────────────────────────
+
+.doc-slogan {
+  text-align: center;
+  font-size: 9pt;
+  font-weight: 700;
+  margin: 2mm 0 3mm;
+  border-top: 1px solid $print-border;
+  border-bottom: 1px solid $print-border;
+  padding: 1.5mm 0;
+}
+
+// ── Tablas ────────────────────────────────────────────────────────
+
+.doc-tables {
+  display: grid;
+  grid-template-columns: 57% 43%;
+  border: 1px solid $print-border-dark;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 7.5pt;
+
+  th,
+  td {
+    border: 1px solid $print-border;
+    padding: 0.75mm 1mm;
+    vertical-align: middle;
+  }
+}
+
+.services-table {
+  border-right: 2px solid $print-border-dark;
+}
+
+.section-title {
+  background: $print-navy;
+  color: $print-navy-text;
+  text-align: center;
+  font-size: 8pt;
+  font-weight: 700;
+  padding: 1.5mm;
+  text-transform: uppercase;
+  border: 1px solid $print-navy;
+}
+
+.col-header-row th {
+  background: $print-navy;
+  color: $print-navy-text;
+  font-weight: 700;
+  text-align: center;
+  font-size: 7pt;
+  text-transform: uppercase;
+  padding: 1mm;
+}
+
+.subtotal-row td {
+  background: $print-navy;
+  color: $print-navy-text;
+  font-weight: 700;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+}
+
+.subtotal-label { text-align: left; }
+.subtotal-value { text-align: right; white-space: nowrap; }
+
+// Anchos — mano de obra
+.services-table {
+  .col-item  { width: 6%;  text-align: center; }
+  .col-desc  { width: 40%; }
+  .col-unit  { width: 14%; text-align: center; }
+  .col-price { width: 13%; text-align: right; }
+  .col-qty   { width: 8%;  text-align: center; }
+  .col-total { width: 13%; text-align: right; }
+}
+
+// Anchos — repuestos
+.parts-table {
+  .col-qty   { width: 10%; text-align: center; }
+  .col-desc  { width: 55%; }
+  .col-price { width: 17%; text-align: right; }
+  .col-total { width: 18%; text-align: right; }
+}
+
+.empty-row {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 2mm;
+}
+
+// ── Pie ───────────────────────────────────────────────────────────
+
+.doc-footer {
+  display: grid;
+  grid-template-columns: 55% 45%;
+  gap: 0;
+  margin-top: 3mm;
+  align-items: stretch;
+  min-height: 18mm;
+}
+
+.recomendacion-box {
+  border: 2px solid $print-red;
+  padding: 1.5mm 2mm;
+  margin-right: 3mm;
+}
+
+.recomendacion-title {
+  color: $print-red;
+  font-weight: 700;
+  font-size: 8.5pt;
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 1.5mm;
+}
+
+.recomendacion-body {
+  font-size: 7.5pt;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+.total-general-box {
+  background: $print-green;
+  color: $print-green-text;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2mm 3mm;
+  font-weight: 700;
+  gap: 2mm;
+}
+
+.total-general-label {
+  font-size: 8.5pt;
+}
+
+.total-general-value {
+  font-size: 12pt;
+  white-space: nowrap;
+}
+
+// ── Firma ─────────────────────────────────────────────────────────
+
+.doc-signature {
+  text-align: center;
+  margin-top: 4mm;
+  font-size: 8pt;
+}
+
+.signature-line {
+  color: #666;
+  letter-spacing: 0.1em;
+  margin-bottom: 1mm;
+}
+
+.signature-name {
+  font-weight: 700;
+  font-size: 9pt;
+  text-transform: uppercase;
+}
+
+.signature-role {
+  font-size: 7.5pt;
+  color: #333;
+}
+
+// ── Impresión ─────────────────────────────────────────────────────
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-modal-wrapper {
+    background: none;
+  }
+
+  .print-document {
+    margin: 0;
+    border: none;
+    padding: 5mm 8mm;
+    width: 100%;
+    page-break-after: always;
+
+    &:last-of-type {
+      page-break-after: avoid;
+    }
+  }
+
+  .page-break {
+    display: none;
+  }
+}

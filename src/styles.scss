@@ -23,6 +23,31 @@
   }
 }
 
+// ── Impresión de Hoja de Servicios ──────────────────────────────
+@media print {
+  body > *:not(.cdk-overlay-container) {
+    display: none !important;
+  }
+
+  .cdk-overlay-backdrop {
+    display: none !important;
+  }
+
+  .service-order-print-panel {
+    .mat-mdc-dialog-surface {
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+    }
+
+    .mat-mdc-dialog-container {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: auto !important;
+    }
+  }
+}
+
 * {
   scrollbar-width: thin;
   scrollbar-color: var(--color-scrollbar-thumb) transparent;

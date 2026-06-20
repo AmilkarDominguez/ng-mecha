@@ -1,0 +1,177 @@
+<div class="print-modal-wrapper">
+
+  <!-- Barra de acciones -->
+  <div class="modal-actions no-print">
+    <span class="modal-title">Vista previa de impresión</span>
+    <div class="action-buttons">
+      <button mat-stroked-button (click)="onClose()">Cerrar</button>
+      <button mat-flat-button color="primary" (click)="onPrint()">
+        <mat-icon>print</mat-icon>
+        Imprimir
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state no-print">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+    </div>
+  }
+
+  @if (hasError()) {
+    <div class="error-state no-print">Error al cargar los datos de la orden.</div>
+  }
+
+  @if (detail(); as d) {
+    <ng-container *ngTemplateOutlet="docTemplate; context: { $implicit: d }" />
+    <div class="page-break"></div>
+    <ng-container *ngTemplateOutlet="docTemplate; context: { $implicit: d }" />
+  }
+
+</div>
+
+<!-- ─── Template del documento (se reutiliza para las 2 copias) ─── -->
+<ng-template #docTemplate let-d>
+  <div class="print-document">
+
+    <!-- Título -->
+    <h1 class="doc-title">HOJA DE SERVICIOS {{ orderNumber() }}</h1>
+
+    <!-- Encabezado -->
+    <table class="header-table">
+      <tbody>
+        <tr>
+          <td class="header-label">Cliente:</td>
+          <td class="header-value">{{ customerName() }}</td>
+          <td class="header-label">Placa:</td>
+          <td class="header-value">{{ d.vehicle?.license_plate ?? '—' }}</td>
+          <td class="header-label">Fecha Ing:</td>
+          <td class="header-value">{{ d.started_date | date:'d/M/yyyy' }}</td>
+          <td class="logo-cell" rowspan="2">
+            <div class="company-logo">
+              <div class="logo-icon">
+                <span class="logo-letters">M</span>
+              </div>
+              <div class="logo-text">
+                <span class="logo-name">MECATRÓNICA</span>
+                <span class="logo-sub">Taller Mecánico Electrónico</span>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="header-label">Vehículo:</td>
+          <td class="header-value">{{ vehicleDesc() }}</td>
+          <td class="header-label">Kilometraje:</td>
+          <td class="header-value">{{ d.mileage ?? '—' }}</td>
+          <td class="header-label">Fecha Entrega:</td>
+          <td class="header-value">{{ d.return_date | date:'d/M/yyyy' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Eslogan -->
+    <div class="doc-slogan">"ESPECIALIZADOS EN TU VEHÍCULO, PRIORIZANDO TU VIDA"</div>
+
+    <!-- Tablas principales -->
+    <div class="doc-tables">
+
+      <!-- Mano de obra -->
+      <table class="data-table services-table">
+        <thead>
+          <tr>
+            <th colspan="6" class="section-title">Lista de trabajos de mano de obra</th>
+          </tr>
+          <tr class="col-header-row">
+            <th class="col-item">ITEM</th>
+            <th class="col-desc">DESCRIPCIÓN</th>
+            <th class="col-unit">UNIDAD</th>
+            <th class="col-price">P.UNIT (Bs.)</th>
+            <th class="col-qty">CANT</th>
+            <th class="col-total">TOTAL (Bs.)</th>
+          </tr>
+          <tr class="subtotal-row">
+            <td colspan="5" class="subtotal-label">TOTAL MANO DE OBRA</td>
+            <td class="subtotal-value">{{ subtotalServices() | number:'1.2-2' }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of d.order_services; track line.id; let i = $index) {
+            <tr>
+              <td class="col-item">{{ i + 1 }}</td>
+              <td class="col-desc">{{ line.service?.name ?? '—' }}</td>
+              <td class="col-unit">SERVICIO</td>
+              <td class="col-price">{{ line.price && line.price > 0 ? (line.price | number:'1.0-0') : '' }}</td>
+              <td class="col-qty">{{ line.quantity }}</td>
+              <td class="col-total">{{ serviceTotal(line.subtotal) }}</td>
+            </tr>
+          }
+          @if (d.order_services.length === 0) {
+            <tr><td colspan="6" class="empty-row">Sin servicios registrados</td></tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Repuestos + Trabajos adicionales -->
+      <table class="data-table parts-table">
+        <thead>
+          <tr>
+            <th colspan="4" class="section-title">Lista de repuestos e insumos</th>
+          </tr>
+          <tr class="col-header-row">
+            <th class="col-qty">CANT</th>
+            <th class="col-desc">DESCRIPCIÓN</th>
+            <th class="col-price">P.UNIT (Bs.)</th>
+            <th class="col-total">TOTAL (Bs)</th>
+          </tr>
+          <tr class="subtotal-row">
+            <td colspan="3" class="subtotal-label">REPUESTOS, TRABAJOS ADICIONALES E INSUMOS</td>
+            <td class="subtotal-value">{{ subtotalParts() | number:'1.2-2' }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of d.order_batches; track line.id) {
+            <tr>
+              <td class="col-qty">{{ line.quantity }}</td>
+              <td class="col-desc">{{ line.batch?.product?.name ?? '—' }}</td>
+              <td class="col-price">{{ line.price ?? '' }}</td>
+              <td class="col-total">{{ line.subtotal ? (line.subtotal | number:'1.2-2') : '-' }}</td>
+            </tr>
+          }
+          @for (line of d.order_externals; track line.id) {
+            <tr>
+              <td class="col-qty">{{ line.quantity }}</td>
+              <td class="col-desc">{{ line.external_service?.name ?? '—' }}</td>
+              <td class="col-price">{{ line.price ?? '' }}</td>
+              <td class="col-total">{{ line.subtotal ? (line.subtotal | number:'1.2-2') : '-' }}</td>
+            </tr>
+          }
+          @if (d.order_batches.length === 0 && d.order_externals.length === 0) {
+            <tr><td colspan="4" class="empty-row">Sin repuestos registrados</td></tr>
+          }
+        </tbody>
+      </table>
+
+    </div>
+
+    <!-- Pie -->
+    <div class="doc-footer">
+      <div class="recomendacion-box">
+        <div class="recomendacion-title">RECOMENDACIÓN</div>
+        <div class="recomendacion-body">{{ d.description ?? '' }}</div>
+      </div>
+      <div class="total-general-box">
+        <span class="total-general-label">TOTAL GENERAL (Bs.):</span>
+        <span class="total-general-value">{{ totalGeneral() | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <!-- Firma -->
+    <div class="doc-signature">
+      <div class="signature-line">- - - - - - - - - - - - - - - - - - - - - - - - -</div>
+      <div class="signature-name">{{ mechanicName() }}</div>
+      <div class="signature-role">ASESOR DE SERVICIOS</div>
+    </div>
+
+  </div>
+</ng-template>

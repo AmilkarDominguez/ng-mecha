@@ -14,6 +14,7 @@ import { DecimalPipe } from '@angular/common';
 import { ServiceOrder, OrderState } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
 import { ServiceOrderDetailModal } from '../components/service-order-detail-modal/service-order-detail-modal';
+import { ServiceOrderPrintModal } from '../components/service-order-print-modal/service-order-print-modal';
 
 @Component({
   selector: 'app-service-order-dashboard',
@@ -60,6 +61,16 @@ export class ServiceOrderDashboard {
 
   onEdit(order: ServiceOrder): void {
     this.router.navigate(['/dashboard/ordenes/editar', order.id]);
+  }
+
+  onPrint(order: ServiceOrder): void {
+    this.dialog.open(ServiceOrderPrintModal, {
+      data: order,
+      width: '95vw',
+      maxWidth: '1200px',
+      maxHeight: '90vh',
+      panelClass: 'service-order-print-panel',
+    });
   }
 
   onView(order: ServiceOrder): void {
