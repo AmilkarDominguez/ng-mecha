@@ -72,6 +72,9 @@
       <ng-container matColumnDef="actions">
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let row">
+          <button mat-icon-button matTooltip="Editar orden" (click)="onEdit(row)">
+            <mat-icon>edit</mat-icon>
+          </button>
           <button mat-icon-button matTooltip="Ver detalle" (click)="onView(row)">
             <mat-icon>visibility</mat-icon>
           </button>

@@ -90,6 +90,10 @@ export const routes: Routes = [
         path: 'ordenes/nueva',
         loadComponent: () => import('./features/service-order/service-order-form/service-order-form').then(m => m.ServiceOrderForm),
       },
+      {
+        path: 'ordenes/editar/:id',
+        loadComponent: () => import('./features/service-order/service-order-form/service-order-form').then(m => m.ServiceOrderForm),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }

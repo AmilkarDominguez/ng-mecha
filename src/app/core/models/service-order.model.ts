@@ -102,7 +102,11 @@ export interface OrderBatchLine {
   discount: number | null;
   subtotal: number | null;
   delivery_time: DeliveryTime;
-  batch: { description: string | null; product: { name: string | null } | null } | null;
+  batch: {
+    description: string | null;
+    product: { name: string | null } | null;
+    industry: { name: string | null } | null;
+  } | null;
 }
 
 export interface OrderExternalLine {

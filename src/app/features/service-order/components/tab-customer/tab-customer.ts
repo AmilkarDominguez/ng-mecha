@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  effect,
   inject,
   input,
   OnInit,
@@ -61,6 +62,45 @@ export class TabCustomer implements OnInit {
 
   initialValue = input<CustomerTabValue | null>(null);
   valueChange = output<CustomerTabValue>();
+
+  constructor() {
+    effect(() => {
+      const initial   = this.initialValue();
+      const customers = this.allCustomers();
+      const vehicles  = this.allVehicles();
+      const mechanics = this.allMechanics();
+
+      if (!initial || customers.length === 0) return;
+      if (this.selectedCustomer() !== null) return;
+
+      if (initial.customer_id) {
+        const customer = customers.find((c) => c.id === initial.customer_id) ?? null;
+        if (customer) {
+          this.customerCtrl.setValue(customer, { emitEvent: false });
+          this.selectedCustomer.set(customer);
+        }
+      }
+      if (initial.vehicle_id && vehicles.length > 0) {
+        const vehicle = vehicles.find((v) => v.id === initial.vehicle_id) ?? null;
+        if (vehicle) {
+          this.vehicleCtrl.setValue(vehicle, { emitEvent: false });
+          this.selectedVehicle.set(vehicle);
+        }
+      }
+      if (initial.mechanic_id && mechanics.length > 0) {
+        const mechanic = mechanics.find((m) => m.id === initial.mechanic_id) ?? null;
+        if (mechanic) {
+          this.mechanicCtrl.setValue(mechanic, { emitEvent: false });
+          this.selectedMechanic.set(mechanic);
+        }
+      }
+      this.form.patchValue({
+        mileage:      initial.mileage ?? '',
+        started_date: initial.started_date ? new Date(initial.started_date) : null,
+        ended_date:   initial.ended_date   ? new Date(initial.ended_date)   : null,
+      }, { emitEvent: false });
+    });
+  }
 
   readonly allCustomers = toSignal(this.customerService.get(), { initialValue: [] });
   readonly allVehicles = toSignal(this.vehicleService.get(), { initialValue: [] });

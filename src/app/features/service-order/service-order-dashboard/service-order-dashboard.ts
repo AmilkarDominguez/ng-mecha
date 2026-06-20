@@ -58,6 +58,10 @@ export class ServiceOrderDashboard {
     this.router.navigate(['/dashboard/ordenes/nueva']);
   }
 
+  onEdit(order: ServiceOrder): void {
+    this.router.navigate(['/dashboard/ordenes/editar', order.id]);
+  }
+
   onView(order: ServiceOrder): void {
     this.dialog.open(ServiceOrderDetailModal, {
       hasBackdrop: false,

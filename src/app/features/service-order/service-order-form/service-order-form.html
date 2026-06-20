@@ -2,13 +2,23 @@
 
   <div class="page-header">
     <div class="page-title-group">
-      <h1 class="page-title">Nueva Orden de Servicio</h1>
-      <span class="page-subtitle">Complete los datos para registrar una orden de servicio</span>
+      <h1 class="page-title">
+        {{ isEditMode() ? 'Editar Orden de Servicio' : 'Nueva Orden de Servicio' }}
+      </h1>
+      <span class="page-subtitle">
+        {{ isEditMode() ? 'Modifique los datos de la orden de servicio' : 'Complete los datos para registrar una orden de servicio' }}
+      </span>
     </div>
     <div class="header-actions">
       <button mat-stroked-button (click)="onCancel()">Cancelar</button>
     </div>
   </div>
+
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+    </div>
+  }
 
   <div class="form-layout">
 
@@ -18,7 +28,9 @@
         <mat-tab-group animationDuration="200ms" color="primary">
 
           <mat-tab label="Cliente">
-            <app-tab-customer (valueChange)="onCustomerTabChange($event)" />
+            <app-tab-customer
+              [initialValue]="customerTabValue()"
+              (valueChange)="onCustomerTabChange($event)" />
           </mat-tab>
 
           <mat-tab label="Mano de Obra">
@@ -137,7 +149,7 @@
         </div>
 
         <button mat-flat-button color="primary" class="save-btn" (click)="onSave()">
-          Registrar Orden
+          {{ isEditMode() ? 'Actualizar Orden' : 'Registrar Orden' }}
         </button>
 
       </div>

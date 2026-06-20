@@ -118,7 +118,7 @@ export class SPServiceOrder {
       batches: from(
         this.supabase
           .from(this.TABLE_BATCHES)
-          .select('*, batch:batches(description, product:products(name))')
+          .select('*, batch:batches(description, product:products(name), industry:industries(name))')
           .eq('service_order_id', id),
       ).pipe(map(({ data, error }) => { if (error) throw error; return data ?? []; })),
       externals: from(
@@ -216,5 +216,16 @@ export class SPServiceOrder {
         if (error) throw error;
       }),
     );
+  }
+
+  public deleteLinesByOrderId(orderId: string): Observable<void> {
+    return forkJoin([
+      from(this.supabase.from(this.TABLE_SERVICES).delete().eq('service_order_id', orderId))
+        .pipe(map(({ error }) => { if (error) throw error; })),
+      from(this.supabase.from(this.TABLE_BATCHES).delete().eq('service_order_id', orderId))
+        .pipe(map(({ error }) => { if (error) throw error; })),
+      from(this.supabase.from(this.TABLE_EXTERNAL).delete().eq('service_order_id', orderId))
+        .pipe(map(({ error }) => { if (error) throw error; })),
+    ]).pipe(map(() => void 0));
   }
 }
