@@ -423,3 +423,71 @@ ALTER TABLE mechanics ADD COLUMN IF NOT EXISTS entry_date DATE;
 -- ============================================================
 ALTER TABLE service_orders ADD COLUMN IF NOT EXISTS mechanic_id UUID REFERENCES mechanics(id) ON DELETE SET NULL;
 ALTER TABLE service_order_services DROP COLUMN IF EXISTS mechanic_id;
+
+
+-- ============================================================
+-- v16 — Auth Module: seed de usuarios de prueba para login
+-- ============================================================
+-- NOTA: password en texto plano (mismo criterio usado hoy por el modulo Admin > Usuarios).
+-- Cambiar/eliminar estos usuarios antes de pasar a produccion.
+INSERT INTO users (name, lastname, email, password, allow_deletion, rol, state) VALUES
+  ('Admin',      'Sistema', 'admin@mecha.test',     'Admin123!',     false, 'ADMIN',     'ACTIVE'),
+  ('Ventas',     'Prueba',  'ventas@mecha.test',    'Ventas123!',    true,  'SALES',     'ACTIVE'),
+  ('Inventario', 'Prueba',  'inventario@mecha.test','Inventario123!',true,  'INVENTORY', 'ACTIVE')
+ON CONFLICT (email) DO NOTHING;
+
+
+-- ============================================================
+-- v17 — Auth Module: hash de contraseñas con pgcrypto (bcrypt)
+-- ============================================================
+-- pgcrypto ya esta habilitado (ver EXTENSIONS al inicio de tables.sql).
+
+-- 1. Hashear cualquier password en texto plano ya existente (incluye el seed de v16).
+UPDATE users
+SET password = crypt(password, gen_salt('bf'))
+WHERE password !~ '^\$2[aby]\$[0-9]{2}\$';
+
+-- 2. Trigger: hashear automaticamente password en INSERT/UPDATE si llega en texto plano.
+CREATE OR REPLACE FUNCTION hash_user_password()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.password IS NOT NULL AND NEW.password !~ '^\$2[aby]\$[0-9]{2}\$' THEN
+    NEW.password := crypt(NEW.password, gen_salt('bf'));
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_hash_user_password ON users;
+CREATE TRIGGER trg_hash_user_password
+  BEFORE INSERT OR UPDATE ON users
+  FOR EACH ROW EXECUTE FUNCTION hash_user_password();
+
+-- 3. RPC de login: compara la contraseña con crypt() server-side y nunca
+--    devuelve la columna password al cliente.
+CREATE OR REPLACE FUNCTION login_user(p_email TEXT, p_password TEXT)
+RETURNS TABLE (
+  id             UUID,
+  name           TEXT,
+  lastname       TEXT,
+  email          TEXT,
+  allow_deletion BOOLEAN,
+  rol            user_role_enum,
+  state          state_enum,
+  created_at     TIMESTAMPTZ,
+  updated_at     TIMESTAMPTZ
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+  SELECT u.id, u.name, u.lastname, u.email, u.allow_deletion, u.rol, u.state, u.created_at, u.updated_at
+  FROM users u
+  WHERE u.email = p_email
+    AND u.password = crypt(p_password, u.password)
+    AND u.state = 'ACTIVE'
+  LIMIT 1;
+$$;
+
+REVOKE ALL ON FUNCTION login_user(TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION login_user(TEXT, TEXT) TO anon, authenticated;

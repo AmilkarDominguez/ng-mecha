@@ -61,6 +61,63 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at     TIMESTAMPTZ     NOT NULL DEFAULT NOW()
 );
 
+-- Hash automatico de password (bcrypt via pgcrypto): si llega en texto plano
+-- (INSERT o UPDATE desde el cliente) se hashea antes de guardarse. Si ya viene
+-- hasheado (formato bcrypt $2a$/$2b$/$2y$) se deja intacto para no doble-hashear.
+CREATE OR REPLACE FUNCTION hash_user_password()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.password IS NOT NULL AND NEW.password !~ '^\$2[aby]\$[0-9]{2}\$' THEN
+    NEW.password := crypt(NEW.password, gen_salt('bf'));
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_hash_user_password ON users;
+CREATE TRIGGER trg_hash_user_password
+  BEFORE INSERT OR UPDATE ON users
+  FOR EACH ROW EXECUTE FUNCTION hash_user_password();
+
+-- RPC de login: compara la contraseña con crypt() server-side y nunca
+-- devuelve la columna password al cliente.
+CREATE OR REPLACE FUNCTION login_user(p_email TEXT, p_password TEXT)
+RETURNS TABLE (
+  id             UUID,
+  name           TEXT,
+  lastname       TEXT,
+  email          TEXT,
+  allow_deletion BOOLEAN,
+  rol            user_role_enum,
+  state          state_enum,
+  created_at     TIMESTAMPTZ,
+  updated_at     TIMESTAMPTZ
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public, extensions
+AS $$
+  SELECT u.id, u.name, u.lastname, u.email, u.allow_deletion, u.rol, u.state, u.created_at, u.updated_at
+  FROM users u
+  WHERE u.email = p_email
+    AND u.password = crypt(p_password, u.password)
+    AND u.state = 'ACTIVE'
+  LIMIT 1;
+$$;
+
+REVOKE ALL ON FUNCTION login_user(TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION login_user(TEXT, TEXT) TO anon, authenticated;
+
+-- Seed: usuarios de prueba para el modulo de autenticacion.
+-- El password se envia en texto plano aqui pero el trigger de arriba lo
+-- hashea automaticamente antes de guardarse en la tabla.
+-- Cambiar/eliminar estos usuarios antes de pasar a produccion.
+INSERT INTO users (name, lastname, email, password, allow_deletion, rol, state) VALUES
+  ('Admin',      'Sistema', 'admin@mecha.test',     'Admin123!',     false, 'ADMIN',     'ACTIVE'),
+  ('Ventas',     'Prueba',  'ventas@mecha.test',    'Ventas123!',    true,  'SALES',     'ACTIVE'),
+  ('Inventario', 'Prueba',  'inventario@mecha.test','Inventario123!',true,  'INVENTORY', 'ACTIVE')
+ON CONFLICT (email) DO NOTHING;
+
 -- 1. product_categories
 CREATE TABLE IF NOT EXISTS product_categories (
   id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -1,48 +1,64 @@
-import {Component, inject, signal} from '@angular/core';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {FormControl, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {MatFormFieldModule} from '@angular/material/form-field';
-import {MatInputModule} from '@angular/material/input';
-import {merge} from 'rxjs';
+import { Component, inject, signal } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
+import { AuthService } from '../../../core/auth/services/auth.service';
 
 @Component({
   selector: 'app-login',
-  imports: [MatFormFieldModule, MatInputModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatIconModule],
+  imports: [
+    MatFormFieldModule,
+    MatInputModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+  ],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
 export class Login {
-  readonly email = new FormControl('', [Validators.required, Validators.email]);
-
-  errorMessage = signal('');
-
   private readonly router = inject(Router);
-  constructor() {
-    merge(this.email.statusChanges, this.email.valueChanges)
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.updateErrorMessage());
-  }
+  private readonly authService = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
 
-  updateErrorMessage() {
-    if (this.email.hasError('required')) {
-      this.errorMessage.set('Debe ingresar un email');
-    } else if (this.email.hasError('email')) {
-      this.errorMessage.set('Correo no valido');
-    } else {
-      this.errorMessage.set('');
-    }
-  }
+  readonly form = this.fb.group({
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required]],
+  });
 
-  hide = signal(true);
-  clickEvent(event: MouseEvent) {
+  readonly hide = signal(true);
+  readonly loading = signal(false);
+  readonly errorMessage = signal('');
+
+  togglePasswordVisibility(event: MouseEvent) {
     this.hide.set(!this.hide());
     event.stopPropagation();
   }
 
-  login(){
-    this.router.navigate(['/dashboard']);
+  login() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+
+    const { email, password } = this.form.getRawValue();
+    this.loading.set(true);
+    this.errorMessage.set('');
+
+    this.authService.login(email!, password!).subscribe({
+      next: () => {
+        this.loading.set(false);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        this.loading.set(false);
+        this.errorMessage.set(err?.message ?? 'Correo o contraseña incorrectos');
+      },
+    });
   }
 }

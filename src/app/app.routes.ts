@@ -3,11 +3,14 @@ import { Login } from './features/auth/login/login';
 import { Dashboard } from './features/dashboard/dashboard';
 import { AdminLayout } from './layouts/admin-layout/admin-layout';
 import { AuthLayout } from './layouts/auth-layout/auth-layout';
+import { authGuard } from './core/auth/guards/auth.guard';
+import { publicGuard } from './core/auth/guards/public.guard';
 
 export const routes: Routes = [
   {
     path: 'auth',
     component: AuthLayout,
+    canActivate: [publicGuard],
     children: [
       { path: 'login', component: Login }
     ]
@@ -15,7 +18,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: AdminLayout,
-    //canActivate: [authGuard]
+    canActivate: [authGuard],
     children: [
       { path: '', component: Dashboard },
       {

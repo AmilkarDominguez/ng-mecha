@@ -48,6 +48,21 @@ mat-sidenav {
   font-weight: 500;
 }
 
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.user-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 .content {
   padding: 24px;
 }

@@ -3,7 +3,7 @@ import { from, Observable, BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { User } from '../../models/user.model';
+import { PublicUser, User } from '../../models/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class SPUser {
@@ -15,6 +15,19 @@ export class SPUser {
 
   constructor() {
     this.supabase = createClient(environment.supabaseUrl, environment.supabaseKey);
+  }
+
+  public login(email: string, password: string): Observable<PublicUser | null> {
+    return from(
+      this.supabase
+        .rpc('login_user', { p_email: email, p_password: password })
+        .maybeSingle<PublicUser>(),
+    ).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return data;
+      }),
+    );
   }
 
   public get(): Observable<User[]> {

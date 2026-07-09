@@ -14,3 +14,5 @@ export interface User {
   created_at?: string | Date;
   updated_at?: string | Date;
 }
+
+export type PublicUser = Omit<User, 'password'>;

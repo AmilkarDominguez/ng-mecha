@@ -8,39 +8,59 @@
     Ingresar
   </section>
 
+  <form class="login-form" [formGroup]="form" (ngSubmit)="login()">
+    <div class="input-container">
+      <mat-form-field>
+        <mat-label>Correo</mat-label>
+        <input
+          matInput
+          placeholder="user@email.com"
+          formControlName="email"
+          required
+        />
+        @if (form.controls.email.hasError('required')) {
+          <mat-error>Debe ingresar un email</mat-error>
+        } @else if (form.controls.email.hasError('email')) {
+          <mat-error>Correo no valido</mat-error>
+        }
+      </mat-form-field>
+    </div>
 
-  <div class="input-container">
-    <mat-form-field>
-      <mat-label>Correo</mat-label>
-      <input
-        matInput
-        placeholder="user@email.com"
-        [formControl]="email"
-        (blur)="updateErrorMessage()"
-        required
-      />
-      @if (email.invalid) {
-        <mat-error>{{ errorMessage() }}</mat-error>
+    <div class="input-container">
+      <mat-form-field>
+        <mat-label>Contraseña</mat-label>
+        <input
+          matInput
+          [type]="hide() ? 'password' : 'text'"
+          formControlName="password"
+          required
+        />
+        <button
+          type="button"
+          matIconButton
+          matSuffix
+          (click)="togglePasswordVisibility($event)"
+          [attr.aria-label]="'Hide password'"
+          [attr.aria-pressed]="hide()"
+        >
+          <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (form.controls.password.hasError('required')) {
+          <mat-error>Debe ingresar una contraseña</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="login-error">{{ errorMessage() }}</p>
+    }
+
+    <button matButton="filled" type="submit" class="login-button" [disabled]="loading()">
+      @if (loading()) {
+        <mat-spinner diameter="20" />
+      } @else {
+        Ingresar
       }
-    </mat-form-field>
-  </div>
-
-  <div class="input-container">
-    <mat-form-field>
-      <mat-label>Contraseña</mat-label>
-      <input matInput [type]="hide() ? 'password' : 'text'" />
-      <button
-        matIconButton
-        matSuffix
-        (click)="clickEvent($event)"
-        [attr.aria-label]="'Hide password'"
-        [attr.aria-pressed]="hide()"
-      >
-        <mat-icon>{{ hide() ? 'visibility_off' : 'visibility' }}</mat-icon>
-      </button>
-    </mat-form-field>
-  </div>
-
-  <button matButton="filled" class="login-button" (click)="login()">Ingresar</button>
+    </button>
+  </form>
 </section>
-
