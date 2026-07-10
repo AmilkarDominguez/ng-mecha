@@ -413,24 +413,29 @@ Mandatory records with allow_deletion = false
 
 **Tabla:** `bank_account_histories`
 
-| Columna                 | Tipo            | Restricciones                   |
-| --------------------    | --------------- | ------------------------------- |
-| id                      | String UUID     | PK, auto-generated              |
-| bank_account_id         | UUID (FK)       | nullable → bank_accounts.id     |
-| user_id                 | UUID (FK)       | nullable → users.id             |
-| transaction_type_id     | UUID (FK)       | nullable → transaction_types.id |
-| amount                  | BigDecimal(8,2) | nullable                        |
-| balance                 | BigDecimal(8,2) | nullable                        |
-| transactionReference    | String          | nullable                        |
-| concept                 | String          | nullable                        |
-| createdAt               | LocalDateTime   | auto                            |
-| updatedAt               | LocalDateTime   | auto                            |
+| Columna                 | Tipo            | Restricciones                          |
+| --------------------    | --------------- | --------------------------------------- |
+| id                      | String UUID     | PK, auto-generated                      |
+| bank_account_id         | UUID (FK)       | nullable → bank_accounts.id             |
+| user_id                 | UUID (FK)       | nullable → users.id                     |
+| transaction_type_id     | UUID (FK)       | nullable → bank_transaction_types.id    |
+| amount                  | BigDecimal(8,2) | nullable                                |
+| balance                 | BigDecimal(8,2) | nullable, saldo de la cuenta post-movimiento |
+| transaction_reference   | String          | nullable, referencia libre (no FK formal). Para pagos de orden de servicio guarda `service_orders.id` |
+| concept                 | String          | nullable                                |
+| created_at              | LocalDateTime   | auto                                    |
+| updated_at              | LocalDateTime   | auto                                    |
 
 **Relaciones:**
 
 - Many-to-One → `bank_accounts`
 - Many-to-One → `users`
-- Many-to-One → `transaction_types`
+- Many-to-One → `bank_transaction_types`
+
+**Uso — Pago de orden de servicio:**
+Al registrar un pago de una orden de servicio se inserta un registro aquí con `transaction_type_id` apuntando al tipo `'Pago de orden de servicio'`[INGRESO] y `transaction_reference = service_orders.id`. El listado de pagos de una orden se obtiene filtrando por `transaction_reference` + `transaction_type_id`. Editar/eliminar un pago revierte y reaplica el ajuste correspondiente en `bank_accounts.balance` y en `service_orders.have`/`must`.
+
+**Atomicidad:** registrar/editar/eliminar un pago se ejecuta mediante RPCs de Postgres (`register_service_order_payment`, `edit_service_order_payment`, `delete_service_order_payment`, ver `migrate.sql` v19) — no con llamadas REST separadas desde el cliente. Un pago toca 3 tablas; sin una transacción real, una falla a mitad de camino deja el balance desincronizado (bug real detectado y corregido el 2026-07-10).
 
 ---
 

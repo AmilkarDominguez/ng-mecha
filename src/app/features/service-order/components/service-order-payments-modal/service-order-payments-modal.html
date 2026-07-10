@@ -1,0 +1,88 @@
+<app-dialog-frame title="Pagos de la Orden" icon="payments" initialSize="md">
+
+  <div class="payments-body">
+
+    <div class="summary-row">
+      <div class="summary-item">
+        <span class="summary-label">Total</span>
+        <span class="summary-value">Bs. {{ totalDue() | number: '1.2-2' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Pagado</span>
+        <span class="summary-value summary-have">Bs. {{ have() | number: '1.2-2' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Saldo Pendiente</span>
+        <span class="summary-value" [class.summary-debt]="!fullyPaid()">
+          Bs. {{ must() | number: '1.2-2' }}
+        </span>
+      </div>
+    </div>
+
+    <mat-divider />
+
+    <div class="register-row">
+      <button mat-flat-button color="primary" [disabled]="!canRegister()" (click)="onRegister()">
+        <mat-icon>add_circle</mat-icon>
+        Registrar Pago
+      </button>
+      @if (fullyPaid()) {
+        <span class="fully-paid-hint">Esta orden ya está pagada en su totalidad.</span>
+      } @else if (order().state === 'CANCELED') {
+        <span class="fully-paid-hint">No se pueden registrar pagos en una orden cancelada.</span>
+      }
+    </div>
+
+    <div class="table-scroll">
+      <table mat-table [dataSource]="payments()" class="payments-table">
+
+        <ng-container matColumnDef="created_at">
+          <th mat-header-cell *matHeaderCellDef>Fecha</th>
+          <td mat-cell *matCellDef="let row">{{ row.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="bank_account">
+          <th mat-header-cell *matHeaderCellDef>Cuenta Bancaria</th>
+          <td mat-cell *matCellDef="let row">{{ row.bank_account?.name ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell *matHeaderCellDef>Monto</th>
+          <td mat-cell *matCellDef="let row" class="cell-amount">Bs. {{ row.amount | number: '1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="concept">
+          <th mat-header-cell *matHeaderCellDef>Concepto</th>
+          <td mat-cell *matCellDef="let row">{{ row.concept ?? '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button matTooltip="Editar pago" (click)="onEdit(row)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button matTooltip="Eliminar pago" (click)="onDelete(row)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-row" [attr.colspan]="columns.length">
+            Sin pagos registrados
+          </td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onClose()">Cerrar</button>
+  </ng-container>
+
+</app-dialog-frame>

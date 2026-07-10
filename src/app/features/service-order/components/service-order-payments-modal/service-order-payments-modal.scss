@@ -1,0 +1,83 @@
+.payments-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1rem 1.5rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-text-muted, #757575);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.summary-value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.summary-have {
+  color: var(--mat-sys-primary);
+}
+
+.summary-debt {
+  color: var(--mat-sys-error);
+}
+
+.register-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.fully-paid-hint {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, #757575);
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.payments-table {
+  width: 100%;
+  min-width: 40rem;
+
+  th.mat-header-cell {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #757575);
+    white-space: nowrap;
+  }
+
+  td.mat-cell {
+    font-size: 0.875rem;
+  }
+}
+
+.cell-amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.empty-row {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted, #757575);
+}

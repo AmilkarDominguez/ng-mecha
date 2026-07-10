@@ -1,0 +1,16 @@
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin: 1rem;
+}
+
+.field-full {
+  grid-column: 1 / -1;
+}
+
+.max-amount-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}

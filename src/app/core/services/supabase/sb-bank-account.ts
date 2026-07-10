@@ -26,6 +26,15 @@ export class SPBankAccount {
     );
   }
 
+  public getById(id: string): Observable<BankAccount> {
+    return from(this.supabase.from(this.TABLE_NAME).select('*').eq('id', id).single()).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return data;
+      }),
+    );
+  }
+
   public add(item: BankAccount): Observable<BankAccount[]> {
     const { id, created_at, updated_at, ...payload } = item;
     return from(this.supabase.from(this.TABLE_NAME).insert([payload]).select()).pipe(

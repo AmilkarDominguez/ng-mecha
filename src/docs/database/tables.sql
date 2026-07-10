@@ -366,6 +366,24 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
   updated_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
 
+-- 17b. bank_account_histories
+-- transaction_reference guarda el id de la entidad relacionada con el
+-- movimiento (por ejemplo, service_orders.id para pagos de orden de
+-- servicio). No es una FK formal: el campo es de referencia libre,
+-- reutilizable por otros tipos de transaccion (depositos, retiros, etc.).
+CREATE TABLE IF NOT EXISTS bank_account_histories (
+  id                    UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
+  bank_account_id       UUID             REFERENCES bank_accounts(id)          ON DELETE SET NULL,
+  user_id               UUID             REFERENCES users(id)                  ON DELETE SET NULL,
+  transaction_type_id   UUID             REFERENCES bank_transaction_types(id) ON DELETE SET NULL,
+  amount                NUMERIC(10,2),
+  balance               NUMERIC(10,2),
+  transaction_reference TEXT,
+  concept               TEXT,
+  created_at            TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
+  updated_at            TIMESTAMPTZ      NOT NULL DEFAULT NOW()
+);
+
 
 -- ============================================================
 -- Service Orders Module
@@ -455,6 +473,205 @@ CREATE TABLE IF NOT EXISTS service_order_external_services (
 
 
 -- ============================================================
+-- Service Orders: RPCs atomicas para pagos
+-- ============================================================
+-- Un pago toca 3 tablas (bank_account_histories, bank_accounts,
+-- service_orders). Hacerlo con llamadas REST separadas desde el cliente
+-- no es atomico: si una falla a mitad de camino, las demas ya se
+-- aplicaron y el balance/saldo queda desincronizado. Estas funciones
+-- ejecutan todo dentro de una sola transaccion de Postgres (mismo
+-- patron que login_user), con FOR UPDATE para evitar carreras entre
+-- pagos concurrentes de la misma orden/cuenta.
+
+CREATE OR REPLACE FUNCTION register_service_order_payment(
+  p_service_order_id    UUID,
+  p_bank_account_id     UUID,
+  p_transaction_type_id UUID,
+  p_amount              NUMERIC,
+  p_concept             TEXT,
+  p_user_id             UUID
+)
+RETURNS bank_account_histories
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order       service_orders%ROWTYPE;
+  v_account     bank_accounts%ROWTYPE;
+  v_total_due   NUMERIC(10,2);
+  v_new_have    NUMERIC(10,2);
+  v_new_must    NUMERIC(10,2);
+  v_new_balance NUMERIC(10,2);
+  v_history     bank_account_histories%ROWTYPE;
+BEGIN
+  IF p_amount IS NULL OR p_amount <= 0 THEN
+    RAISE EXCEPTION 'El monto debe ser mayor a 0.';
+  END IF;
+
+  SELECT * INTO v_order FROM service_orders WHERE id = p_service_order_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orden de servicio no encontrada.';
+  END IF;
+
+  SELECT * INTO v_account FROM bank_accounts WHERE id = p_bank_account_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cuenta bancaria no encontrada.';
+  END IF;
+
+  v_total_due := COALESCE(CASE WHEN v_order.with_iva THEN COALESCE(v_order.total_iva, v_order.total) ELSE v_order.total END, 0);
+
+  IF p_amount > (v_total_due - COALESCE(v_order.have, 0) + 0.01) THEN
+    RAISE EXCEPTION 'El monto supera el saldo pendiente de la orden.';
+  END IF;
+
+  v_new_have    := COALESCE(v_order.have, 0) + p_amount;
+  v_new_must    := GREATEST(v_total_due - v_new_have, 0);
+  v_new_balance := COALESCE(v_account.balance, 0) + p_amount;
+
+  INSERT INTO bank_account_histories (
+    bank_account_id, user_id, transaction_type_id, amount, balance, transaction_reference, concept
+  ) VALUES (
+    p_bank_account_id, p_user_id, p_transaction_type_id, p_amount, v_new_balance, p_service_order_id::TEXT, p_concept
+  ) RETURNING * INTO v_history;
+
+  UPDATE bank_accounts SET balance = v_new_balance WHERE id = p_bank_account_id;
+  UPDATE service_orders SET have = v_new_have, must = v_new_must WHERE id = p_service_order_id;
+
+  RETURN v_history;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION register_service_order_payment(UUID, UUID, UUID, NUMERIC, TEXT, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION register_service_order_payment(UUID, UUID, UUID, NUMERIC, TEXT, UUID) TO anon, authenticated;
+
+
+CREATE OR REPLACE FUNCTION edit_service_order_payment(
+  p_history_id      UUID,
+  p_bank_account_id UUID,
+  p_amount          NUMERIC,
+  p_concept         TEXT
+)
+RETURNS bank_account_histories
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_history      bank_account_histories%ROWTYPE;
+  v_order        service_orders%ROWTYPE;
+  v_new_account  bank_accounts%ROWTYPE;
+  v_total_due    NUMERIC(10,2);
+  v_have_without NUMERIC(10,2);
+  v_new_have     NUMERIC(10,2);
+  v_new_must     NUMERIC(10,2);
+BEGIN
+  IF p_amount IS NULL OR p_amount <= 0 THEN
+    RAISE EXCEPTION 'El monto debe ser mayor a 0.';
+  END IF;
+
+  SELECT * INTO v_history FROM bank_account_histories WHERE id = p_history_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Pago no encontrado.';
+  END IF;
+
+  SELECT * INTO v_order FROM service_orders WHERE id = v_history.transaction_reference::UUID FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orden de servicio no encontrada.';
+  END IF;
+
+  -- Bloquea ambas cuentas involucradas (actual y destino) en orden
+  -- determinista por id para evitar deadlocks entre ediciones cruzadas.
+  PERFORM 1 FROM bank_accounts WHERE id IN (v_history.bank_account_id, p_bank_account_id) ORDER BY id FOR UPDATE;
+
+  v_total_due    := COALESCE(CASE WHEN v_order.with_iva THEN COALESCE(v_order.total_iva, v_order.total) ELSE v_order.total END, 0);
+  v_have_without := COALESCE(v_order.have, 0) - COALESCE(v_history.amount, 0);
+
+  IF p_amount > (v_total_due - v_have_without + 0.01) THEN
+    RAISE EXCEPTION 'El monto supera el saldo pendiente de la orden.';
+  END IF;
+
+  v_new_have := v_have_without + p_amount;
+  v_new_must := GREATEST(v_total_due - v_new_have, 0);
+
+  IF p_bank_account_id = v_history.bank_account_id THEN
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) - COALESCE(v_history.amount, 0) + p_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+  ELSE
+    UPDATE bank_accounts SET balance = COALESCE(balance, 0) - COALESCE(v_history.amount, 0) WHERE id = v_history.bank_account_id;
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) + p_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Cuenta bancaria destino no encontrada.';
+    END IF;
+  END IF;
+
+  UPDATE bank_account_histories
+    SET bank_account_id = p_bank_account_id,
+        amount = p_amount,
+        concept = p_concept,
+        balance = v_new_account.balance
+    WHERE id = p_history_id
+    RETURNING * INTO v_history;
+
+  UPDATE service_orders SET have = v_new_have, must = v_new_must WHERE id = v_order.id;
+
+  RETURN v_history;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION edit_service_order_payment(UUID, UUID, NUMERIC, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION edit_service_order_payment(UUID, UUID, NUMERIC, TEXT) TO anon, authenticated;
+
+
+CREATE OR REPLACE FUNCTION delete_service_order_payment(p_history_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_history   bank_account_histories%ROWTYPE;
+  v_order     service_orders%ROWTYPE;
+  v_account   bank_accounts%ROWTYPE;
+  v_total_due NUMERIC(10,2);
+  v_new_have  NUMERIC(10,2);
+  v_new_must  NUMERIC(10,2);
+BEGIN
+  SELECT * INTO v_history FROM bank_account_histories WHERE id = p_history_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Pago no encontrado.';
+  END IF;
+
+  SELECT * INTO v_order FROM service_orders WHERE id = v_history.transaction_reference::UUID FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orden de servicio no encontrada.';
+  END IF;
+
+  SELECT * INTO v_account FROM bank_accounts WHERE id = v_history.bank_account_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cuenta bancaria no encontrada.';
+  END IF;
+
+  v_total_due := COALESCE(CASE WHEN v_order.with_iva THEN COALESCE(v_order.total_iva, v_order.total) ELSE v_order.total END, 0);
+  v_new_have  := GREATEST(COALESCE(v_order.have, 0) - COALESCE(v_history.amount, 0), 0);
+  v_new_must  := GREATEST(v_total_due - v_new_have, 0);
+
+  DELETE FROM bank_account_histories WHERE id = p_history_id;
+  UPDATE bank_accounts SET balance = COALESCE(balance, 0) - COALESCE(v_history.amount, 0) WHERE id = v_history.bank_account_id;
+  UPDATE service_orders SET have = v_new_have, must = v_new_must WHERE id = v_order.id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION delete_service_order_payment(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION delete_service_order_payment(UUID) TO anon, authenticated;
+
+
+-- ============================================================
 -- INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_users_email              ON users(email);
@@ -480,6 +697,8 @@ CREATE INDEX IF NOT EXISTS idx_service_orders_state                 ON service_o
 CREATE INDEX IF NOT EXISTS idx_service_order_services_order_id      ON service_order_services(service_order_id);
 CREATE INDEX IF NOT EXISTS idx_service_order_batches_order_id       ON service_order_batches(service_order_id);
 CREATE INDEX IF NOT EXISTS idx_service_order_external_order_id      ON service_order_external_services(service_order_id);
+CREATE INDEX IF NOT EXISTS idx_bah_bank_account_id                  ON bank_account_histories(bank_account_id);
+CREATE INDEX IF NOT EXISTS idx_bah_transaction_reference            ON bank_account_histories(transaction_reference);
 
 
 -- ============================================================
@@ -515,6 +734,7 @@ BEGIN
     'vehicles',
     'bank_transaction_types',
     'bank_accounts',
+    'bank_account_histories',
     'service_orders',
     'service_order_services',
     'service_order_batches',
@@ -552,6 +772,7 @@ ALTER TABLE external_services     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vehicles              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bank_transaction_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bank_accounts                      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bank_account_histories             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_orders                     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_order_services             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_order_batches              ENABLE ROW LEVEL SECURITY;
@@ -744,6 +965,10 @@ CREATE POLICY "auth_update_bank_accounts"
 CREATE POLICY "auth_delete_bank_accounts"
   ON bank_accounts FOR DELETE TO authenticated USING (true);
 
+-- bank_account_histories
+CREATE POLICY "auth_all_bank_account_histories"
+  ON bank_account_histories FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 
 -- ============================================================
 -- RLS POLICIES — anon role (desarrollo sin auth activo)
@@ -931,6 +1156,10 @@ CREATE POLICY "anon_update_bank_accounts"
 CREATE POLICY "anon_delete_bank_accounts"
   ON bank_accounts FOR DELETE TO anon USING (true);
 
+-- bank_account_histories
+CREATE POLICY "anon_all_bank_account_histories"
+  ON bank_account_histories FOR ALL TO anon USING (true) WITH CHECK (true);
+
 
 -- ============================================================
 -- REALTIME — enable publications for live listening
@@ -957,7 +1186,8 @@ BEGIN
     'external_services',
     'vehicles',
     'bank_transaction_types',
-    'bank_accounts'
+    'bank_accounts',
+    'bank_account_histories'
   ] LOOP
     -- Add table to the supabase_realtime publication if not already present
     IF NOT EXISTS (

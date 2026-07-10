@@ -15,6 +15,7 @@ DROP TABLE IF EXISTS service_order_batches           CASCADE;
 DROP TABLE IF EXISTS service_order_services          CASCADE;
 DROP TABLE IF EXISTS service_orders                  CASCADE;
 DROP TABLE IF EXISTS users                           CASCADE;
+DROP TABLE IF EXISTS bank_account_histories CASCADE;
 DROP TABLE IF EXISTS bank_transaction_types CASCADE;
 DROP TABLE IF EXISTS bank_accounts         CASCADE;
 DROP TABLE IF EXISTS vehicles              CASCADE;
@@ -38,6 +39,9 @@ DROP TABLE IF EXISTS product_categories    CASCADE;
 -- FUNCIONES
 -- ============================================================
 DROP FUNCTION IF EXISTS set_updated_at() CASCADE;
+DROP FUNCTION IF EXISTS register_service_order_payment(UUID, UUID, UUID, NUMERIC, TEXT, UUID) CASCADE;
+DROP FUNCTION IF EXISTS edit_service_order_payment(UUID, UUID, NUMERIC, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS delete_service_order_payment(UUID) CASCADE;
 
 
 -- ============================================================

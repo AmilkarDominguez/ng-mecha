@@ -15,6 +15,7 @@ import { ServiceOrder, OrderState } from '../../../core/models/service-order.mod
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
 import { ServiceOrderDetailModal } from '../components/service-order-detail-modal/service-order-detail-modal';
 import { ServiceOrderPrintModal } from '../components/service-order-print-modal/service-order-print-modal';
+import { ServiceOrderPaymentsModal } from '../components/service-order-payments-modal/service-order-payments-modal';
 
 @Component({
   selector: 'app-service-order-dashboard',
@@ -78,6 +79,14 @@ export class ServiceOrderDashboard {
       hasBackdrop: false,
       panelClass: 'floating-dialog-panel',
       data: order,
+    });
+  }
+
+  onPayments(order: ServiceOrder): void {
+    this.dialog.open(ServiceOrderPaymentsModal, {
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
+      data: { order },
     });
   }
 
