@@ -120,3 +120,23 @@
   // Modal
   --color-modal-backgroud: rgba(0, 0, 0, 0.22);
 }
+
+// ============================================================
+// Print tokens — Hoja de Servicios
+// Colores del documento físico. Independientes del tema:
+// la hoja impresa se ve igual en claro u oscuro.
+// ============================================================
+:root {
+  // Azul de cabeceras / subtotales de tabla (antes navy #1a237e)
+  --color-print-blue: #dbeafe;
+  --color-print-blue-text: #1e3a8a;
+
+  // Rojo de título, logo y caja de recomendación (antes #c62828)
+  --color-print-red: #ef4444;
+
+  // Bloque Total General (3 filas)
+  --color-print-subtotal-bg: #86efac; // Sub Total (sin IVA)
+  --color-print-iva-bg: #22c55e; // IVA - IT (13%)
+  --color-print-total-bg: #86efac; // Total (Sub Total + IVA-IT)
+  --color-print-total-text: #14532d; // Texto sobre las 3 filas verdes
+}

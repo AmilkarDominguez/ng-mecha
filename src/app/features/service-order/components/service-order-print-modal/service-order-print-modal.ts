@@ -7,6 +7,8 @@ import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ServiceOrder, ServiceOrderWithLines } from '../../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../../core/services/supabase/sb-service-order';
 
+const IVA_RATE = 0.13;
+
 @Component({
   selector: 'app-service-order-print-modal',
   imports: [
@@ -41,10 +43,21 @@ export class ServiceOrderPrintModal implements OnInit {
     return batches + externals;
   });
 
-  readonly totalGeneral = computed(() => {
+  // Base sin IVA
+  readonly subtotalSinIva = computed(() => this.detail()?.total ?? 0);
+
+  // IVA - IT (13 %). Usa el valor guardado; si falta, lo calcula sobre la base.
+  readonly ivaIt = computed(() => {
+    const d = this.detail();
+    if (!d || !d.with_iva) return 0;
+    return d.iva ?? (d.total ?? 0) * IVA_RATE;
+  });
+
+  // Total final: con IVA usa total_iva; sin IVA es la base.
+  readonly totalFinal = computed(() => {
     const d = this.detail();
     if (!d) return 0;
-    return d.with_iva ? (d.total_iva ?? d.total ?? 0) : (d.total ?? 0);
+    return d.with_iva ? (d.total_iva ?? (d.total ?? 0) + this.ivaIt()) : (d.total ?? 0);
   });
 
   ngOnInit(): void {

@@ -24,8 +24,6 @@
 
   @if (detail(); as d) {
     <ng-container *ngTemplateOutlet="docTemplate; context: { $implicit: d }" />
-    <div class="page-break"></div>
-    <ng-container *ngTemplateOutlet="docTemplate; context: { $implicit: d }" />
   }
 
 </div>
@@ -161,8 +159,18 @@
         <div class="recomendacion-body">{{ d.description ?? '' }}</div>
       </div>
       <div class="total-general-box">
-        <span class="total-general-label">TOTAL GENERAL (Bs.):</span>
-        <span class="total-general-value">{{ totalGeneral() | number:'1.2-2' }}</span>
+        <div class="total-row total-row--subtotal">
+          <span class="total-row-label">Sub Total (Total sin IVA)</span>
+          <span class="total-row-value">{{ subtotalSinIva() | number:'1.2-2' }}</span>
+        </div>
+        <div class="total-row total-row--iva">
+          <span class="total-row-label">IVA - IT (Cálculo del 13%)</span>
+          <span class="total-row-value">{{ ivaIt() | number:'1.2-2' }}</span>
+        </div>
+        <div class="total-row total-row--total">
+          <span class="total-row-label">Total (Sub Total + IVA - IT)</span>
+          <span class="total-row-value">{{ totalFinal() | number:'1.2-2' }}</span>
+        </div>
       </div>
     </div>
 

@@ -1,8 +1,5 @@
-$print-red:         #c62828;
-$print-navy:        #1a237e;
-$print-navy-text:   #ffffff;
-$print-green:       #2e7d32;
-$print-green-text:  #ffffff;
+// Los colores de marca (rojo, azul y verdes del documento) viven en
+// src/styles/_variables.scss como variables --color-print-*
 $print-border:      #999999;
 $print-border-dark: #333333;
 $doc-font:          'Arial', sans-serif;
@@ -47,14 +44,6 @@ $doc-font:          'Arial', sans-serif;
   background: #e0e0e0;
 }
 
-// ── Separador entre copias ─────────────────────────────────────────
-
-.page-break {
-  width: 210mm;
-  margin: 0 auto;
-  border-top: 2px dashed #aaa;
-}
-
 // ── Documento ─────────────────────────────────────────────────────
 
 .print-document {
@@ -76,7 +65,7 @@ $doc-font:          'Arial', sans-serif;
   text-align: center;
   font-size: 14pt;
   font-weight: 700;
-  color: $print-red;
+  color: var(--color-print-red);
   text-decoration: underline;
   margin: 0 0 4mm;
   text-transform: uppercase;
@@ -127,7 +116,7 @@ $doc-font:          'Arial', sans-serif;
 .logo-icon {
   width: 13mm;
   height: 13mm;
-  background: $print-red;
+  background: var(--color-print-red);
   border-radius: 2mm;
   display: flex;
   align-items: center;
@@ -150,7 +139,7 @@ $doc-font:          'Arial', sans-serif;
 .logo-name {
   font-size: 10pt;
   font-weight: 900;
-  color: $print-red;
+  color: var(--color-print-red);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   line-height: 1.1;
@@ -199,19 +188,19 @@ $doc-font:          'Arial', sans-serif;
 }
 
 .section-title {
-  background: $print-navy;
-  color: $print-navy-text;
+  background: var(--color-print-blue);
+  color: var(--color-print-blue-text);
   text-align: center;
   font-size: 8pt;
   font-weight: 700;
   padding: 1.5mm;
   text-transform: uppercase;
-  border: 1px solid $print-navy;
+  border: 1px solid var(--color-print-blue);
 }
 
 .col-header-row th {
-  background: $print-navy;
-  color: $print-navy-text;
+  background: var(--color-print-blue);
+  color: var(--color-print-blue-text);
   font-weight: 700;
   text-align: center;
   font-size: 7pt;
@@ -220,8 +209,8 @@ $doc-font:          'Arial', sans-serif;
 }
 
 .subtotal-row td {
-  background: $print-navy;
-  color: $print-navy-text;
+  background: var(--color-print-blue);
+  color: var(--color-print-blue-text);
   font-weight: 700;
   font-size: 7.5pt;
   text-transform: uppercase;
@@ -267,13 +256,13 @@ $doc-font:          'Arial', sans-serif;
 }
 
 .recomendacion-box {
-  border: 2px solid $print-red;
+  border: 2px solid var(--color-print-red);
   padding: 1.5mm 2mm;
   margin-right: 3mm;
 }
 
 .recomendacion-title {
-  color: $print-red;
+  color: var(--color-print-red);
   font-weight: 700;
   font-size: 8.5pt;
   text-align: center;
@@ -287,23 +276,45 @@ $doc-font:          'Arial', sans-serif;
   line-height: 1.5;
 }
 
+// ── Bloque Total General (3 filas) ─────────────────────────────────
+
 .total-general-box {
-  background: $print-green;
-  color: $print-green-text;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+  border: 1px solid $print-border-dark;
+}
+
+.total-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 2mm 3mm;
+  gap: 3mm;
+  padding: 1.5mm 3mm;
   font-weight: 700;
-  gap: 2mm;
+  color: var(--color-print-total-text);
+
+  & + & {
+    border-top: 1px solid rgba(0, 0, 0, 0.18);
+  }
 }
 
-.total-general-label {
-  font-size: 8.5pt;
+.total-row--subtotal {
+  background: var(--color-print-subtotal-bg);
+}
+.total-row--iva {
+  background: var(--color-print-iva-bg);
+}
+.total-row--total {
+  background: var(--color-print-total-bg);
 }
 
-.total-general-value {
-  font-size: 12pt;
+.total-row-label {
+  font-size: 8pt;
+}
+
+.total-row-value {
+  font-size: 11pt;
   white-space: nowrap;
 }
 
@@ -348,14 +359,5 @@ $doc-font:          'Arial', sans-serif;
     border: none;
     padding: 5mm 8mm;
     width: 100%;
-    page-break-after: always;
-
-    &:last-of-type {
-      page-break-after: avoid;
-    }
-  }
-
-  .page-break {
-    display: none;
   }
 }

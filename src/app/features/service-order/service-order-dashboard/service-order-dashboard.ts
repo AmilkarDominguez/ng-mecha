@@ -67,9 +67,10 @@ export class ServiceOrderDashboard {
   onPrint(order: ServiceOrder): void {
     this.dialog.open(ServiceOrderPrintModal, {
       data: order,
-      width: '95vw',
-      maxWidth: '1200px',
-      maxHeight: '90vh',
+      width: '840px',      // ancho A4 (210mm ≈ 794px) + margen lateral
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      autoFocus: false,
       panelClass: 'service-order-print-panel',
     });
   }
