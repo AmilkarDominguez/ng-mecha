@@ -45,6 +45,8 @@ DROP FUNCTION IF EXISTS delete_service_order_payment(UUID) CASCADE;
 DROP FUNCTION IF EXISTS apply_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) CASCADE;
 DROP FUNCTION IF EXISTS reconcile_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) CASCADE;
 DROP FUNCTION IF EXISTS reverse_batch_purchase(UUID) CASCADE;
+DROP FUNCTION IF EXISTS apply_external_service_expense(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) CASCADE;
+DROP FUNCTION IF EXISTS reverse_external_service_expenses_for_order(UUID) CASCADE;
 
 
 -- ============================================================

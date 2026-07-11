@@ -957,3 +957,103 @@ $$;
 
 REVOKE ALL ON FUNCTION reverse_batch_purchase(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION reverse_batch_purchase(UUID) TO anon, authenticated;
+
+
+-- ============================================================
+-- v21 — Service Orders: RPCs atomicas para el egreso de
+-- trabajos adicionales / servicios externos (Pago servicio externo)
+-- ============================================================
+
+-- Inserta el movimiento de egreso de UNA linea de service_order_external_services
+-- y descuenta el saldo. Se llama una vez por cada linea con bank_account_id
+-- seleccionado, tanto al crear la orden como al re-crear las lineas en una
+-- edicion (ver reverse_external_service_expenses_for_order mas abajo).
+CREATE OR REPLACE FUNCTION apply_external_service_expense(
+  p_line_id         UUID,
+  p_bank_account_id UUID,
+  p_cost            NUMERIC,
+  p_quantity        NUMERIC,
+  p_concept         TEXT,
+  p_user_id         UUID
+)
+RETURNS bank_account_histories
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_account bank_accounts%ROWTYPE;
+  v_type_id UUID;
+  v_amount  NUMERIC(10,2);
+  v_history bank_account_histories%ROWTYPE;
+BEGIN
+  v_amount := COALESCE(p_cost, 0) * COALESCE(p_quantity, 0);
+  IF v_amount <= 0 THEN
+    RAISE EXCEPTION 'El costo y la cantidad deben ser mayores a 0 para registrar el egreso en la cuenta bancaria.';
+  END IF;
+
+  SELECT id INTO v_type_id FROM bank_transaction_types WHERE name = 'Pago servicio externo' AND type = 'EXPENSE' LIMIT 1;
+  IF v_type_id IS NULL THEN
+    RAISE EXCEPTION 'No se encontro el tipo de transaccion "Pago servicio externo".';
+  END IF;
+
+  SELECT * INTO v_account FROM bank_accounts WHERE id = p_bank_account_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cuenta bancaria no encontrada.';
+  END IF;
+
+  UPDATE bank_accounts SET balance = COALESCE(balance, 0) - v_amount WHERE id = p_bank_account_id
+    RETURNING balance INTO v_account.balance;
+
+  INSERT INTO bank_account_histories (
+    bank_account_id, user_id, transaction_type_id, amount, balance, transaction_reference, concept
+  ) VALUES (
+    p_bank_account_id, p_user_id, v_type_id, v_amount, v_account.balance,
+    p_line_id::TEXT, p_concept
+  ) RETURNING * INTO v_history;
+
+  RETURN v_history;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION apply_external_service_expense(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION apply_external_service_expense(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) TO anon, authenticated;
+
+-- Revierte TODOS los movimientos de egreso de servicios externos de una
+-- orden (busca por transaction_reference entre los ids de sus lineas
+-- actuales) y los elimina. Debe llamarse ANTES de deleteLinesByOrderId,
+-- mientras las lineas viejas todavia existen para poder encontrarlas.
+CREATE OR REPLACE FUNCTION reverse_external_service_expenses_for_order(p_service_order_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_type_id UUID;
+  v_row     RECORD;
+BEGIN
+  SELECT id INTO v_type_id FROM bank_transaction_types WHERE name = 'Pago servicio externo' AND type = 'EXPENSE' LIMIT 1;
+  IF v_type_id IS NULL THEN
+    RETURN;
+  END IF;
+
+  FOR v_row IN
+    SELECT h.id AS history_id, h.bank_account_id, h.amount
+    FROM bank_account_histories h
+    WHERE h.transaction_type_id = v_type_id
+      AND h.transaction_reference IN (
+        SELECT id::TEXT FROM service_order_external_services WHERE service_order_id = p_service_order_id
+      )
+    FOR UPDATE OF h
+  LOOP
+    IF v_row.bank_account_id IS NOT NULL THEN
+      UPDATE bank_accounts SET balance = COALESCE(balance, 0) + COALESCE(v_row.amount, 0) WHERE id = v_row.bank_account_id;
+    END IF;
+    DELETE FROM bank_account_histories WHERE id = v_row.history_id;
+  END LOOP;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION reverse_external_service_expenses_for_order(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION reverse_external_service_expenses_for_order(UUID) TO anon, authenticated;

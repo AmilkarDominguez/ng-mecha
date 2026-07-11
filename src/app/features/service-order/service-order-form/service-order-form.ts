@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -25,11 +26,13 @@ import {
   ServiceOrderServiceRow,
   ServiceOrderBatchRow,
   ServiceOrderExternalServiceRow,
+  ServiceOrderExternalService,
   OrderServiceLine,
   OrderBatchLine,
   OrderExternalLine,
 } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { SPServiceOrderExternalExpense } from '../../../core/services/supabase/sb-service-order-external-expense';
 import { AuthService } from '../../../core/auth/services/auth.service';
 
 const IVA_RATE = 0.13;
@@ -61,6 +64,7 @@ const IVA_RATE = 0.13;
 })
 export class ServiceOrderForm implements OnInit {
   private serviceOrderProvider = inject(SPServiceOrder);
+  private externalExpenseService = inject(SPServiceOrderExternalExpense);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -240,10 +244,21 @@ export class ServiceOrderForm implements OnInit {
   private executeUpdate(orderId: string, payload: object): void {
     this.serviceOrderProvider.update({ id: orderId, ...payload } as ServiceOrder).subscribe({
       next: () => {
-        this.serviceOrderProvider.deleteLinesByOrderId(orderId).subscribe({
-          next: () => this.saveLines(orderId, 'Orden actualizada correctamente'),
-          error: () => {
-            this.snackBar.open('Error al sincronizar las líneas', 'Cerrar', { duration: 4000 });
+        this.externalExpenseService.reverseForOrder(orderId).subscribe({
+          next: () => {
+            this.serviceOrderProvider.deleteLinesByOrderId(orderId).subscribe({
+              next: () => this.saveLines(orderId, 'Orden actualizada correctamente'),
+              error: () => {
+                this.snackBar.open('Error al sincronizar las líneas', 'Cerrar', { duration: 4000 });
+              },
+            });
+          },
+          error: (err: unknown) => {
+            this.snackBar.open(
+              (err as Error)?.message ?? 'No se pudieron revertir los egresos de servicios externos; no se actualizó la orden.',
+              'Cerrar',
+              { duration: 5000 },
+            );
           },
         });
       },
@@ -286,7 +301,13 @@ export class ServiceOrderForm implements OnInit {
     const saves: Observable<unknown>[] = [];
     if (servicesToSave.length > 0)  saves.push(this.serviceOrderProvider.bulkAddServices(servicesToSave) as Observable<unknown>);
     if (batchesToSave.length > 0)   saves.push(this.serviceOrderProvider.bulkAddBatches(batchesToSave) as Observable<unknown>);
-    if (externalToSave.length > 0)  saves.push(this.serviceOrderProvider.bulkAddExternalServices(externalToSave) as Observable<unknown>);
+    if (externalToSave.length > 0) {
+      saves.push(
+        this.serviceOrderProvider.bulkAddExternalServices(externalToSave).pipe(
+          switchMap((created) => this.applyExternalExpenses(created)),
+        ) as Observable<unknown>,
+      );
+    }
 
     if (saves.length === 0) {
       this.snackBar.open(successMessage, 'Cerrar', { duration: 3000 });
@@ -310,6 +331,39 @@ export class ServiceOrderForm implements OnInit {
         },
       });
     }
+  }
+
+  private applyExternalExpenses(rows: ServiceOrderExternalService[]): Observable<unknown> {
+    const withAccount = rows.filter((r) => r.bank_account_id);
+    if (withAccount.length === 0) return of(null);
+
+    const originalRows = this.externalRows();
+    const applies = withAccount.map((r) => {
+      const original = originalRows.find(
+        (o) => o.external_service_id === r.external_service_id && o.bank_account_id === r.bank_account_id,
+      );
+      const concept = 'Servicio externo' + (original?.external_service_name ? ' — ' + original.external_service_name : '');
+      return this.externalExpenseService
+        .apply({
+          lineId: r.id,
+          bankAccountId: r.bank_account_id!,
+          cost: r.cost,
+          quantity: r.quantity,
+          concept,
+          userId: this.auth.currentUser()?.id ?? null,
+        })
+        .pipe(
+          catchError((err: unknown) => {
+            this.snackBar.open(
+              (err as Error)?.message ?? 'No se pudo registrar el egreso de un servicio externo',
+              'Cerrar',
+              { duration: 5000 },
+            );
+            return of(null);
+          }),
+        );
+    });
+    return forkJoin(applies);
   }
 
   private toServiceRow(l: OrderServiceLine): ServiceOrderServiceRow {
