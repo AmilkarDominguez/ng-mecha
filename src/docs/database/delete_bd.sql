@@ -42,6 +42,9 @@ DROP FUNCTION IF EXISTS set_updated_at() CASCADE;
 DROP FUNCTION IF EXISTS register_service_order_payment(UUID, UUID, UUID, NUMERIC, TEXT, UUID) CASCADE;
 DROP FUNCTION IF EXISTS edit_service_order_payment(UUID, UUID, NUMERIC, TEXT) CASCADE;
 DROP FUNCTION IF EXISTS delete_service_order_payment(UUID) CASCADE;
+DROP FUNCTION IF EXISTS apply_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) CASCADE;
+DROP FUNCTION IF EXISTS reconcile_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) CASCADE;
+DROP FUNCTION IF EXISTS reverse_batch_purchase(UUID) CASCADE;
 
 
 -- ============================================================

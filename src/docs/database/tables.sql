@@ -366,6 +366,10 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
   updated_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
 
+-- batches.bank_account_id se agrega aqui (no en la definicion de la tabla
+-- #9) porque bank_accounts todavia no existia en ese punto del script.
+ALTER TABLE batches ADD COLUMN IF NOT EXISTS bank_account_id UUID REFERENCES bank_accounts(id) ON DELETE SET NULL;
+
 -- 17b. bank_account_histories
 -- transaction_reference guarda el id de la entidad relacionada con el
 -- movimiento (por ejemplo, service_orders.id para pagos de orden de
@@ -672,6 +676,194 @@ GRANT EXECUTE ON FUNCTION delete_service_order_payment(UUID) TO anon, authentica
 
 
 -- ============================================================
+-- Inventory: RPCs atomicas para la compra de lote (Compra lote
+-- de productos) — bank_account_id en batches, ver ALTER arriba.
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION apply_batch_purchase(
+  p_batch_id        UUID,
+  p_bank_account_id UUID,
+  p_cost            NUMERIC,
+  p_stock           NUMERIC,
+  p_code            TEXT,
+  p_user_id         UUID
+)
+RETURNS bank_account_histories
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_account bank_accounts%ROWTYPE;
+  v_type_id UUID;
+  v_amount  NUMERIC(10,2);
+  v_history bank_account_histories%ROWTYPE;
+BEGIN
+  v_amount := COALESCE(p_cost, 0) * COALESCE(p_stock, 0);
+  IF v_amount <= 0 THEN
+    RAISE EXCEPTION 'El costo y el stock deben ser mayores a 0 para registrar la compra en la cuenta bancaria.';
+  END IF;
+
+  SELECT id INTO v_type_id FROM bank_transaction_types WHERE name = 'Compra lote de productos' AND type = 'EXPENSE' LIMIT 1;
+  IF v_type_id IS NULL THEN
+    RAISE EXCEPTION 'No se encontro el tipo de transaccion "Compra lote de productos".';
+  END IF;
+
+  SELECT * INTO v_account FROM bank_accounts WHERE id = p_bank_account_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cuenta bancaria no encontrada.';
+  END IF;
+
+  UPDATE bank_accounts SET balance = COALESCE(balance, 0) - v_amount WHERE id = p_bank_account_id
+    RETURNING balance INTO v_account.balance;
+
+  INSERT INTO bank_account_histories (
+    bank_account_id, user_id, transaction_type_id, amount, balance, transaction_reference, concept
+  ) VALUES (
+    p_bank_account_id, p_user_id, v_type_id, v_amount, v_account.balance,
+    p_batch_id::TEXT, 'Compra de lote' || CASE WHEN p_code IS NOT NULL AND p_code <> '' THEN ' ' || p_code ELSE '' END
+  ) RETURNING * INTO v_history;
+
+  RETURN v_history;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION apply_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION apply_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) TO anon, authenticated;
+
+CREATE OR REPLACE FUNCTION reconcile_batch_purchase(
+  p_batch_id        UUID,
+  p_bank_account_id UUID,
+  p_cost            NUMERIC,
+  p_stock           NUMERIC,
+  p_code            TEXT,
+  p_user_id         UUID
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_existing    bank_account_histories%ROWTYPE;
+  v_type_id     UUID;
+  v_amount      NUMERIC(10,2);
+  v_old_account bank_accounts%ROWTYPE;
+  v_new_account bank_accounts%ROWTYPE;
+BEGIN
+  SELECT id INTO v_type_id FROM bank_transaction_types WHERE name = 'Compra lote de productos' AND type = 'EXPENSE' LIMIT 1;
+  IF v_type_id IS NULL THEN
+    RAISE EXCEPTION 'No se encontro el tipo de transaccion "Compra lote de productos".';
+  END IF;
+
+  SELECT * INTO v_existing FROM bank_account_histories
+    WHERE transaction_reference = p_batch_id::TEXT AND transaction_type_id = v_type_id
+    FOR UPDATE;
+
+  IF NOT FOUND AND p_bank_account_id IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF NOT FOUND AND p_bank_account_id IS NOT NULL THEN
+    PERFORM apply_batch_purchase(p_batch_id, p_bank_account_id, p_cost, p_stock, p_code, p_user_id);
+    RETURN;
+  END IF;
+
+  IF FOUND AND p_bank_account_id IS NULL THEN
+    IF v_existing.bank_account_id IS NOT NULL THEN
+      UPDATE bank_accounts SET balance = COALESCE(balance, 0) + COALESCE(v_existing.amount, 0) WHERE id = v_existing.bank_account_id;
+    END IF;
+    DELETE FROM bank_account_histories WHERE id = v_existing.id;
+    RETURN;
+  END IF;
+
+  v_amount := COALESCE(p_cost, 0) * COALESCE(p_stock, 0);
+  IF v_amount <= 0 THEN
+    RAISE EXCEPTION 'El costo y el stock deben ser mayores a 0 para registrar la compra en la cuenta bancaria.';
+  END IF;
+
+  IF v_existing.bank_account_id IS NOT NULL AND v_existing.bank_account_id <> p_bank_account_id THEN
+    PERFORM 1 FROM bank_accounts WHERE id IN (v_existing.bank_account_id, p_bank_account_id) ORDER BY id FOR UPDATE;
+
+    SELECT * INTO v_new_account FROM bank_accounts WHERE id = p_bank_account_id;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Cuenta bancaria destino no encontrada.';
+    END IF;
+
+    SELECT * INTO v_old_account FROM bank_accounts WHERE id = v_existing.bank_account_id;
+  ELSE
+    SELECT * INTO v_new_account FROM bank_accounts WHERE id = p_bank_account_id FOR UPDATE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Cuenta bancaria destino no encontrada.';
+    END IF;
+  END IF;
+
+  IF v_existing.bank_account_id = p_bank_account_id THEN
+    -- EGRESO: revertir el monto anterior es sumarlo, aplicar el nuevo es
+    -- restarlo (al reves que un pago de orden de servicio, que es INGRESO).
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) + COALESCE(v_existing.amount, 0) - v_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+  ELSE
+    IF v_old_account.id IS NOT NULL THEN
+      UPDATE bank_accounts
+        SET balance = COALESCE(balance, 0) + COALESCE(v_existing.amount, 0)
+        WHERE id = v_old_account.id
+        RETURNING * INTO v_old_account;
+    END IF;
+
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) - v_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+  END IF;
+
+  UPDATE bank_account_histories
+    SET bank_account_id = p_bank_account_id,
+        amount = v_amount,
+        balance = v_new_account.balance,
+        concept = 'Compra de lote' || CASE WHEN p_code IS NOT NULL AND p_code <> '' THEN ' ' || p_code ELSE '' END
+    WHERE id = v_existing.id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION reconcile_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION reconcile_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) TO anon, authenticated;
+
+CREATE OR REPLACE FUNCTION reverse_batch_purchase(p_batch_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_existing bank_account_histories%ROWTYPE;
+  v_type_id  UUID;
+BEGIN
+  SELECT id INTO v_type_id FROM bank_transaction_types WHERE name = 'Compra lote de productos' AND type = 'EXPENSE' LIMIT 1;
+  IF v_type_id IS NULL THEN
+    RETURN;
+  END IF;
+
+  SELECT * INTO v_existing FROM bank_account_histories
+    WHERE transaction_reference = p_batch_id::TEXT AND transaction_type_id = v_type_id
+    FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN;
+  END IF;
+
+  UPDATE bank_accounts SET balance = COALESCE(balance, 0) + COALESCE(v_existing.amount, 0) WHERE id = v_existing.bank_account_id;
+  DELETE FROM bank_account_histories WHERE id = v_existing.id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION reverse_batch_purchase(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION reverse_batch_purchase(UUID) TO anon, authenticated;
+
+
+-- ============================================================
 -- INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_users_email              ON users(email);
@@ -684,6 +876,7 @@ CREATE INDEX IF NOT EXISTS idx_batches_warehouse_id     ON batches(warehouse_id)
 CREATE INDEX IF NOT EXISTS idx_batches_supplier_id      ON batches(supplier_id);
 CREATE INDEX IF NOT EXISTS idx_batches_industry_id      ON batches(industry_id);
 CREATE INDEX IF NOT EXISTS idx_batches_brand_id         ON batches(brand_id);
+CREATE INDEX IF NOT EXISTS idx_batches_bank_account_id  ON batches(bank_account_id);
 CREATE INDEX IF NOT EXISTS idx_contacts_reference_id    ON contacts(reference_id);
 CREATE INDEX IF NOT EXISTS idx_mechanics_state           ON mechanics(state);
 CREATE INDEX IF NOT EXISTS idx_services_state            ON services(state);

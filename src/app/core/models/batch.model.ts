@@ -7,6 +7,7 @@ export interface Batch {
   supplier_id: string;
   industry_id: string;
   brand_id: string | null;
+  bank_account_id?: string | null;
   cost: number | null;
   price: number | null;
   code: string | null;

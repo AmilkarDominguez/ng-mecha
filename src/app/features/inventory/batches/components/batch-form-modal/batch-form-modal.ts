@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -8,12 +8,15 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Batch } from '../../../../../core/models/batch.model';
 import { Product } from '../../../../../core/models/product.model';
 import { Warehouse } from '../../../../../core/models/warehouse.model';
 import { Supplier } from '../../../../../core/models/supplier.model';
 import { Industry } from '../../../../../core/models/industry.model';
 import { Brand } from '../../../../../core/models/brand.model';
+import { SPBankAccount } from '../../../../../core/services/supabase/sb-bank-account';
 
 export interface BatchFormData {
   batch?: Batch;
@@ -42,7 +45,12 @@ export interface BatchFormData {
 export class BatchFormModal implements OnInit {
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<BatchFormModal>);
+  private bankAccountService = inject(SPBankAccount);
+  private snackBar = inject(MatSnackBar);
   readonly data: BatchFormData = inject(MAT_DIALOG_DATA);
+
+  private readonly bankAccounts = toSignal(this.bankAccountService.listen(), { initialValue: [] });
+  readonly activeBankAccounts = computed(() => this.bankAccounts().filter((a) => a.state === 'ACTIVE'));
 
   get isEditMode(): boolean {
     return !!this.data?.batch;
@@ -54,6 +62,7 @@ export class BatchFormModal implements OnInit {
     supplier_id: ['', [Validators.required]],
     industry_id: ['', [Validators.required]],
     brand_id: [null as string | null],
+    bank_account_id: [null as string | null],
     code: [null as string | null, [Validators.maxLength(80)]],
     stock: [null as number | null, [Validators.min(0)]],
     cost: [null as number | null, [Validators.min(0)]],
@@ -74,6 +83,7 @@ export class BatchFormModal implements OnInit {
         supplier_id: batch.supplier_id,
         industry_id: batch.industry_id,
         brand_id: batch.brand_id,
+        bank_account_id: batch.bank_account_id ?? null,
         code: batch.code,
         stock: batch.stock,
         cost: batch.cost,
@@ -93,15 +103,30 @@ export class BatchFormModal implements OnInit {
       return;
     }
     const raw = this.form.value;
+    const cost = raw.cost !== null && raw.cost !== undefined ? Number(raw.cost) : null;
+    const stock = raw.stock !== null && raw.stock !== undefined ? Number(raw.stock) : null;
+
+    if (raw.bank_account_id && (!cost || !stock)) {
+      this.form.controls.cost.markAsTouched();
+      this.form.controls.stock.markAsTouched();
+      this.snackBar.open(
+        'Debe indicar costo y stock mayores a 0 para registrar la compra en la cuenta bancaria.',
+        'Cerrar',
+        { duration: 4000 },
+      );
+      return;
+    }
+
     this.dialogRef.close({
       product_id: raw.product_id!,
       warehouse_id: raw.warehouse_id!,
       supplier_id: raw.supplier_id!,
       industry_id: raw.industry_id!,
       brand_id: raw.brand_id || null,
+      bank_account_id: raw.bank_account_id || null,
       code: raw.code || null,
-      stock: raw.stock !== null && raw.stock !== undefined ? Number(raw.stock) : null,
-      cost: raw.cost !== null && raw.cost !== undefined ? Number(raw.cost) : null,
+      stock,
+      cost,
       price: raw.price !== null && raw.price !== undefined ? Number(raw.price) : null,
       description: raw.description || null,
       compatible_brands: raw.compatible_brands || null,

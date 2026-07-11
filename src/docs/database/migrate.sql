@@ -729,3 +729,231 @@ $$;
 
 REVOKE ALL ON FUNCTION delete_service_order_payment(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION delete_service_order_payment(UUID) TO anon, authenticated;
+
+
+-- ============================================================
+-- v20 — Inventory Module: bank_account_id en batches + RPCs
+-- atomicas para la compra de lote (Compra lote de productos)
+-- ============================================================
+ALTER TABLE batches ADD COLUMN IF NOT EXISTS bank_account_id UUID REFERENCES bank_accounts(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_batches_bank_account_id ON batches(bank_account_id);
+
+-- Inserta el movimiento de egreso y descuenta el saldo. Se usa al crear un
+-- lote con cuenta bancaria seleccionada, y tambien la reutiliza
+-- reconcile_batch_purchase() cuando una edicion pasa de "sin cuenta" a
+-- "con cuenta".
+CREATE OR REPLACE FUNCTION apply_batch_purchase(
+  p_batch_id        UUID,
+  p_bank_account_id UUID,
+  p_cost            NUMERIC,
+  p_stock           NUMERIC,
+  p_code            TEXT,
+  p_user_id         UUID
+)
+RETURNS bank_account_histories
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_account bank_accounts%ROWTYPE;
+  v_type_id UUID;
+  v_amount  NUMERIC(10,2);
+  v_history bank_account_histories%ROWTYPE;
+BEGIN
+  v_amount := COALESCE(p_cost, 0) * COALESCE(p_stock, 0);
+  IF v_amount <= 0 THEN
+    RAISE EXCEPTION 'El costo y el stock deben ser mayores a 0 para registrar la compra en la cuenta bancaria.';
+  END IF;
+
+  SELECT id INTO v_type_id FROM bank_transaction_types WHERE name = 'Compra lote de productos' AND type = 'EXPENSE' LIMIT 1;
+  IF v_type_id IS NULL THEN
+    RAISE EXCEPTION 'No se encontro el tipo de transaccion "Compra lote de productos".';
+  END IF;
+
+  SELECT * INTO v_account FROM bank_accounts WHERE id = p_bank_account_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cuenta bancaria no encontrada.';
+  END IF;
+
+  UPDATE bank_accounts SET balance = COALESCE(balance, 0) - v_amount WHERE id = p_bank_account_id
+    RETURNING balance INTO v_account.balance;
+
+  INSERT INTO bank_account_histories (
+    bank_account_id, user_id, transaction_type_id, amount, balance, transaction_reference, concept
+  ) VALUES (
+    p_bank_account_id, p_user_id, v_type_id, v_amount, v_account.balance,
+    p_batch_id::TEXT, 'Compra de lote' || CASE WHEN p_code IS NOT NULL AND p_code <> '' THEN ' ' || p_code ELSE '' END
+  ) RETURNING * INTO v_history;
+
+  RETURN v_history;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION apply_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION apply_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) TO anon, authenticated;
+
+-- Reconcilia el movimiento existente de un lote (si lo hay) contra el
+-- estado actual del formulario tras una edicion. Cubre los 4 casos:
+-- sin registro + sin cuenta (no-op), sin registro + nueva cuenta (crea),
+-- con registro + cuenta removida (revierte y elimina), con registro +
+-- cuenta igual o distinta (recalcula el monto y ajusta balances).
+CREATE OR REPLACE FUNCTION reconcile_batch_purchase(
+  p_batch_id        UUID,
+  p_bank_account_id UUID,
+  p_cost            NUMERIC,
+  p_stock           NUMERIC,
+  p_code            TEXT,
+  p_user_id         UUID
+)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_existing    bank_account_histories%ROWTYPE;
+  v_type_id     UUID;
+  v_amount      NUMERIC(10,2);
+  v_old_account bank_accounts%ROWTYPE;
+  v_new_account bank_accounts%ROWTYPE;
+BEGIN
+  SELECT id INTO v_type_id FROM bank_transaction_types WHERE name = 'Compra lote de productos' AND type = 'EXPENSE' LIMIT 1;
+  IF v_type_id IS NULL THEN
+    RAISE EXCEPTION 'No se encontro el tipo de transaccion "Compra lote de productos".';
+  END IF;
+
+  SELECT * INTO v_existing FROM bank_account_histories
+    WHERE transaction_reference = p_batch_id::TEXT AND transaction_type_id = v_type_id
+    FOR UPDATE;
+
+  IF NOT FOUND AND p_bank_account_id IS NULL THEN
+    RETURN;
+  END IF;
+
+  IF NOT FOUND AND p_bank_account_id IS NOT NULL THEN
+    PERFORM apply_batch_purchase(p_batch_id, p_bank_account_id, p_cost, p_stock, p_code, p_user_id);
+    RETURN;
+  END IF;
+
+  IF FOUND AND p_bank_account_id IS NULL THEN
+    -- v_existing.bank_account_id puede ser NULL si la cuenta original ya fue
+    -- eliminada (ON DELETE SET NULL en bank_account_histories.bank_account_id):
+    -- en ese caso no hay saldo que revertir, solo se limpia el registro.
+    IF v_existing.bank_account_id IS NOT NULL THEN
+      UPDATE bank_accounts SET balance = COALESCE(balance, 0) + COALESCE(v_existing.amount, 0) WHERE id = v_existing.bank_account_id;
+    END IF;
+    DELETE FROM bank_account_histories WHERE id = v_existing.id;
+    RETURN;
+  END IF;
+
+  -- Caso: habia un movimiento y sigue habiendo cuenta seleccionada (igual o
+  -- distinta). Se valida explicitamente que la cuenta destino exista *antes*
+  -- de tocar cualquier saldo (en vez de confiar solo en el FK de
+  -- bank_account_histories.bank_account_id, que daria un error generico y
+  -- dejaria ambiguo cual de las dos cuentas fallo).
+  v_amount := COALESCE(p_cost, 0) * COALESCE(p_stock, 0);
+  IF v_amount <= 0 THEN
+    RAISE EXCEPTION 'El costo y el stock deben ser mayores a 0 para registrar la compra en la cuenta bancaria.';
+  END IF;
+
+  IF v_existing.bank_account_id IS NOT NULL AND v_existing.bank_account_id <> p_bank_account_id THEN
+    -- Bloquea ambas cuentas (origen y destino) en una sola sentencia y en
+    -- orden deterministico por id, para evitar deadlocks si otra
+    -- reconciliacion concurrente intercambia las mismas dos cuentas en
+    -- sentido opuesto (A<-B a la vez que B<-A).
+    PERFORM 1 FROM bank_accounts WHERE id IN (v_existing.bank_account_id, p_bank_account_id) ORDER BY id FOR UPDATE;
+
+    SELECT * INTO v_new_account FROM bank_accounts WHERE id = p_bank_account_id;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Cuenta bancaria destino no encontrada.';
+    END IF;
+
+    -- v_old_account puede no encontrarse si la cuenta original ya fue
+    -- eliminada (ON DELETE SET NULL); en ese caso no hay saldo previo que
+    -- revertir, solo se aplica el nuevo egreso a la cuenta destino.
+    SELECT * INTO v_old_account FROM bank_accounts WHERE id = v_existing.bank_account_id;
+  ELSE
+    SELECT * INTO v_new_account FROM bank_accounts WHERE id = p_bank_account_id FOR UPDATE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Cuenta bancaria destino no encontrada.';
+    END IF;
+  END IF;
+
+  IF v_existing.bank_account_id = p_bank_account_id THEN
+    -- Misma cuenta: un solo movimiento neto. OJO CON EL SIGNO: esto es un
+    -- EGRESO (registrarlo resta del balance), lo opuesto a un pago de orden
+    -- de servicio (que es un INGRESO y suma). Revertir un egreso es SUMAR
+    -- el monto anterior; aplicar el nuevo egreso es RESTAR el monto nuevo.
+    -- Formula: balance + monto_anterior - monto_nuevo (NO al reves).
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) + COALESCE(v_existing.amount, 0) - v_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+  ELSE
+    -- Cuenta distinta: la cuenta anterior recupera su monto (si aun existe)
+    -- y la cuenta destino descuenta el nuevo monto. Verifica al final que
+    -- ambos saldos reflejen exactamente el delta esperado.
+    IF v_old_account.id IS NOT NULL THEN
+      UPDATE bank_accounts
+        SET balance = COALESCE(balance, 0) + COALESCE(v_existing.amount, 0)
+        WHERE id = v_old_account.id
+        RETURNING * INTO v_old_account;
+
+      IF v_old_account.balance IS DISTINCT FROM NULL
+         AND v_old_account.balance < 0
+         AND COALESCE(v_existing.amount, 0) > 0 THEN
+        RAISE WARNING 'La cuenta % quedo con saldo negativo (%) tras revertir un egreso.', v_old_account.id, v_old_account.balance;
+      END IF;
+    END IF;
+
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) - v_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+  END IF;
+
+  UPDATE bank_account_histories
+    SET bank_account_id = p_bank_account_id,
+        amount = v_amount,
+        balance = v_new_account.balance,
+        concept = 'Compra de lote' || CASE WHEN p_code IS NOT NULL AND p_code <> '' THEN ' ' || p_code ELSE '' END
+    WHERE id = v_existing.id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION reconcile_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION reconcile_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) TO anon, authenticated;
+
+-- Revierte el movimiento de un lote (si existe) antes de eliminarlo, para
+-- no dejar un egreso huerfano sin lote asociado.
+CREATE OR REPLACE FUNCTION reverse_batch_purchase(p_batch_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_existing bank_account_histories%ROWTYPE;
+  v_type_id  UUID;
+BEGIN
+  SELECT id INTO v_type_id FROM bank_transaction_types WHERE name = 'Compra lote de productos' AND type = 'EXPENSE' LIMIT 1;
+  IF v_type_id IS NULL THEN
+    RETURN;
+  END IF;
+
+  SELECT * INTO v_existing FROM bank_account_histories
+    WHERE transaction_reference = p_batch_id::TEXT AND transaction_type_id = v_type_id
+    FOR UPDATE;
+
+  IF NOT FOUND THEN
+    RETURN;
+  END IF;
+
+  UPDATE bank_accounts SET balance = COALESCE(balance, 0) + COALESCE(v_existing.amount, 0) WHERE id = v_existing.bank_account_id;
+  DELETE FROM bank_account_histories WHERE id = v_existing.id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION reverse_batch_purchase(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION reverse_batch_purchase(UUID) TO anon, authenticated;

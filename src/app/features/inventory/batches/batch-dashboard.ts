@@ -8,11 +8,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Batch } from '../../../core/models/batch.model';
 import { SPBatch } from '../../../core/services/supabase/sb-batch';
+import { SPBatchPurchase } from '../../../core/services/supabase/sb-batch-purchase';
 import { SPProduct } from '../../../core/services/supabase/sb-product';
 import { SPWarehouse } from '../../../core/services/supabase/sb-warehouse';
 import { SPSupplier } from '../../../core/services/supabase/sb-supplier';
 import { SPIndustry } from '../../../core/services/supabase/sb-industry';
 import { SPBrand } from '../../../core/services/supabase/sb-brand';
+import { AuthService } from '../../../core/auth/services/auth.service';
 import { BatchTable } from './components/batch-table/batch-table';
 import {
   BatchFormModal,
@@ -37,6 +39,8 @@ export class BatchDashboard {
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
   private service = inject(SPBatch);
+  private batchPurchaseService = inject(SPBatchPurchase);
+  private auth = inject(AuthService);
 
   readonly batches = toSignal(this.service.listen(), { initialValue: [] });
   readonly products = toSignal(inject(SPProduct).listen(), { initialValue: [] });
@@ -90,8 +94,34 @@ export class BatchDashboard {
         state: result.state ?? 'ACTIVE',
       };
 
-      this.service.add(newBatch).subscribe(() => {
-        this.snackBar.open('Lote registrado correctamente', 'Cerrar', { duration: 3000 });
+      this.service.add(newBatch).subscribe({
+        next: (data) => {
+          this.snackBar.open('Lote registrado correctamente', 'Cerrar', { duration: 3000 });
+          const created = data[0];
+          if (created && newBatch.bank_account_id) {
+            this.batchPurchaseService
+              .apply({
+                batchId: created.id,
+                bankAccountId: newBatch.bank_account_id,
+                cost: created.cost,
+                stock: created.stock,
+                code: created.code,
+                userId: this.auth.currentUser()?.id ?? null,
+              })
+              .subscribe({
+                error: (err) => {
+                  this.snackBar.open(
+                    err?.message ?? 'Lote registrado, pero no se pudo registrar la compra en la cuenta bancaria',
+                    'Cerrar',
+                    { duration: 5000 },
+                  );
+                },
+              });
+          }
+        },
+        error: () => {
+          this.snackBar.open('Error al registrar el lote', 'Cerrar', { duration: 4000 });
+        },
       });
     });
   }
@@ -113,8 +143,31 @@ export class BatchDashboard {
     ref.afterClosed().subscribe((result) => {
       if (!result) return;
 
-      this.service.update({ ...result, id: batch.id }).subscribe(() => {
-        this.snackBar.open('Lote actualizado correctamente', 'Cerrar', { duration: 3000 });
+      this.service.update({ ...result, id: batch.id }).subscribe({
+        next: () => {
+          this.snackBar.open('Lote actualizado correctamente', 'Cerrar', { duration: 3000 });
+          this.batchPurchaseService
+            .reconcile({
+              batchId: batch.id,
+              bankAccountId: result.bank_account_id ?? null,
+              cost: result.cost,
+              stock: result.stock,
+              code: result.code,
+              userId: this.auth.currentUser()?.id ?? null,
+            })
+            .subscribe({
+              error: (err) => {
+                this.snackBar.open(
+                  err?.message ?? 'Lote actualizado, pero no se pudo ajustar el movimiento bancario',
+                  'Cerrar',
+                  { duration: 5000 },
+                );
+              },
+            });
+        },
+        error: () => {
+          this.snackBar.open('Error al actualizar el lote', 'Cerrar', { duration: 4000 });
+        },
       });
     });
   }
@@ -144,8 +197,19 @@ export class BatchDashboard {
     ref.afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
 
-      this.service.delete(batch.id).subscribe(() => {
-        this.snackBar.open('Lote eliminado', 'Cerrar', { duration: 3000 });
+      this.batchPurchaseService.reverse(batch.id).subscribe({
+        next: () => {
+          this.service.delete(batch.id).subscribe(() => {
+            this.snackBar.open('Lote eliminado', 'Cerrar', { duration: 3000 });
+          });
+        },
+        error: (err) => {
+          this.snackBar.open(
+            err?.message ?? 'No se pudo revertir el movimiento bancario del lote; no se eliminó.',
+            'Cerrar',
+            { duration: 5000 },
+          );
+        },
       });
     });
   }
