@@ -105,7 +105,7 @@ export class SPServiceOrder {
       order: from(
         this.supabase
           .from(this.TABLE)
-          .select('*, customer:customers(id,name,lastname,ci,phone), vehicle:vehicles(id,license_plate,brand,model,year), mechanic:mechanics(id,name,lastname)')
+          .select('*, customer:customers(id,name,lastname,ci,phone), vehicle:vehicles(id,license_plate,brand,model,year), mechanic:mechanics(id,name,lastname), user:users(id,name,lastname)')
           .eq('id', id)
           .single(),
       ).pipe(map(({ data, error }) => { if (error) throw error; return data; })),

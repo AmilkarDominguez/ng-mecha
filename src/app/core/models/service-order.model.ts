@@ -122,6 +122,7 @@ export interface OrderExternalLine {
 
 export interface ServiceOrderWithLines extends ServiceOrder {
   mechanic: { id: string; name: string | null; lastname: string | null } | null;
+  user: { id: string; name: string | null; lastname: string | null } | null;
   order_services: OrderServiceLine[];
   order_batches: OrderBatchLine[];
   order_externals: OrderExternalLine[];

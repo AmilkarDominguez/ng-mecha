@@ -91,6 +91,10 @@
           <span class="detail-label">Registrado</span>
           <span class="detail-value">{{ d.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
         </div>
+        <div class="detail-section">
+          <span class="detail-label">Registrado por</span>
+          <span class="detail-value">{{ userLabel(d) }}</span>
+        </div>
       </div>
 
       @if (d.description) {

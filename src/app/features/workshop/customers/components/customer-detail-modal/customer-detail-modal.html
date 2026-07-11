@@ -39,6 +39,11 @@
       </div>
 
       <div class="detail-section">
+        <span class="detail-label">Órdenes de Servicio</span>
+        <span class="detail-value">{{ customer.order_count ?? 0 }}</span>
+      </div>
+
+      <div class="detail-section">
         <span class="detail-label">Calificación</span>
         @if (customer.rating) {
           <span class="detail-value detail-rating"

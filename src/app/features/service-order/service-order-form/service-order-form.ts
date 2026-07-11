@@ -30,6 +30,7 @@ import {
   OrderExternalLine,
 } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { AuthService } from '../../../core/auth/services/auth.service';
 
 const IVA_RATE = 0.13;
 
@@ -63,10 +64,12 @@ export class ServiceOrderForm implements OnInit {
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private auth = inject(AuthService);
 
-  readonly isEditMode  = signal(false);
-  readonly editOrderId = signal<string | null>(null);
-  readonly loading     = signal(false);
+  readonly isEditMode     = signal(false);
+  readonly editOrderId    = signal<string | null>(null);
+  readonly loading        = signal(false);
+  readonly originalUserId = signal<string | null>(null);
 
   readonly customerTabValue = signal<CustomerTabValue | null>(null);
 
@@ -121,6 +124,7 @@ export class ServiceOrderForm implements OnInit {
       this.loading.set(true);
       this.serviceOrderProvider.getWithLines(id).subscribe({
         next: (order) => {
+          this.originalUserId.set(order.user_id);
           this.summaryForm.patchValue({
             number:       order.number ?? '',
             payment_type: order.payment_type,
@@ -191,7 +195,7 @@ export class ServiceOrderForm implements OnInit {
       customer_id:           tab.customer_id,
       vehicle_id:            tab.vehicle_id,
       mechanic_id:           tab.mechanic_id,
-      user_id:               null,
+      user_id:               this.isEditMode() ? this.originalUserId() : (this.auth.currentUser()?.id ?? null),
       number:                raw.number || null,
       description:           raw.description || null,
       total:                 this.total(),

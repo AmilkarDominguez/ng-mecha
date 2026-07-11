@@ -21,11 +21,16 @@ export class SPCustomer {
   }
 
   public get(): Observable<Customer[]> {
-    return from(this.supabase.from(this.TABLE_NAME).select('*')).pipe(
+    return from(this.supabase.from(this.TABLE_NAME).select('*, service_orders(count)')).pipe(
       switchMap(({ data, error }) => {
         if (error) throw error;
-        const customers: Customer[] = data ?? [];
-        if (!customers.length) return of([]);
+        const rows: (Customer & { service_orders?: { count: number }[] })[] = data ?? [];
+        if (!rows.length) return of([]);
+
+        const customers: Customer[] = rows.map((row) => {
+          const { service_orders, ...customer } = row;
+          return { ...customer, order_count: service_orders?.[0]?.count ?? 0 };
+        });
 
         const ids = customers.map((c) => c.id);
         return from(
@@ -44,7 +49,7 @@ export class SPCustomer {
   }
 
   public add(item: Customer): Observable<Customer[]> {
-    const { id, created_at, updated_at, contacts, ...payload } = item;
+    const { id, created_at, updated_at, contacts, order_count, ...payload } = item;
     return from(this.supabase.from(this.TABLE_NAME).insert([payload]).select()).pipe(
       switchMap(({ data, error }) => {
         if (error) throw error;
@@ -59,7 +64,7 @@ export class SPCustomer {
   }
 
   public update(item: Customer): Observable<Customer[]> {
-    const { created_at, updated_at, contacts, ...payload } = item;
+    const { created_at, updated_at, contacts, order_count, ...payload } = item;
     return from(
       this.supabase.from(this.TABLE_NAME).update(payload).eq('id', item.id).select(),
     ).pipe(

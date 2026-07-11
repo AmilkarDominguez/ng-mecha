@@ -15,6 +15,7 @@ export interface Customer {
   rating: CustomerRating | null;
   state: EntityState;
   contacts?: Contact[];
+  order_count?: number;
   created_at?: string | Date;
   updated_at?: string | Date;
 }

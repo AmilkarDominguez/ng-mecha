@@ -79,6 +79,12 @@ export class ServiceOrderDetailModal implements OnInit {
     return [m.name, m.lastname].filter(Boolean).join(' ') || '—';
   }
 
+  userLabel(d: ServiceOrderWithLines): string {
+    const u = d.user;
+    if (!u) return 'Sistema';
+    return [u.name, u.lastname].filter(Boolean).join(' ') || '—';
+  }
+
   serviceName(line: OrderServiceLine): string {
     return line.service?.name ?? '—';
   }

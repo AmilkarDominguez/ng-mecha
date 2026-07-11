@@ -9,26 +9,26 @@ Esto ayuda a identificar rápidamente la frecuencia de visitas de cada cliente.
 ## Pasos
 
 1. **Actualiza el servicio de clientes**
-   - En `src/app/core/services/supabase/sb-customer.ts`, agrega un método `getWithOrderCount()` (o modifica `get()`) que haga un join o consulta adicional para obtener el conteo de órdenes de servicio por cliente.
-   - Ejemplo de query Supabase: `select('*, service_orders(count)')` — esto retorna el conteo embebido.
-   - Si el servicio usa datos mock, agrega el campo `order_count: number` en los datos de prueba.
+   - En `src/app/core/services/supabase/sb-customer.ts`, dentro de `get()`, amplía el `select('*')` actual a `select('*, service_orders(count)')`. **Verificado contra el Supabase real del proyecto**: PostgREST soporta el conteo embebido vía la FK `service_orders.customer_id → customers.id` y devuelve la forma `service_orders: [{ count: N }]` (array de un solo elemento), no un número plano.
+   - `get()` ya hace un segundo query para traer `contacts` y mergearlos manualmente (mismo archivo, líneas ~23-44) — sigue exactamente ese mismo patrón: al mapear `customers.map((c) => ({ ...c, contacts: ... }))`, agrega también `order_count: (c as any).service_orders?.[0]?.count ?? 0` y elimina la propiedad cruda `service_orders` del objeto final para no filtrarla al resto de la app.
+   - No crees un método nuevo `getWithOrderCount()` — el dashboard de clientes ya usa `service.listen()` que internamente llama a `get()`; ampliar `get()` directamente evita tener dos fuentes de verdad.
 
 2. **Actualiza el modelo TypeScript**
-   - En `src/app/core/models/customer.model.ts`, agrega `order_count?: number` como campo opcional en la interfaz `Customer` (o crea una interfaz derivada `CustomerWithCount`).
+   - En `src/app/core/models/customer.model.ts`, agrega `order_count?: number` como campo opcional en la interfaz `Customer` (junto a `contacts?: Contact[]`).
 
 3. **Actualiza la tabla de clientes**
-   - En `src/app/features/workshop/customers/components/customer-table/`, agrega una columna "Órdenes" que muestre el conteo `order_count` de cada cliente.
-   - Ubícala antes de la columna de acciones.
-   - Si el valor es `0` o `undefined`, mostrar `0`.
+   - En `src/app/features/workshop/customers/components/customer-table/customer-table.ts`, agrega `'orderCount'` al array `displayedColumns` (antes de `'actions'`), y un caso `case 'orderCount': return item.order_count ?? 0;` en `sortingDataAccessor` para que la columna sea ordenable (sigue el mismo patrón que las demás columnas de esa tabla, que usa `MatTableDataSource` + `MatSort`, a diferencia de otras tablas del proyecto que no ordenan).
+   - En `customer-table.html`, agrega la columna "Órdenes" (`matColumnDef="orderCount"`) mostrando `{{ customer.order_count ?? 0 }}`, ubicada antes de la columna de acciones.
 
 4. **Actualiza el modal de detalles del cliente**
-   - En `src/app/features/workshop/customers/components/customer-detail-modal/`, agrega una sección que muestre "Total de órdenes de servicio: N".
+   - En `src/app/features/workshop/customers/components/customer-detail-modal/`, agrega una sección/`detail-section` que muestre "Órdenes de Servicio" con el valor `customer.order_count ?? 0`.
 
-5. **Actualiza el dashboard de clientes**
-   - En `src/app/features/workshop/customers/customer-dashboard.ts`, usa el método actualizado del servicio que incluye el conteo.
+5. **Dashboard de clientes**
+   - No requiere cambios: `customer-dashboard.ts` ya usa `toSignal(this.service.listen(), ...)`, que reflejará automáticamente el `order_count` una vez ampliado `get()`.
 
 ## Consideraciones
 - Toma como referencia los componentes existentes en `src/app/features/workshop/customers/`.
-- Si Supabase no soporta el conteo embebido directamente, usa una segunda consulta en el servicio y combina los resultados con `combineLatest` o `forkJoin` de RxJS.
+- El conteo embebido de PostgREST ya fue probado y funciona en este proyecto — no hace falta el fallback de `combineLatest`/`forkJoin` con una segunda consulta a `service_orders`.
 - Sigue las convenciones del CLAUDE.md: signals, Angular Material, sin HTTP.
 - No modifica la estructura de la base de datos (es solo lectura).
+- Cuidado con `add()`/`update()` en `sb-customer.ts`: ya destructuran `contacts` fuera del payload antes de insertar/actualizar; si `order_count` llega a estar presente en el objeto pasado a esos métodos (no debería, es derivado y de solo lectura), tampoco debe enviarse a Supabase — decestrúctúralo igual que `contacts` por seguridad.

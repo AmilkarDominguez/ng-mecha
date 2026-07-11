@@ -31,7 +31,7 @@ export class CustomerTable implements AfterViewInit {
   view = output<Customer>();
   delete = output<Customer>();
 
-  readonly displayedColumns = ['fullName', 'ci', 'nit', 'phone', 'rating', 'state', 'actions'];
+  readonly displayedColumns = ['fullName', 'ci', 'nit', 'phone', 'rating', 'state', 'orderCount', 'actions'];
 
   dataSource = new MatTableDataSource<Customer>([]);
 
@@ -56,6 +56,7 @@ export class CustomerTable implements AfterViewInit {
         case 'phone': return (item.phone ?? '').toLowerCase();
         case 'rating': return item.rating ?? '';
         case 'state': return item.state;
+        case 'orderCount': return item.order_count ?? 0;
         default: return '';
       }
     };
