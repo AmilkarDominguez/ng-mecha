@@ -82,6 +82,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/accounting/bank-transaction-types/bank-transaction-type-dashboard').then(m => m.BankTransactionTypeDashboard),
       },
       {
+        path: 'cuentas/ingresos',
+        loadComponent: () => import('./features/accounting/income-report/income-report-dashboard').then(m => m.IncomeReportDashboard),
+      },
+      {
+        path: 'cuentas/egresos',
+        loadComponent: () => import('./features/accounting/expense-report/expense-report-dashboard').then(m => m.ExpenseReportDashboard),
+      },
+      {
         path: 'admin/usuarios',
         loadComponent: () => import('./features/admin/users/user-dashboard').then(m => m.UserDashboard),
       },

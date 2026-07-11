@@ -1,0 +1,124 @@
+.expense-report-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.page-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+}
+
+.page-subtitle {
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.filters-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-accounts {
+  flex: 1;
+  min-width: 18rem;
+  max-width: 28rem;
+}
+
+.filter-date {
+  width: 12rem;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 3.5rem;
+}
+
+.summary-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.summary-label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--mat-sys-error);
+}
+
+.result-count {
+  margin-left: auto;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.expense-table {
+  width: 100%;
+  min-width: 48rem;
+
+  th.mat-header-cell {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+  }
+
+  td.mat-cell {
+    font-size: 0.875rem;
+  }
+}
+
+.cell-amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.empty-row {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 48rem) {
+  .page-title {
+    font-size: 1.375rem;
+  }
+
+  .filter-accounts,
+  .filter-date {
+    width: 100%;
+    max-width: none;
+  }
+}

@@ -4,6 +4,13 @@ import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { BankAccountHistory } from '../../models/bank-account-history.model';
+import { BankTransactionKind } from '../../models/bank-transaction-type.model';
+
+export interface TransactionReportFilters {
+  bankAccountIds?: string[];
+  from?: string;
+  to?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class SPBankAccountHistory {
@@ -38,6 +45,34 @@ export class SPBankAccountHistory {
         .eq('transaction_type_id', transactionTypeId)
         .order('created_at', { ascending: false }),
     ).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return data ?? [];
+      }),
+    );
+  }
+
+  public getByTransactionKind(
+    kind: BankTransactionKind,
+    filters: TransactionReportFilters,
+  ): Observable<BankAccountHistory[]> {
+    let query = this.supabase
+      .from(this.TABLE_NAME)
+      .select('*, bank_account:bank_accounts(id,name,number), transaction_type:bank_transaction_types!inner(id,name,type)')
+      .eq('transaction_type.type', kind)
+      .order('created_at', { ascending: false });
+
+    if (filters.bankAccountIds?.length) {
+      query = query.in('bank_account_id', filters.bankAccountIds);
+    }
+    if (filters.from) {
+      query = query.gte('created_at', `${filters.from}T00:00:00`);
+    }
+    if (filters.to) {
+      query = query.lte('created_at', `${filters.to}T23:59:59`);
+    }
+
+    return from(query).pipe(
       map(({ data, error }) => {
         if (error) throw error;
         return data ?? [];
