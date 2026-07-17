@@ -112,19 +112,19 @@ export class SPServiceOrder {
       services: from(
         this.supabase
           .from(this.TABLE_SERVICES)
-          .select('*, service:services(name,code)')
+          .select('*, service:services(name,code), quote:quotes(number)')
           .eq('service_order_id', id),
       ).pipe(map(({ data, error }) => { if (error) throw error; return data ?? []; })),
       batches: from(
         this.supabase
           .from(this.TABLE_BATCHES)
-          .select('*, batch:batches(description, product:products(name), industry:industries(name))')
+          .select('*, batch:batches(description, product:products(name), industry:industries(name)), quote:quotes(number)')
           .eq('service_order_id', id),
       ).pipe(map(({ data, error }) => { if (error) throw error; return data ?? []; })),
       externals: from(
         this.supabase
           .from(this.TABLE_EXTERNAL)
-          .select('*, external_service:external_services(name,company_name)')
+          .select('*, external_service:external_services(name,company_name), quote:quotes(number)')
           .eq('service_order_id', id),
       ).pipe(map(({ data, error }) => { if (error) throw error; return data ?? []; })),
     }).pipe(

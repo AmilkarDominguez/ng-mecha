@@ -136,6 +136,7 @@ export class TabExternal {
       id: crypto.randomUUID(),
       external_service_id: service.id,
       service_order_id: null,
+      quote_id: null,
       bank_account_id: raw.bank_account_id ?? null,
       cost: raw.cost ?? null,
       price,

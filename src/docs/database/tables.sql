@@ -408,6 +408,16 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
+DO $$ BEGIN
+  CREATE TYPE quote_state_enum AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED', 'CONVERTED', 'CANCELED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+DO $$ BEGIN
+  CREATE TYPE reservation_state_enum AS ENUM ('ACTIVE', 'CONSUMED', 'RELEASED', 'EXPIRED');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
 -- 18. service_orders
 CREATE TABLE IF NOT EXISTS service_orders (
   id                    UUID                 PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -474,6 +484,110 @@ CREATE TABLE IF NOT EXISTS service_order_external_services (
   created_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
   updated_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW()
 );
+
+
+-- ============================================================
+-- Quotes Module — diseno completo en .claude/commands/quote-module.md
+-- ============================================================
+
+-- 22. quotes
+CREATE TABLE IF NOT EXISTS quotes (
+  id                          UUID               PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id                 UUID               NOT NULL REFERENCES customers(id)     ON DELETE RESTRICT,
+  vehicle_id                  UUID               REFERENCES vehicles(id)                ON DELETE SET NULL,
+  user_id                     UUID               REFERENCES users(id)                   ON DELETE SET NULL,
+  converted_service_order_id  UUID               REFERENCES service_orders(id)          ON DELETE SET NULL,
+  number                      TEXT,
+  description                 TEXT,
+  total                       NUMERIC(10,2),
+  iva                         NUMERIC(10,2),
+  total_iva                   NUMERIC(10,2),
+  with_iva                    BOOLEAN            NOT NULL DEFAULT false,
+  expiration_date             DATE,
+  state                       quote_state_enum   NOT NULL DEFAULT 'PENDING',
+  created_at                  TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
+  updated_at                  TIMESTAMPTZ        NOT NULL DEFAULT NOW()
+);
+
+-- 23. quote_services
+CREATE TABLE IF NOT EXISTS quote_services (
+  id          UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
+  quote_id    UUID           NOT NULL REFERENCES quotes(id)  ON DELETE CASCADE,
+  service_id  UUID           REFERENCES services(id)          ON DELETE SET NULL,
+  discount    NUMERIC(8,2),
+  price       NUMERIC(8,2),
+  quantity    NUMERIC,
+  subtotal    NUMERIC(8,2),
+  created_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ    NOT NULL DEFAULT NOW()
+);
+
+-- 24. quote_batches
+CREATE TABLE IF NOT EXISTS quote_batches (
+  id             UUID                 PRIMARY KEY DEFAULT gen_random_uuid(),
+  quote_id       UUID                 NOT NULL REFERENCES quotes(id) ON DELETE CASCADE,
+  batch_id       UUID                 REFERENCES batches(id)          ON DELETE SET NULL,
+  description    TEXT,
+  delivery_time  delivery_time_enum   NOT NULL DEFAULT 'IMMEDIATE',
+  quantity       NUMERIC,
+  price          NUMERIC(8,2),
+  discount       NUMERIC(8,2),
+  subtotal       NUMERIC(8,2),
+  created_at     TIMESTAMPTZ          NOT NULL DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ          NOT NULL DEFAULT NOW()
+);
+
+-- 25. quote_external_services
+CREATE TABLE IF NOT EXISTS quote_external_services (
+  id                   UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
+  quote_id             UUID             NOT NULL REFERENCES quotes(id)           ON DELETE CASCADE,
+  external_service_id  UUID             REFERENCES external_services(id)         ON DELETE SET NULL,
+  cost                 NUMERIC(8,2),
+  price                NUMERIC(8,2),
+  quantity             NUMERIC,
+  subtotal             NUMERIC(8,2),
+  created_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
+  updated_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW()
+);
+
+-- 26. batch_reservations — no tiene CRUD de usuario, solo la tocan las RPCs de abajo
+CREATE TABLE IF NOT EXISTS batch_reservations (
+  id              UUID                     PRIMARY KEY DEFAULT gen_random_uuid(),
+  quote_batch_id  UUID                     NOT NULL REFERENCES quote_batches(id) ON DELETE CASCADE,
+  batch_id        UUID                     NOT NULL REFERENCES batches(id)       ON DELETE RESTRICT,
+  quantity        NUMERIC                  NOT NULL,
+  reserved_until  DATE                     NOT NULL,
+  state           reservation_state_enum   NOT NULL DEFAULT 'ACTIVE',
+  created_at      TIMESTAMPTZ              NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ              NOT NULL DEFAULT NOW()
+);
+
+-- quote_id de trazabilidad (nullable) en las 3 tablas pivote de Orden de
+-- Servicio. No hay quote_id de cabecera en service_orders (ver entities.md).
+ALTER TABLE service_order_services          ADD COLUMN IF NOT EXISTS quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL;
+ALTER TABLE service_order_batches           ADD COLUMN IF NOT EXISTS quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL;
+ALTER TABLE service_order_external_services ADD COLUMN IF NOT EXISTS quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL;
+
+-- Vista: stock disponible = stock fisico - reservas activas de cotizaciones
+-- vigentes - compromisos de ordenes ya en curso. batches.stock NUNCA se
+-- descuenta por cotizaciones ni por ordenes.
+CREATE OR REPLACE VIEW batch_available_stock AS
+SELECT
+  b.id AS batch_id,
+  b.stock,
+  COALESCE(b.stock, 0)
+    - COALESCE((
+        SELECT SUM(r.quantity) FROM batch_reservations r
+        WHERE r.batch_id = b.id AND r.state = 'ACTIVE' AND r.reserved_until >= CURRENT_DATE
+      ), 0)
+    - COALESCE((
+        SELECT SUM(sob.quantity) FROM service_order_batches sob
+        JOIN service_orders so ON so.id = sob.service_order_id
+        WHERE sob.batch_id = b.id AND so.state = 'IN_PROGRESS'
+      ), 0) AS available_stock
+FROM batches b;
+
+GRANT SELECT ON batch_available_stock TO anon, authenticated;
 
 
 -- ============================================================
@@ -956,6 +1070,203 @@ GRANT EXECUTE ON FUNCTION reverse_external_service_expenses_for_order(UUID) TO a
 
 
 -- ============================================================
+-- Quotes: RPCs atomicas (reserva / liberacion / conversion)
+-- ============================================================
+
+-- Aprueba una cotizacion PENDING: reserva stock (FOR UPDATE por lote,
+-- orden deterministico por batch_id para evitar deadlocks) de sus lineas
+-- IMMEDIATE con batch_id no nulo. Si algun lote no tiene disponibilidad
+-- suficiente, aborta toda la aprobacion (ninguna reserva parcial).
+CREATE OR REPLACE FUNCTION reserve_quote_batches(p_quote_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_quote        quotes%ROWTYPE;
+  v_line         RECORD;
+  v_batch        batches%ROWTYPE;
+  v_available    NUMERIC;
+  v_product_name TEXT;
+BEGIN
+  SELECT * INTO v_quote FROM quotes WHERE id = p_quote_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cotizacion no encontrada.';
+  END IF;
+  IF v_quote.state <> 'PENDING' THEN
+    RAISE EXCEPTION 'Solo se puede aprobar una cotizacion en estado Pendiente.';
+  END IF;
+  IF v_quote.expiration_date IS NULL OR v_quote.expiration_date < CURRENT_DATE THEN
+    RAISE EXCEPTION 'La cotizacion debe tener una fecha de vencimiento valida (hoy o posterior) para poder aprobarse.';
+  END IF;
+
+  FOR v_line IN
+    SELECT qb.id, qb.batch_id, qb.quantity
+    FROM quote_batches qb
+    WHERE qb.quote_id = p_quote_id
+      AND qb.delivery_time = 'IMMEDIATE'
+      AND qb.batch_id IS NOT NULL
+    ORDER BY qb.batch_id
+  LOOP
+    SELECT * INTO v_batch FROM batches WHERE id = v_line.batch_id FOR UPDATE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Repuesto no encontrado.';
+    END IF;
+
+    v_available := COALESCE(v_batch.stock, 0)
+      - COALESCE((SELECT SUM(r.quantity) FROM batch_reservations r WHERE r.batch_id = v_batch.id AND r.state = 'ACTIVE' AND r.reserved_until >= CURRENT_DATE), 0)
+      - COALESCE((SELECT SUM(sob.quantity) FROM service_order_batches sob JOIN service_orders so ON so.id = sob.service_order_id WHERE sob.batch_id = v_batch.id AND so.state = 'IN_PROGRESS'), 0);
+
+    IF COALESCE(v_line.quantity, 0) > v_available THEN
+      SELECT p.name INTO v_product_name FROM products p WHERE p.id = v_batch.product_id;
+      RAISE EXCEPTION 'Stock insuficiente para "%": disponible %, solicitado %.',
+        COALESCE(v_product_name, v_batch.code, v_batch.id::TEXT), v_available, v_line.quantity;
+    END IF;
+
+    INSERT INTO batch_reservations (quote_batch_id, batch_id, quantity, reserved_until, state)
+    VALUES (v_line.id, v_batch.id, v_line.quantity, v_quote.expiration_date, 'ACTIVE');
+  END LOOP;
+
+  UPDATE quotes SET state = 'APPROVED' WHERE id = p_quote_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION reserve_quote_batches(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION reserve_quote_batches(UUID) TO anon, authenticated;
+
+-- Libera las reservas activas de una cotizacion y la mueve al estado
+-- indicado (REJECTED, CANCELED o EXPIRED). Una cotizacion PENDING sin
+-- reservas puede rechazarse/anularse con un UPDATE directo sin pasar por
+-- aqui (no tiene nada que liberar).
+CREATE OR REPLACE FUNCTION release_quote_reservations(p_quote_id UUID, p_target_state TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_quote              quotes%ROWTYPE;
+  v_reservation_state  reservation_state_enum;
+BEGIN
+  SELECT * INTO v_quote FROM quotes WHERE id = p_quote_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cotizacion no encontrada.';
+  END IF;
+
+  v_reservation_state := CASE WHEN p_target_state = 'EXPIRED' THEN 'EXPIRED'::reservation_state_enum ELSE 'RELEASED'::reservation_state_enum END;
+
+  UPDATE batch_reservations
+    SET state = v_reservation_state
+    WHERE quote_batch_id IN (SELECT id FROM quote_batches WHERE quote_id = p_quote_id)
+      AND state = 'ACTIVE';
+
+  UPDATE quotes SET state = p_target_state::quote_state_enum WHERE id = p_quote_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION release_quote_reservations(UUID, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION release_quote_reservations(UUID, TEXT) TO anon, authenticated;
+
+-- Convierte una cotizacion APPROVED completa hacia una orden de servicio
+-- (nueva o ya IN_PROGRESS): copia sus 3 tipos de linea con quote_id de
+-- trazabilidad, consume sus reservas, y recalcula el total de la orden
+-- desde cero (suma de TODAS sus lineas, no un delta incremental) para
+-- que convertir una segunda cotizacion sobre una orden ya abierta nunca
+-- desincronice el total.
+CREATE OR REPLACE FUNCTION convert_quote_to_order(p_quote_id UUID, p_service_order_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_quote     quotes%ROWTYPE;
+  v_order     service_orders%ROWTYPE;
+  v_total     NUMERIC(10,2);
+  v_iva       NUMERIC(10,2);
+  v_total_iva NUMERIC(10,2);
+  v_must      NUMERIC(10,2);
+BEGIN
+  SELECT * INTO v_quote FROM quotes WHERE id = p_quote_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cotizacion no encontrada.';
+  END IF;
+  IF v_quote.state <> 'APPROVED' THEN
+    RAISE EXCEPTION 'Solo se puede convertir una cotizacion en estado Aprobada.';
+  END IF;
+
+  SELECT * INTO v_order FROM service_orders WHERE id = p_service_order_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orden de servicio no encontrada.';
+  END IF;
+
+  INSERT INTO service_order_services (service_order_id, quote_id, service_id, discount, price, quantity, subtotal)
+  SELECT p_service_order_id, p_quote_id, service_id, discount, price, quantity, subtotal
+  FROM quote_services WHERE quote_id = p_quote_id;
+
+  INSERT INTO service_order_batches (service_order_id, quote_id, batch_id, quantity, delivery_time, price, discount, subtotal)
+  SELECT p_service_order_id, p_quote_id, batch_id, quantity, delivery_time, price, discount, subtotal
+  FROM quote_batches WHERE quote_id = p_quote_id;
+
+  INSERT INTO service_order_external_services (service_order_id, quote_id, external_service_id, cost, price, quantity, subtotal)
+  SELECT p_service_order_id, p_quote_id, external_service_id, cost, price, quantity, subtotal
+  FROM quote_external_services WHERE quote_id = p_quote_id;
+
+  UPDATE batch_reservations
+    SET state = 'CONSUMED'
+    WHERE quote_batch_id IN (SELECT id FROM quote_batches WHERE quote_id = p_quote_id)
+      AND state = 'ACTIVE';
+
+  SELECT
+    COALESCE((SELECT SUM(subtotal) FROM service_order_services WHERE service_order_id = p_service_order_id), 0)
+    + COALESCE((SELECT SUM(subtotal) FROM service_order_batches WHERE service_order_id = p_service_order_id), 0)
+    + COALESCE((SELECT SUM(subtotal) FROM service_order_external_services WHERE service_order_id = p_service_order_id), 0)
+  INTO v_total;
+
+  v_iva       := CASE WHEN v_order.with_iva THEN v_total * 0.13 ELSE 0 END;
+  v_total_iva := v_total + v_iva;
+  v_must      := GREATEST((CASE WHEN v_order.with_iva THEN v_total_iva ELSE v_total END) - COALESCE(v_order.have, 0), 0);
+
+  UPDATE service_orders
+    SET total = v_total, iva = v_iva, total_iva = v_total_iva, must = v_must
+    WHERE id = p_service_order_id;
+
+  UPDATE quotes SET state = 'CONVERTED', converted_service_order_id = p_service_order_id WHERE id = p_quote_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION convert_quote_to_order(UUID, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION convert_quote_to_order(UUID, UUID) TO anon, authenticated;
+
+-- Resolucion perezosa de vencimientos (no hay cron en el proyecto): se
+-- invoca best-effort desde SPQuote al cargar el dashboard de Cotizaciones.
+CREATE OR REPLACE FUNCTION expire_overdue_quote_reservations()
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_quote_id UUID;
+BEGIN
+  FOR v_quote_id IN
+    SELECT id FROM quotes WHERE state = 'APPROVED' AND expiration_date < CURRENT_DATE FOR UPDATE
+  LOOP
+    UPDATE batch_reservations
+      SET state = 'EXPIRED'
+      WHERE quote_batch_id IN (SELECT id FROM quote_batches WHERE quote_id = v_quote_id)
+        AND state = 'ACTIVE';
+    UPDATE quotes SET state = 'EXPIRED' WHERE id = v_quote_id;
+  END LOOP;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION expire_overdue_quote_reservations() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION expire_overdue_quote_reservations() TO anon, authenticated;
+
+
+-- ============================================================
 -- INDEXES
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_users_email              ON users(email);
@@ -984,6 +1295,20 @@ CREATE INDEX IF NOT EXISTS idx_service_order_batches_order_id       ON service_o
 CREATE INDEX IF NOT EXISTS idx_service_order_external_order_id      ON service_order_external_services(service_order_id);
 CREATE INDEX IF NOT EXISTS idx_bah_bank_account_id                  ON bank_account_histories(bank_account_id);
 CREATE INDEX IF NOT EXISTS idx_bah_transaction_reference            ON bank_account_histories(transaction_reference);
+CREATE INDEX IF NOT EXISTS idx_quotes_customer_id                ON quotes(customer_id);
+CREATE INDEX IF NOT EXISTS idx_quotes_vehicle_id                 ON quotes(vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_quotes_state                      ON quotes(state);
+CREATE INDEX IF NOT EXISTS idx_quotes_converted_service_order_id ON quotes(converted_service_order_id);
+CREATE INDEX IF NOT EXISTS idx_quote_services_quote_id           ON quote_services(quote_id);
+CREATE INDEX IF NOT EXISTS idx_quote_batches_quote_id            ON quote_batches(quote_id);
+CREATE INDEX IF NOT EXISTS idx_quote_batches_batch_id            ON quote_batches(batch_id);
+CREATE INDEX IF NOT EXISTS idx_quote_external_services_quote_id  ON quote_external_services(quote_id);
+CREATE INDEX IF NOT EXISTS idx_batch_reservations_quote_batch_id ON batch_reservations(quote_batch_id);
+CREATE INDEX IF NOT EXISTS idx_batch_reservations_batch_id       ON batch_reservations(batch_id);
+CREATE INDEX IF NOT EXISTS idx_batch_reservations_state          ON batch_reservations(state);
+CREATE INDEX IF NOT EXISTS idx_sos_quote_id ON service_order_services(quote_id);
+CREATE INDEX IF NOT EXISTS idx_sob_quote_id ON service_order_batches(quote_id);
+CREATE INDEX IF NOT EXISTS idx_soe_quote_id ON service_order_external_services(quote_id);
 
 
 -- ============================================================
@@ -1023,7 +1348,12 @@ BEGIN
     'service_orders',
     'service_order_services',
     'service_order_batches',
-    'service_order_external_services'
+    'service_order_external_services',
+    'quotes',
+    'quote_services',
+    'quote_batches',
+    'quote_external_services',
+    'batch_reservations'
   ] LOOP
     EXECUTE format(
       'DROP TRIGGER IF EXISTS trg_set_updated_at ON %I;
@@ -1062,6 +1392,11 @@ ALTER TABLE service_orders                     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_order_services             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_order_batches              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_order_external_services    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quotes                             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quote_services                     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quote_batches                      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quote_external_services            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE batch_reservations                 ENABLE ROW LEVEL SECURITY;
 
 
 -- ============================================================
@@ -1254,6 +1589,13 @@ CREATE POLICY "auth_delete_bank_accounts"
 CREATE POLICY "auth_all_bank_account_histories"
   ON bank_account_histories FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+-- Quotes Module
+CREATE POLICY "auth_all_quotes"                  ON quotes                  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all_quote_services"          ON quote_services          FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all_quote_batches"           ON quote_batches           FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all_quote_external_services" ON quote_external_services FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all_batch_reservations"      ON batch_reservations      FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 
 -- ============================================================
 -- RLS POLICIES — anon role (desarrollo sin auth activo)
@@ -1445,6 +1787,13 @@ CREATE POLICY "anon_delete_bank_accounts"
 CREATE POLICY "anon_all_bank_account_histories"
   ON bank_account_histories FOR ALL TO anon USING (true) WITH CHECK (true);
 
+-- Quotes Module
+CREATE POLICY "anon_all_quotes"                  ON quotes                  FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_quote_services"          ON quote_services          FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_quote_batches"           ON quote_batches           FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_quote_external_services" ON quote_external_services FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_batch_reservations"      ON batch_reservations      FOR ALL TO anon USING (true) WITH CHECK (true);
+
 
 -- ============================================================
 -- REALTIME — enable publications for live listening
@@ -1472,7 +1821,8 @@ BEGIN
     'vehicles',
     'bank_transaction_types',
     'bank_accounts',
-    'bank_account_histories'
+    'bank_account_histories',
+    'quotes'
   ] LOOP
     -- Add table to the supabase_realtime publication if not already present
     IF NOT EXISTS (

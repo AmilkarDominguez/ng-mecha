@@ -1,0 +1,157 @@
+<div class="tab-quote">
+
+  <div class="section-title">Agregar Cotización Aprobada</div>
+  <p class="hint">
+    Busque una cotización <strong>Aprobada</strong> del cliente (y vehículo, si corresponde) seleccionado
+    en la pestaña Cliente. Podrá revisar sus líneas antes de confirmar la adición.
+  </p>
+
+  @if (!customerId()) {
+    <p class="hint hint-warn">Seleccione primero un cliente en la pestaña "Cliente".</p>
+  } @else {
+    <div class="search-row">
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Cotización aprobada</mat-label>
+        <input matInput [formControl]="quoteCtrl" [matAutocomplete]="autoQuote"
+               placeholder="Número o total..." />
+        <mat-autocomplete #autoQuote="matAutocomplete" [displayWith]="displayQuote"
+                          (optionSelected)="onQuoteSelected($event.option.value)">
+          @for (q of filteredQuotes(); track q.id) {
+            <mat-option [value]="q">{{ quoteLabel(q) }}</mat-option>
+          }
+          @if (filteredQuotes().length === 0) {
+            <mat-option disabled>Sin cotizaciones aprobadas disponibles</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+    </div>
+  }
+
+  @if (loadingPreview()) {
+    <div class="preview-loading">
+      <mat-spinner diameter="32" />
+      <span>Cargando detalle de la cotización...</span>
+    </div>
+  }
+
+  @if (previewError()) {
+    <p class="hint hint-warn">No se pudo cargar el detalle de la cotización seleccionada.</p>
+  }
+
+  @if (!loadingPreview() && preview(); as p) {
+    <div class="quote-preview">
+
+      <div class="preview-header">
+        <span class="preview-number">{{ p.number ?? 'Sin número' }}</span>
+        @if (p.expiration_date) {
+          <span class="preview-expiration">Vence: {{ p.expiration_date }}</span>
+        }
+      </div>
+
+      @if (p.lines_services.length > 0) {
+        <div class="lines-section">
+          <span class="lines-title">Mano de Obra</span>
+          <table class="lines-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Servicio</th>
+                <th class="cell-num">Precio</th>
+                <th class="cell-num">Cant.</th>
+                <th class="cell-num">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of p.lines_services; track line.id; let i = $index) {
+                <tr>
+                  <td class="cell-idx">{{ i + 1 }}</td>
+                  <td>{{ serviceName(line) }}</td>
+                  <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
+                  <td class="cell-num">{{ line.quantity }}</td>
+                  <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (p.lines_batches.length > 0) {
+        <div class="lines-section">
+          <span class="lines-title">Repuestos e Insumos</span>
+          <table class="lines-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Producto</th>
+                <th>Entrega</th>
+                <th class="cell-num">Precio</th>
+                <th class="cell-num">Cant.</th>
+                <th class="cell-num">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of p.lines_batches; track line.id; let i = $index) {
+                <tr>
+                  <td class="cell-idx">{{ i + 1 }}</td>
+                  <td>{{ batchName(line) }}</td>
+                  <td>{{ line.delivery_time === 'IMMEDIATE' ? 'Inmediato' : 'Pedido' }}</td>
+                  <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
+                  <td class="cell-num">{{ line.quantity }}</td>
+                  <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (p.lines_externals.length > 0) {
+        <div class="lines-section">
+          <span class="lines-title">Servicios Externos</span>
+          <table class="lines-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Servicio</th>
+                <th class="cell-num">Costo</th>
+                <th class="cell-num">Precio</th>
+                <th class="cell-num">Cant.</th>
+                <th class="cell-num">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of p.lines_externals; track line.id; let i = $index) {
+                <tr>
+                  <td class="cell-idx">{{ i + 1 }}</td>
+                  <td>{{ externalServiceName(line) }}</td>
+                  <td class="cell-num">
+                    @if (line.cost != null) { Bs. {{ line.cost | number:'1.2-2' }} } @else { — }
+                  </td>
+                  <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
+                  <td class="cell-num">{{ line.quantity }}</td>
+                  <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <div class="preview-total">
+        <span class="preview-total-label">Total de la cotización</span>
+        <span class="preview-total-value">Bs. {{ p.total | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="preview-actions">
+        <button mat-stroked-button (click)="onCancelPreview()">Cancelar</button>
+        <button mat-flat-button color="primary" (click)="onConfirmAdd()">
+          <mat-icon>add_circle</mat-icon>
+          Agregar a la Orden
+        </button>
+      </div>
+
+    </div>
+  }
+
+</div>

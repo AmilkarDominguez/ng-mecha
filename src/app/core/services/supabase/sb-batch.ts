@@ -69,6 +69,20 @@ export class SPBatch {
     );
   }
 
+  /** batch_id → stock disponible (stock fisico - reservas activas de cotizaciones - compromisos de ordenes en curso). Ver batch_available_stock en quote-module.md #5. */
+  public getAvailableStock(): Observable<Record<string, number>> {
+    return from(this.supabase.from('batch_available_stock').select('batch_id, available_stock')).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        const result: Record<string, number> = {};
+        for (const row of data ?? []) {
+          result[row.batch_id] = row.available_stock ?? 0;
+        }
+        return result;
+      }),
+    );
+  }
+
   public listen(): Observable<Batch[]> {
     this.get().subscribe((items) => this.data$.next(items));
 

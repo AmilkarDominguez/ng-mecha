@@ -184,6 +184,18 @@
   font-weight: 600;
 }
 
+.quote-tag {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.0625rem 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: #ede7f6;
+  color: #5e35b1;
+  vertical-align: middle;
+}
+
 .financial-summary {
   display: flex;
   flex-direction: column;

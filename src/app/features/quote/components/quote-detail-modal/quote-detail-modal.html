@@ -1,0 +1,214 @@
+<app-dialog-frame title="Detalle de Cotización" icon="request_quote" initialSize="lg">
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40" />
+      <span>Cargando detalle...</span>
+    </div>
+  }
+
+  @if (hasError()) {
+    <div class="error-state">
+      <mat-icon>error_outline</mat-icon>
+      <span>No se pudo cargar el detalle de la cotización</span>
+    </div>
+  }
+
+  @if (!loading() && detail(); as d) {
+    <div class="detail-body">
+
+      <div class="quote-header">
+        <div class="quote-number-group">
+          <span class="quote-label">Cotización</span>
+          <span class="quote-value">{{ d.number ?? 'Sin número' }}</span>
+        </div>
+        <div class="quote-badges">
+          <span class="state-chip" [attr.data-state]="d.state">{{ stateLabel(d.state) }}</span>
+          @if (d.with_iva) {
+            <span class="iva-chip">Con IVA</span>
+          }
+        </div>
+      </div>
+
+      <mat-divider />
+
+      <div class="detail-columns">
+        <div class="detail-section">
+          <span class="detail-label">Cliente</span>
+          <span class="detail-value">{{ customerLabel(d) }}</span>
+          @if (d.customer?.ci) {
+            <span class="detail-sub">CI: {{ d.customer?.ci }}</span>
+          }
+          @if (d.customer?.phone) {
+            <span class="detail-sub">Tel: {{ d.customer?.phone }}</span>
+          }
+        </div>
+
+        <div class="detail-section">
+          <span class="detail-label">Vehículo</span>
+          <span class="detail-value">{{ vehicleLabel(d) }}</span>
+          @if (d.vehicle?.license_plate) {
+            <span class="detail-sub">Placa: {{ d.vehicle?.license_plate }}</span>
+          }
+        </div>
+      </div>
+
+      <div class="detail-columns detail-columns--four">
+        @if (d.expiration_date) {
+          <div class="detail-section">
+            <span class="detail-label">Vencimiento de Reserva</span>
+            <span class="detail-value">{{ d.expiration_date }}</span>
+          </div>
+        }
+        <div class="detail-section">
+          <span class="detail-label">Registrado</span>
+          <span class="detail-value">{{ d.created_at | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="detail-section">
+          <span class="detail-label">Registrado por</span>
+          <span class="detail-value">{{ userLabel(d) }}</span>
+        </div>
+      </div>
+
+      @if (d.description) {
+        <div class="detail-section">
+          <span class="detail-label">Observaciones</span>
+          <span class="detail-value">{{ d.description }}</span>
+        </div>
+      }
+
+      @if (d.lines_services.length > 0) {
+        <mat-divider />
+        <div class="lines-section">
+          <span class="lines-title">Mano de Obra</span>
+          <table class="lines-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Servicio</th>
+                <th class="cell-num">Precio</th>
+                <th class="cell-num">Cant.</th>
+                <th class="cell-num">Desc. %</th>
+                <th class="cell-num">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of d.lines_services; track line.id; let i = $index) {
+                <tr>
+                  <td class="cell-idx">{{ i + 1 }}</td>
+                  <td>{{ serviceName(line) }}</td>
+                  <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
+                  <td class="cell-num">{{ line.quantity }}</td>
+                  <td class="cell-num">{{ line.discount ?? 0 }}%</td>
+                  <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (d.lines_batches.length > 0) {
+        <mat-divider />
+        <div class="lines-section">
+          <span class="lines-title">Repuestos e Insumos</span>
+          <table class="lines-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Producto</th>
+                <th>Entrega</th>
+                <th class="cell-num">Precio</th>
+                <th class="cell-num">Cant.</th>
+                <th class="cell-num">Desc. %</th>
+                <th class="cell-num">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of d.lines_batches; track line.id; let i = $index) {
+                <tr>
+                  <td class="cell-idx">{{ i + 1 }}</td>
+                  <td>{{ batchName(line) }}</td>
+                  <td>{{ line.delivery_time === 'IMMEDIATE' ? 'Inmediato' : 'Pedido' }}</td>
+                  <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
+                  <td class="cell-num">{{ line.quantity }}</td>
+                  <td class="cell-num">{{ line.discount ?? 0 }}%</td>
+                  <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      @if (d.lines_externals.length > 0) {
+        <mat-divider />
+        <div class="lines-section">
+          <span class="lines-title">Servicios Externos</span>
+          <table class="lines-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Servicio</th>
+                <th class="cell-num">Costo</th>
+                <th class="cell-num">Precio</th>
+                <th class="cell-num">Cant.</th>
+                <th class="cell-num">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of d.lines_externals; track line.id; let i = $index) {
+                <tr>
+                  <td class="cell-idx">{{ i + 1 }}</td>
+                  <td>{{ externalServiceName(line) }}</td>
+                  <td class="cell-num">
+                    @if (line.cost != null) { Bs. {{ line.cost | number:'1.2-2' }} } @else { — }
+                  </td>
+                  <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
+                  <td class="cell-num">{{ line.quantity }}</td>
+                  <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+
+      <mat-divider />
+
+      <div class="financial-summary">
+        <div class="summary-row">
+          <span class="summary-label">Total</span>
+          <span class="summary-value">Bs. {{ d.total | number:'1.2-2' }}</span>
+        </div>
+        @if (d.with_iva && d.iva != null) {
+          <div class="summary-row">
+            <span class="summary-label">IVA (13%)</span>
+            <span class="summary-value">Bs. {{ d.iva | number:'1.2-2' }}</span>
+          </div>
+          <div class="summary-row summary-total">
+            <span class="summary-label">Total con IVA</span>
+            <span class="summary-value">Bs. {{ d.total_iva | number:'1.2-2' }}</span>
+          </div>
+        }
+      </div>
+
+      <mat-divider />
+
+      <div class="detail-section">
+        <span class="detail-label">ID de Cotización</span>
+        <span class="detail-value detail-id">{{ d.id }}</span>
+      </div>
+
+    </div>
+  }
+
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onClose()">Cerrar</button>
+    <button mat-stroked-button class="no-print" (click)="onPrint()">
+      <mat-icon>print</mat-icon>
+      Imprimir
+    </button>
+  </ng-container>
+
+</app-dialog-frame>

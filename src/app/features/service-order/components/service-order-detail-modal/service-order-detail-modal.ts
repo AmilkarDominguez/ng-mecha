@@ -1,10 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   OrderBatchLine,
   OrderExternalLine,
@@ -15,6 +16,7 @@ import {
 } from '../../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../../core/services/supabase/sb-service-order';
 import { DialogFrame } from '../../../../shared/components/dialog-frame/dialog-frame';
+import { AddQuoteToOrderModal } from '../add-quote-to-order-modal/add-quote-to-order-modal';
 
 @Component({
   selector: 'app-service-order-detail-modal',
@@ -26,6 +28,7 @@ import { DialogFrame } from '../../../../shared/components/dialog-frame/dialog-f
     MatDividerModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   templateUrl: './service-order-detail-modal.html',
   styleUrl: './service-order-detail-modal.scss',
@@ -33,6 +36,7 @@ import { DialogFrame } from '../../../../shared/components/dialog-frame/dialog-f
 export class ServiceOrderDetailModal implements OnInit {
   private dialogRef = inject(MatDialogRef<ServiceOrderDetailModal>);
   private orderService = inject(SPServiceOrder);
+  private dialog = inject(MatDialog);
   readonly order: ServiceOrder = inject(MAT_DIALOG_DATA);
 
   readonly loading = signal(true);
@@ -40,6 +44,11 @@ export class ServiceOrderDetailModal implements OnInit {
   readonly hasError = signal(false);
 
   ngOnInit(): void {
+    this.loadDetail();
+  }
+
+  private loadDetail(): void {
+    this.loading.set(true);
     this.orderService.getWithLines(this.order.id).subscribe({
       next: (data) => {
         this.detail.set(data);
@@ -49,6 +58,17 @@ export class ServiceOrderDetailModal implements OnInit {
         this.hasError.set(true);
         this.loading.set(false);
       },
+    });
+  }
+
+  onAddQuote(): void {
+    const ref = this.dialog.open(AddQuoteToOrderModal, {
+      hasBackdrop: false,
+      panelClass: 'floating-dialog-panel',
+      data: { order: this.order },
+    });
+    ref.afterClosed().subscribe((added: boolean) => {
+      if (added) this.loadDetail();
     });
   }
 
@@ -95,6 +115,11 @@ export class ServiceOrderDetailModal implements OnInit {
 
   externalServiceName(line: OrderExternalLine): string {
     return line.external_service?.name ?? '—';
+  }
+
+  quoteTag(line: { quote_id: string | null; quote: { number: string | null } | null }): string | null {
+    if (!line.quote_id) return null;
+    return line.quote?.number ?? line.quote_id.slice(0, 8);
   }
 
   onClose(): void {

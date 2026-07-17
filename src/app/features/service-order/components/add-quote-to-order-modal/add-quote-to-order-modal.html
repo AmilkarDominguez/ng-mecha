@@ -1,0 +1,139 @@
+<app-dialog-frame title="Agregar Cotización a la Orden" icon="request_quote" initialSize="md">
+
+  <div class="modal-body">
+
+    <p class="hint">
+      Solo se listan cotizaciones <strong>Aprobadas</strong> del mismo cliente
+      @if (data.order.vehicle_id) { y del mismo vehículo }. Revise sus líneas antes de
+      confirmar; al agregarla, el total de la orden se recalcula.
+    </p>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Cotización aprobada</mat-label>
+      <input matInput [formControl]="quoteCtrl" [matAutocomplete]="autoQuote"
+             placeholder="Número o total..." />
+      <mat-autocomplete #autoQuote="matAutocomplete" [displayWith]="displayQuote"
+                        (optionSelected)="onQuoteSelected($event.option.value)">
+        @for (q of filteredQuotes(); track q.id) {
+          <mat-option [value]="q">{{ quoteLabel(q) }}</mat-option>
+        }
+        @if (filteredQuotes().length === 0) {
+          <mat-option disabled>Sin cotizaciones aprobadas para este cliente</mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+
+    @if (loadingPreview()) {
+      <div class="preview-loading">
+        <mat-spinner diameter="28" />
+        <span>Cargando detalle de la cotización...</span>
+      </div>
+    }
+
+    @if (previewError()) {
+      <p class="hint hint-warn">No se pudo cargar el detalle de la cotización seleccionada.</p>
+    }
+
+    @if (!loadingPreview() && preview(); as p) {
+      <div class="quote-preview">
+
+        @if (p.lines_services.length > 0) {
+          <div class="lines-section">
+            <span class="lines-title">Mano de Obra</span>
+            <table class="lines-table">
+              <thead>
+                <tr>
+                  <th>Servicio</th>
+                  <th class="cell-num">Precio</th>
+                  <th class="cell-num">Cant.</th>
+                  <th class="cell-num">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of p.lines_services; track line.id) {
+                  <tr>
+                    <td>{{ serviceName(line) }}</td>
+                    <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
+                    <td class="cell-num">{{ line.quantity }}</td>
+                    <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @if (p.lines_batches.length > 0) {
+          <div class="lines-section">
+            <span class="lines-title">Repuestos e Insumos</span>
+            <table class="lines-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th class="cell-num">Precio</th>
+                  <th class="cell-num">Cant.</th>
+                  <th class="cell-num">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of p.lines_batches; track line.id) {
+                  <tr>
+                    <td>{{ batchName(line) }}</td>
+                    <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
+                    <td class="cell-num">{{ line.quantity }}</td>
+                    <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        @if (p.lines_externals.length > 0) {
+          <div class="lines-section">
+            <span class="lines-title">Servicios Externos</span>
+            <table class="lines-table">
+              <thead>
+                <tr>
+                  <th>Servicio</th>
+                  <th class="cell-num">Precio</th>
+                  <th class="cell-num">Cant.</th>
+                  <th class="cell-num">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of p.lines_externals; track line.id) {
+                  <tr>
+                    <td>{{ externalServiceName(line) }}</td>
+                    <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
+                    <td class="cell-num">{{ line.quantity }}</td>
+                    <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <div class="preview-total">
+          <span class="preview-total-label">Total de la cotización</span>
+          <span class="preview-total-value">Bs. {{ p.total | number:'1.2-2' }}</span>
+        </div>
+
+      </div>
+    }
+
+  </div>
+
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onCancel()" [disabled]="saving()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onConfirm()" [disabled]="saving() || !preview()">
+      @if (saving()) {
+        <mat-spinner diameter="18" />
+      } @else {
+        Agregar a la Orden
+      }
+    </button>
+  </ng-container>
+
+</app-dialog-frame>

@@ -1,5 +1,7 @@
 Vincula obligatoriamente una cotización a cada orden de servicio
 
+> ⚠️ **Superado por `.claude/commands/quote-module.md`.** El diseño original de este archivo (un único `service_orders.quote_id NOT NULL`, relación 1:1) no soporta el flujo real del taller: una orden puede nacer de varias cotizaciones aprobadas, y una orden ya `IN_PROGRESS` puede recibir cotizaciones adicionales (ej. daños extra encontrados durante el servicio). El módulo de Cotizaciones implementa el vínculo a nivel de línea (`quote_id` nullable en `service_order_services`/`service_order_batches`/`service_order_external_services`) y a nivel de cotización (`quotes.converted_service_order_id`), sin FK obligatoria de cabecera. Usa `quote-module.md` como referencia; este archivo se conserva solo como historial de la primera intención de diseño.
+
 Utiliza un razonamiento: adaptive thinking
 
 ## Contexto

@@ -123,7 +123,12 @@
               @for (line of d.order_services; track line.id; let i = $index) {
                 <tr>
                   <td class="cell-idx">{{ i + 1 }}</td>
-                  <td>{{ serviceName(line) }}</td>
+                  <td>
+                    {{ serviceName(line) }}
+                    @if (quoteTag(line); as tag) {
+                      <span class="quote-tag" matTooltip="Origen: cotización">{{ tag }}</span>
+                    }
+                  </td>
                   <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
                   <td class="cell-num">{{ line.quantity }}</td>
                   <td class="cell-num">{{ line.discount ?? 0 }}%</td>
@@ -154,7 +159,12 @@
               @for (line of d.order_batches; track line.id; let i = $index) {
                 <tr>
                   <td class="cell-idx">{{ i + 1 }}</td>
-                  <td>{{ batchName(line) }}</td>
+                  <td>
+                    {{ batchName(line) }}
+                    @if (quoteTag(line); as tag) {
+                      <span class="quote-tag" matTooltip="Origen: cotización">{{ tag }}</span>
+                    }
+                  </td>
                   <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
                   <td class="cell-num">{{ line.quantity }}</td>
                   <td class="cell-num">{{ line.discount ?? 0 }}%</td>
@@ -185,7 +195,12 @@
               @for (line of d.order_externals; track line.id; let i = $index) {
                 <tr>
                   <td class="cell-idx">{{ i + 1 }}</td>
-                  <td>{{ externalServiceName(line) }}</td>
+                  <td>
+                    {{ externalServiceName(line) }}
+                    @if (quoteTag(line); as tag) {
+                      <span class="quote-tag" matTooltip="Origen: cotización">{{ tag }}</span>
+                    }
+                  </td>
                   <td class="cell-num">
                     @if (line.cost != null) { Bs. {{ line.cost | number:'1.2-2' }} } @else { — }
                   </td>
@@ -240,6 +255,12 @@
 
   <ng-container dialog-actions>
     <button mat-stroked-button (click)="onClose()">Cerrar</button>
+    @if (detail()?.state === 'IN_PROGRESS') {
+      <button mat-stroked-button class="no-print" (click)="onAddQuote()">
+        <mat-icon>request_quote</mat-icon>
+        Agregar Cotización
+      </button>
+    }
     <button mat-stroked-button class="no-print" (click)="onPrint()">
       <mat-icon>print</mat-icon>
       Imprimir

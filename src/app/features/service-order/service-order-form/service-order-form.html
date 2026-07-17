@@ -45,6 +45,14 @@
             <app-tab-external (addItem)="onAddExternal($event)" />
           </mat-tab>
 
+          <mat-tab label="Cotizaciones">
+            <app-tab-quote
+              [customerId]="customerTabValue()?.customer_id ?? null"
+              [vehicleId]="customerTabValue()?.vehicle_id ?? null"
+              [excludeIds]="selectedQuoteIds()"
+              (addQuote)="onAddQuote($event)" />
+          </mat-tab>
+
         </mat-tab-group>
       </div>
 
@@ -63,6 +71,11 @@
         <app-service-order-external-services-table
           [items]="externalRows()"
           (removeItem)="onRemoveExternal($event)"
+        />
+
+        <app-service-order-quotes-table
+          [items]="selectedQuotes()"
+          (removeItem)="onRemoveQuote($event)"
         />
 
       </div>
@@ -128,6 +141,13 @@
             <span class="total-label">Trabajos adicionales</span>
             <span class="total-value">Bs. {{ subtotalExternal() | number:'1.2-2' }}</span>
           </div>
+
+          @if (selectedQuotes().length > 0) {
+            <div class="total-row">
+              <span class="total-label">Cotizaciones ({{ selectedQuotes().length }})</span>
+              <span class="total-value">+ Bs. {{ subtotalQuotes() | number:'1.2-2' }}</span>
+            </div>
+          }
 
           <mat-divider />
 

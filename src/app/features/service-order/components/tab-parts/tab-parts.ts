@@ -157,6 +157,7 @@ export class TabParts {
       id: crypto.randomUUID(),
       batch_id: batch.id,
       service_order_id: null,
+      quote_id: null,
       quantity,
       delivery_time: 'IMMEDIATE',
       price,

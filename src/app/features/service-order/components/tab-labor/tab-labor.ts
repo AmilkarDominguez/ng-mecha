@@ -123,6 +123,7 @@ export class TabLabor {
       id: crypto.randomUUID(),
       service_id: service.id,
       service_order_id: null,
+      quote_id: null,
       price,
       quantity,
       discount: 0,

@@ -1,0 +1,113 @@
+<div class="tab-customer">
+
+  <div class="section-title">Datos del Cliente</div>
+
+  <div class="search-row">
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Buscar cliente</mat-label>
+      <input matInput [formControl]="customerCtrl" [matAutocomplete]="autoCustomer"
+             placeholder="Nombre o apellido..." />
+      <mat-autocomplete #autoCustomer="matAutocomplete" [displayWith]="displayCustomer">
+        @for (c of filteredCustomers(); track c.id) {
+          <mat-option [value]="c">
+            <span class="option-main">{{ customerLabel(c) }}</span>
+            @if (c.ci) {
+              <span class="option-sub">CI: {{ c.ci }}</span>
+            }
+            @if (c.phone) {
+              <span class="option-sub">Tel: {{ c.phone }}</span>
+            }
+          </mat-option>
+        }
+      </mat-autocomplete>
+    </mat-form-field>
+    <button mat-icon-button color="primary" class="quick-add-btn"
+            matTooltip="Registrar nuevo cliente"
+            (click)="openNewCustomerDialog()">
+      <mat-icon>add_circle</mat-icon>
+    </button>
+  </div>
+
+  @if (selectedCustomer(); as customer) {
+    <div class="customer-card">
+      <div class="customer-card-header">
+        <span class="customer-name">{{ customerLabel(customer) }}</span>
+        <span class="customer-state" [class.state-active]="customer.state === 'ACTIVE'">
+          {{ customer.state === 'ACTIVE' ? 'Activo' : 'Inactivo' }}
+        </span>
+      </div>
+      <div class="customer-card-body">
+        @if (customer.ci) {
+          <div class="customer-field">
+            <span class="field-label">CI</span>
+            <span class="field-value">{{ customer.ci }}</span>
+          </div>
+        }
+        @if (customer.phone) {
+          <div class="customer-field">
+            <span class="field-label">Teléfono</span>
+            <span class="field-value">{{ customer.phone }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <mat-divider class="section-divider" />
+
+  <div class="section-title">Vehículo</div>
+
+  @if (selectedCustomer()) {
+    <div class="search-row">
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Buscar vehículo del cliente</mat-label>
+        <input matInput [formControl]="vehicleCtrl" [matAutocomplete]="autoVehicle"
+               placeholder="Marca, modelo o placa..." />
+        <mat-autocomplete #autoVehicle="matAutocomplete" [displayWith]="displayVehicle" (optionSelected)="onVehicleSelected($event)">
+          @for (v of filteredVehicles(); track v.id) {
+            <mat-option [value]="v">
+              <span class="option-main">{{ vehicleLabel(v) }}</span>
+              @if (v.year) {
+                <span class="option-sub">Año: {{ v.year }}</span>
+              }
+            </mat-option>
+          }
+          @if (filteredVehicles().length === 0) {
+            <mat-option disabled>Sin vehículos registrados</mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+    </div>
+
+    @if (selectedVehicle(); as vehicle) {
+      <div class="vehicle-card">
+        <div class="vehicle-card-header">
+          <span class="vehicle-name">{{ vehicleLabel(vehicle) }}</span>
+        </div>
+        <div class="vehicle-card-body">
+          @if (vehicle.license_plate) {
+            <div class="customer-field">
+              <span class="field-label">Placa</span>
+              <span class="field-value">{{ vehicle.license_plate }}</span>
+            </div>
+          }
+          @if (vehicle.brand) {
+            <div class="customer-field">
+              <span class="field-label">Marca</span>
+              <span class="field-value">{{ vehicle.brand }}</span>
+            </div>
+          }
+          @if (vehicle.model) {
+            <div class="customer-field">
+              <span class="field-label">Modelo</span>
+              <span class="field-value">{{ vehicle.model }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  } @else {
+    <p class="vehicle-hint">Seleccione un cliente para ver sus vehículos</p>
+  }
+
+</div>
