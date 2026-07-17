@@ -8,6 +8,20 @@ Toda la data debe ser simulada con datos estaticos o mocks locales (sin servicio
 
 ---
 
+## Reglas de contexto adicional (`.claude/rules/`)
+
+Antes de modificar cualquiera de estos módulos, lee la regla completa correspondiente —
+capturan el estado **real** del código (no solo el diseño original) y los invariantes que no
+deben romperse al tocarlos:
+
+| Archivo | Cuándo leerlo |
+|---------|---------------|
+| `.claude/rules/quotes-service-orders.md` | Módulo de Cotizaciones (`quotes`) y su integración con Órdenes de Servicio: modelo de relación N:1, RPCs de reserva/aprobación/conversión, trazabilidad `quote_id` en las líneas de orden. |
+| `.claude/rules/service-order-flow.md` | Módulo de Órdenes de Servicio: formulario (crear/editar), tabs, guardado en cascada, pagos, egresos de servicios externos, impresión. |
+| `.claude/rules/features-navigation.md` | Mapa real de módulos/rutas/menú (`app.routes.ts` + `nav-menu.ts`) contra el plan en `.claude/docs/features.md` — qué existe, qué falta, y la convención a seguir para agregar un módulo nuevo. |
+
+---
+
 ## Stack tecnico
 
 | Tecnologia      | Version     |

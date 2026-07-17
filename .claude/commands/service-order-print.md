@@ -2,7 +2,7 @@ Crea el componente de impresión de la Hoja de Servicios del taller Mecatrónica
 
 Utiliza un razonamiento: adaptive thinking
 
-Lee `.claude/docs/service-order-flow.md` antes de comenzar.
+Lee `.claude/rules/service-order-flow.md` antes de comenzar.
 
 ---
 
