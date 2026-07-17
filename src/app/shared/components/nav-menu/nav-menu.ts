@@ -84,6 +84,13 @@ export class NavMenu {
       ],
     },
     {
+      title: 'Cotizaciones',
+      icon: 'request_quote',
+      items: [
+        { label: 'Cotizaciones', icon: 'description', route: '/dashboard/cotizaciones/activas' },
+      ],
+    },
+    {
       title: 'Órdenes de Servicio',
       icon: 'receipt_long',
       items: [

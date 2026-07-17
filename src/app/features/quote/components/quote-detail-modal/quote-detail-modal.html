@@ -1,4 +1,4 @@
-<app-dialog-frame title="Detalle de Orden de Servicio" icon="receipt_long" initialSize="lg">
+<app-dialog-frame title="Detalle de Cotización" icon="request_quote" initialSize="lg">
 
   @if (loading()) {
     <div class="loading-state">
@@ -10,21 +10,20 @@
   @if (hasError()) {
     <div class="error-state">
       <mat-icon>error_outline</mat-icon>
-      <span>No se pudo cargar el detalle de la orden</span>
+      <span>No se pudo cargar el detalle de la cotización</span>
     </div>
   }
 
   @if (!loading() && detail(); as d) {
     <div class="detail-body">
 
-      <div class="order-header">
-        <div class="order-number-group">
-          <span class="order-label">Orden</span>
-          <span class="order-value">{{ d.number ?? 'Sin número' }}</span>
+      <div class="quote-header">
+        <div class="quote-number-group">
+          <span class="quote-label">Cotización</span>
+          <span class="quote-value">{{ d.number ?? 'Sin número' }}</span>
         </div>
-        <div class="order-badges">
+        <div class="quote-badges">
           <span class="state-chip" [attr.data-state]="d.state">{{ stateLabel(d.state) }}</span>
-          <span class="payment-chip">{{ d.payment_type === 'CASH' ? 'Contado' : 'Crédito' }}</span>
           @if (d.with_iva) {
             <span class="iva-chip">Con IVA</span>
           }
@@ -54,37 +53,11 @@
         </div>
       </div>
 
-      <div class="detail-columns">
-        <div class="detail-section">
-          <span class="detail-label">Mecánico Responsable</span>
-          <span class="detail-value">{{ mechanicLabel(d) }}</span>
-        </div>
-
-        @if (d.mileage) {
-          <div class="detail-section">
-            <span class="detail-label">Kilometraje</span>
-            <span class="detail-value">{{ d.mileage }}</span>
-          </div>
-        }
-      </div>
-
       <div class="detail-columns detail-columns--four">
-        @if (d.started_date) {
+        @if (d.expiration_date) {
           <div class="detail-section">
-            <span class="detail-label">Fecha de Ingreso</span>
-            <span class="detail-value">{{ d.started_date }}</span>
-          </div>
-        }
-        @if (d.ended_date) {
-          <div class="detail-section">
-            <span class="detail-label">Fecha de Salida</span>
-            <span class="detail-value">{{ d.ended_date }}</span>
-          </div>
-        }
-        @if (d.return_date) {
-          <div class="detail-section">
-            <span class="detail-label">Fecha de Retorno</span>
-            <span class="detail-value">{{ d.return_date }}</span>
+            <span class="detail-label">Vencimiento de Reserva</span>
+            <span class="detail-value">{{ d.expiration_date }}</span>
           </div>
         }
         <div class="detail-section">
@@ -99,12 +72,12 @@
 
       @if (d.description) {
         <div class="detail-section">
-          <span class="detail-label">Descripción / Diagnóstico</span>
+          <span class="detail-label">Observaciones</span>
           <span class="detail-value">{{ d.description }}</span>
         </div>
       }
 
-      @if (d.order_services.length > 0) {
+      @if (d.lines_services.length > 0) {
         <mat-divider />
         <div class="lines-section">
           <span class="lines-title">Mano de Obra</span>
@@ -120,7 +93,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (line of d.order_services; track line.id; let i = $index) {
+              @for (line of d.lines_services; track line.id; let i = $index) {
                 <tr>
                   <td class="cell-idx">{{ i + 1 }}</td>
                   <td>{{ serviceName(line) }}</td>
@@ -135,7 +108,7 @@
         </div>
       }
 
-      @if (d.order_batches.length > 0) {
+      @if (d.lines_batches.length > 0) {
         <mat-divider />
         <div class="lines-section">
           <span class="lines-title">Repuestos e Insumos</span>
@@ -144,6 +117,7 @@
               <tr>
                 <th>#</th>
                 <th>Producto</th>
+                <th>Entrega</th>
                 <th class="cell-num">Precio</th>
                 <th class="cell-num">Cant.</th>
                 <th class="cell-num">Desc. %</th>
@@ -151,10 +125,11 @@
               </tr>
             </thead>
             <tbody>
-              @for (line of d.order_batches; track line.id; let i = $index) {
+              @for (line of d.lines_batches; track line.id; let i = $index) {
                 <tr>
                   <td class="cell-idx">{{ i + 1 }}</td>
                   <td>{{ batchName(line) }}</td>
+                  <td>{{ line.delivery_time === 'IMMEDIATE' ? 'Inmediato' : 'Pedido' }}</td>
                   <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
                   <td class="cell-num">{{ line.quantity }}</td>
                   <td class="cell-num">{{ line.discount ?? 0 }}%</td>
@@ -166,10 +141,10 @@
         </div>
       }
 
-      @if (d.order_externals.length > 0) {
+      @if (d.lines_externals.length > 0) {
         <mat-divider />
         <div class="lines-section">
-          <span class="lines-title">Trabajos Adicionales</span>
+          <span class="lines-title">Servicios Externos</span>
           <table class="lines-table">
             <thead>
               <tr>
@@ -182,7 +157,7 @@
               </tr>
             </thead>
             <tbody>
-              @for (line of d.order_externals; track line.id; let i = $index) {
+              @for (line of d.lines_externals; track line.id; let i = $index) {
                 <tr>
                   <td class="cell-idx">{{ i + 1 }}</td>
                   <td>{{ externalServiceName(line) }}</td>
@@ -216,22 +191,12 @@
             <span class="summary-value">Bs. {{ d.total_iva | number:'1.2-2' }}</span>
           </div>
         }
-        @if (d.have != null && d.have > 0) {
-          <div class="summary-row">
-            <span class="summary-label">Pagado</span>
-            <span class="summary-value">Bs. {{ d.have | number:'1.2-2' }}</span>
-          </div>
-          <div class="summary-row summary-debt">
-            <span class="summary-label">Saldo pendiente</span>
-            <span class="summary-value">Bs. {{ d.must | number:'1.2-2' }}</span>
-          </div>
-        }
       </div>
 
       <mat-divider />
 
       <div class="detail-section">
-        <span class="detail-label">ID de Orden</span>
+        <span class="detail-label">ID de Cotización</span>
         <span class="detail-value detail-id">{{ d.id }}</span>
       </div>
 
@@ -240,12 +205,6 @@
 
   <ng-container dialog-actions>
     <button mat-stroked-button (click)="onClose()">Cerrar</button>
-    @if (detail()?.state === 'IN_PROGRESS') {
-      <button mat-stroked-button class="no-print" (click)="onAddQuote()">
-        <mat-icon>request_quote</mat-icon>
-        Agregar Cotización
-      </button>
-    }
     <button mat-stroked-button class="no-print" (click)="onPrint()">
       <mat-icon>print</mat-icon>
       Imprimir

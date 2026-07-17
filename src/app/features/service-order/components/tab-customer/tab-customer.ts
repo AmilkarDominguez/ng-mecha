@@ -14,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
@@ -23,9 +24,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Customer } from '../../../../core/models/customer.model';
 import { Vehicle } from '../../../../core/models/vehicle.model';
 import { Mechanic } from '../../../../core/models/mechanic.model';
+import { Quote } from '../../../../core/models/quote.model';
 import { SPCustomer } from '../../../../core/services/supabase/sb-customer';
 import { SPVehicle } from '../../../../core/services/supabase/sb-vehicles';
 import { SPMechanic } from '../../../../core/services/supabase/sb-mechanic';
+import { SPQuote } from '../../../../core/services/supabase/sb-quote';
 import { CustomerFormModal } from '../../../workshop/customers/components/customer-form-modal/customer-form-modal';
 
 export interface CustomerTabValue {
@@ -35,6 +38,7 @@ export interface CustomerTabValue {
   mileage: string | null;
   started_date: string | null;
   ended_date: string | null;
+  quote_ids: string[];
 }
 
 @Component({
@@ -46,6 +50,7 @@ export interface CustomerTabValue {
     MatAutocompleteModule,
     MatButtonModule,
     MatIconModule,
+    MatSelectModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatDividerModule,
@@ -58,6 +63,7 @@ export class TabCustomer implements OnInit {
   private customerService = inject(SPCustomer);
   private vehicleService = inject(SPVehicle);
   private mechanicService = inject(SPMechanic);
+  private quoteService = inject(SPQuote);
   private dialog = inject(MatDialog);
 
   initialValue = input<CustomerTabValue | null>(null);
@@ -100,11 +106,49 @@ export class TabCustomer implements OnInit {
         ended_date:   initial.ended_date   ? new Date(initial.ended_date)   : null,
       }, { emitEvent: false });
     });
+
+    // Preseleccion de cotizaciones (por edicion futura o por ?quoteId= en la
+    // ruta de nueva orden). Efecto separado: corre una sola vez cuando las
+    // cotizaciones y clientes ya cargaron, y puede fijar el cliente/vehiculo
+    // incluso si el initialValue no trajo customer_id (caso ?quoteId=).
+    effect(() => {
+      if (this.quotesInitialized) return;
+      const initial = this.initialValue();
+      const quotes = this.approvedQuotes();
+      const customers = this.allCustomers();
+      if (!initial || !initial.quote_ids || initial.quote_ids.length === 0) return;
+      if (quotes.length === 0 || customers.length === 0) return;
+
+      this.quotesInitialized = true;
+      this.selectedQuoteIds.set(initial.quote_ids);
+
+      if (!this.selectedCustomer()) {
+        const firstQuote = quotes.find((q) => q.id === initial.quote_ids[0]);
+        if (firstQuote) {
+          const customer = customers.find((c) => c.id === firstQuote.customer_id) ?? null;
+          if (customer) {
+            this.customerCtrl.setValue(customer);
+            this.selectedCustomer.set(customer);
+            if (firstQuote.vehicle_id) {
+              const vehicle = this.allVehicles().find((v) => v.id === firstQuote.vehicle_id) ?? null;
+              if (vehicle) {
+                this.vehicleCtrl.setValue(vehicle, { emitEvent: false });
+                this.selectedVehicle.set(vehicle);
+              }
+            }
+          }
+        }
+      }
+      this.emitValue();
+    });
   }
+
+  private quotesInitialized = false;
 
   readonly allCustomers = toSignal(this.customerService.get(), { initialValue: [] });
   readonly allVehicles = toSignal(this.vehicleService.get(), { initialValue: [] });
   readonly allMechanics = toSignal(this.mechanicService.get(), { initialValue: [] });
+  readonly allQuotes = toSignal(this.quoteService.get(), { initialValue: [] });
 
   readonly customerCtrl = new FormControl<Customer | string | null>(null);
   readonly vehicleCtrl = new FormControl<Vehicle | string | null>(null);
@@ -117,6 +161,16 @@ export class TabCustomer implements OnInit {
   readonly selectedCustomer = signal<Customer | null>(null);
   readonly selectedVehicle = signal<Vehicle | null>(null);
   readonly selectedMechanic = signal<Mechanic | null>(null);
+  readonly selectedQuoteIds = signal<string[]>([]);
+
+  readonly approvedQuotes = computed(() => this.allQuotes().filter((q) => q.state === 'APPROVED'));
+
+  readonly quotesForCustomer = computed(() => {
+    const customer = this.selectedCustomer();
+    const all = this.approvedQuotes();
+    if (!customer) return all;
+    return all.filter((q) => q.customer_id === customer.id);
+  });
 
   readonly filteredCustomers = computed(() => {
     const val = this.customerCtrlValue();
@@ -215,6 +269,35 @@ export class TabCustomer implements OnInit {
     return this.mechanicLabel(value);
   };
 
+  quoteLabel(q: Quote): string {
+    const total = q.total != null ? `Bs. ${q.total.toFixed(2)}` : '';
+    return [q.number ?? q.id.slice(0, 8), total].filter(Boolean).join(' — ');
+  }
+
+  onQuotesChange(ids: string[]): void {
+    this.selectedQuoteIds.set(ids);
+
+    if (!this.selectedCustomer() && ids.length > 0) {
+      const quote = this.approvedQuotes().find((q) => q.id === ids[0]);
+      if (quote) {
+        const customer = this.allCustomers().find((c) => c.id === quote.customer_id) ?? null;
+        if (customer) {
+          this.customerCtrl.setValue(customer);
+          this.selectedCustomer.set(customer);
+          if (quote.vehicle_id) {
+            const vehicle = this.allVehicles().find((v) => v.id === quote.vehicle_id) ?? null;
+            if (vehicle) {
+              this.vehicleCtrl.setValue(vehicle, { emitEvent: false });
+              this.selectedVehicle.set(vehicle);
+            }
+          }
+        }
+      }
+    }
+
+    this.emitValue();
+  }
+
   private emitValue(): void {
     const raw = this.form.value;
     this.valueChange.emit({
@@ -224,6 +307,7 @@ export class TabCustomer implements OnInit {
       mileage: raw.mileage || null,
       started_date: raw.started_date ? this.toIsoDate(raw.started_date) : null,
       ended_date: raw.ended_date ? this.toIsoDate(raw.ended_date) : null,
+      quote_ids: this.selectedQuoteIds(),
     });
   }
 

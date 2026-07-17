@@ -1,0 +1,154 @@
+<div class="form-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">
+        {{ isEditMode() ? 'Editar Cotización' : 'Nueva Cotización' }}
+      </h1>
+      <span class="page-subtitle">
+        {{ isEditMode() ? 'Modifique los datos de la cotización' : 'Complete los datos para registrar una cotización' }}
+      </span>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+    </div>
+  }
+
+  <div class="form-layout">
+
+    <div class="main-panel">
+
+      <div class="tabs-card">
+        <mat-tab-group animationDuration="200ms" color="primary">
+
+          <mat-tab label="Cliente">
+            <app-quote-tab-customer
+              [initialValue]="customerTabValue()"
+              (valueChange)="onCustomerTabChange($event)" />
+          </mat-tab>
+
+          <mat-tab label="Mano de Obra">
+            <app-quote-tab-labor (addItem)="onAddService($event)" />
+          </mat-tab>
+
+          <mat-tab label="Repuestos e Insumos">
+            <app-quote-tab-parts (addItem)="onAddBatch($event)" />
+          </mat-tab>
+
+          <mat-tab label="Servicios Externos">
+            <app-quote-tab-external (addItem)="onAddExternal($event)" />
+          </mat-tab>
+
+        </mat-tab-group>
+      </div>
+
+      <div class="tables-section">
+
+        <app-quote-services-table
+          [items]="serviceRows()"
+          (removeItem)="onRemoveService($event)"
+        />
+
+        <app-quote-batches-table
+          [items]="batchRows()"
+          (removeItem)="onRemoveBatch($event)"
+        />
+
+        <app-quote-external-services-table
+          [items]="externalRows()"
+          (removeItem)="onRemoveExternal($event)"
+        />
+
+      </div>
+
+    </div>
+
+    <div class="summary-panel">
+
+      <div class="summary-card">
+
+        <div class="summary-section-title">Configuración</div>
+
+        <form [formGroup]="summaryForm" class="summary-form">
+
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Número de Cotización</mat-label>
+            <input matInput formControlName="number" placeholder="Ej: COT-001" />
+          </mat-form-field>
+
+          <div class="radio-group-field">
+            <span class="radio-label">IVA</span>
+            <mat-radio-group formControlName="with_iva" class="radio-group">
+              <mat-radio-button [value]="false">Sin IVA</mat-radio-button>
+              <mat-radio-button [value]="true">Con IVA (13%)</mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Vencimiento de la Reserva</mat-label>
+            <input matInput [matDatepicker]="pickerExpiration" formControlName="expiration_date" />
+            <mat-datepicker-toggle matSuffix [for]="pickerExpiration" />
+            <mat-datepicker #pickerExpiration />
+            <mat-hint>Requerido para aprobar y reservar stock</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Observaciones</mat-label>
+            <textarea matInput formControlName="description" rows="4"
+                      placeholder="Notas para el cliente..."></textarea>
+          </mat-form-field>
+
+        </form>
+
+        <mat-divider />
+
+        <div class="totals-section">
+          <div class="total-row">
+            <span class="total-label">Mano de obra</span>
+            <span class="total-value">Bs. {{ subtotalServices() | number:'1.2-2' }}</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Repuestos</span>
+            <span class="total-value">Bs. {{ subtotalBatches() | number:'1.2-2' }}</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Servicios externos</span>
+            <span class="total-value">Bs. {{ subtotalExternal() | number:'1.2-2' }}</span>
+          </div>
+
+          <mat-divider />
+
+          <div class="total-row total-row--main">
+            <span class="total-label">TOTAL</span>
+            <span class="total-value">Bs. {{ total() | number:'1.2-2' }}</span>
+          </div>
+
+          @if (summaryForm.value.with_iva) {
+            <div class="total-row">
+              <span class="total-label">IVA (13%)</span>
+              <span class="total-value">Bs. {{ ivaAmount() | number:'1.2-2' }}</span>
+            </div>
+            <div class="total-row total-row--grand">
+              <span class="total-label">TOTAL + IVA</span>
+              <span class="total-value">Bs. {{ totalWithIva() | number:'1.2-2' }}</span>
+            </div>
+          }
+        </div>
+
+        <button mat-flat-button color="primary" class="save-btn" (click)="onSave()">
+          {{ isEditMode() ? 'Actualizar Cotización' : 'Registrar Cotización' }}
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

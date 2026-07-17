@@ -1,0 +1,153 @@
+<div class="tab-parts">
+
+  <div class="section-title-row">
+    <div class="section-title">Repuestos e Insumos</div>
+    <button mat-button color="primary" class="toggle-btn" (click)="toggleManualMode()">
+      @if (manualMode()) {
+        <ng-container>
+          <mat-icon>search</mat-icon>
+          Buscar en inventario
+        </ng-container>
+      } @else {
+        <ng-container>
+          <mat-icon>edit_note</mat-icon>
+          Repuesto no encontrado (por pedir)
+        </ng-container>
+      }
+    </button>
+  </div>
+
+  @if (!manualMode()) {
+
+    @if (!selectedBatch()) {
+      <div class="search-wrapper">
+        <div class="search-row">
+          <mat-form-field appearance="outline" class="field-full">
+            <mat-label>Buscar lote</mat-label>
+            <input matInput [value]="searchTerm()" (input)="onSearch($event)"
+                   placeholder="Producto, descripción, marca o modelo compatible..." />
+          </mat-form-field>
+          <button mat-icon-button color="primary" class="quick-add-btn"
+                  matTooltip="Registrar nuevo repuesto"
+                  (click)="openNewBatchDialog()">
+            <mat-icon>add_circle</mat-icon>
+          </button>
+        </div>
+
+        @if (searchResults().length > 0) {
+          <div class="search-results">
+            @for (b of searchResults(); track b.id) {
+              <div class="result-item">
+                <div class="result-info">
+                  <span class="result-name">{{ b.product?.name ?? b.description ?? b.id }}</span>
+                  <div class="result-details">
+                    @if (b.code) {
+                      <span class="result-tag">Cód: {{ b.code }}</span>
+                    }
+                    <span class="result-tag" [class.result-tag--empty]="availableStockFor(b.id) <= 0">
+                      Disponible: {{ availableStockFor(b.id) }}
+                    </span>
+                    @if (b.price != null) {
+                      <span class="result-tag price">Bs. {{ b.price | number:'1.2-2' }}</span>
+                    }
+                    @if (b.industry?.name) {
+                      <span class="result-tag">{{ b.industry?.name }}</span>
+                    }
+                  </div>
+                </div>
+                <button mat-stroked-button color="primary" (click)="selectBatch(b)">
+                  Seleccionar
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        @if (searchTerm().length >= 2 && searchResults().length === 0) {
+          <div class="no-results">Sin resultados para "{{ searchTerm() }}"</div>
+        }
+      </div>
+    }
+
+    @if (selectedBatch(); as batch) {
+      <div class="batch-card">
+        <div class="batch-card-header">
+          <span class="batch-name">{{ batch.product?.name ?? batch.description ?? batch.id }}</span>
+          <button mat-stroked-button (click)="clearSelection()">Cambiar</button>
+        </div>
+        <div class="batch-card-body">
+          @if (batch.code) {
+            <div class="batch-field">
+              <span class="field-label">Código</span>
+              <span class="field-value">{{ batch.code }}</span>
+            </div>
+          }
+          <div class="batch-field">
+            <span class="field-label">Disponible</span>
+            <span class="field-value">{{ selectedAvailableStock() }}</span>
+          </div>
+          @if (batch.industry?.name) {
+            <div class="batch-field">
+              <span class="field-label">Industria</span>
+              <span class="field-value">{{ batch.industry?.name }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <form [formGroup]="form" class="add-fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Precio (Bs.)</mat-label>
+          <input matInput type="number" formControlName="price" min="0" step="1" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Cantidad</mat-label>
+          <input matInput type="number" formControlName="quantity" min="1" step="1" />
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" class="add-btn" (click)="onAdd()">
+          Agregar
+        </button>
+      </form>
+
+      @if (exceedsAvailableStock()) {
+        <div class="stock-warning">
+          <mat-icon>warning</mat-icon>
+          La cantidad supera el stock disponible ({{ selectedAvailableStock() }}). Al aprobar la cotización, la reserva podría rechazarse.
+        </div>
+      }
+    }
+
+  } @else {
+
+    <p class="manual-hint">
+      Repuesto que no está en inventario o requiere pedirse a proveedor. No se reserva stock — el precio es un estimado.
+    </p>
+
+    <form [formGroup]="form" class="manual-fields">
+      <mat-form-field appearance="outline" class="field-full">
+        <mat-label>Descripción del repuesto</mat-label>
+        <input matInput formControlName="description" placeholder="Ej: Kit de embrague" />
+      </mat-form-field>
+
+      <div class="add-fields">
+        <mat-form-field appearance="outline">
+          <mat-label>Precio estimado (Bs.)</mat-label>
+          <input matInput type="number" formControlName="price" min="0" step="1" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Cantidad</mat-label>
+          <input matInput type="number" formControlName="quantity" min="1" step="1" />
+        </mat-form-field>
+
+        <button mat-flat-button color="primary" class="add-btn" (click)="onAdd()">
+          Agregar
+        </button>
+      </div>
+    </form>
+
+  }
+
+</div>

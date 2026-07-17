@@ -439,6 +439,139 @@ Al registrar un pago de una orden de servicio se inserta un registro aquí con `
 
 ---
 
+# Quotes Module
+
+> Diseño completo, RPCs y flujo de negocio en `.claude/commands/quote-module.md`. Entidades propias (no reutilizan las tablas de `ServiceOrder`) porque una cotización vive un ciclo de vida distinto (pendiente → aprobada → convertida/rechazada/expirada, con vencimiento) y varias cotizaciones pueden alimentar la misma orden — incluso agregarse a una orden que ya está `IN_PROGRESS`.
+
+---
+
+## 1. Quote
+
+**Tabla:** `quotes`
+
+| Columna                    | Tipo              | Restricciones                  |
+| --------------------------- | ----------------- | ------------------------------- |
+| id                          | UUID               | PK, auto-generated              |
+| customer_id                 | UUID (FK)          | not null → customers.id         |
+| vehicle_id                  | UUID (FK)          | nullable → vehicles.id          |
+| user_id                     | UUID (FK)          | nullable → users.id             |
+| converted_service_order_id  | UUID (FK)          | nullable → service_orders.id — se llena al convertir |
+| number                      | String             | nullable                        |
+| description                 | String             | nullable                        |
+| total                       | BigDecimal(8,2)    | nullable                        |
+| iva                         | BigDecimal(8,2)    | nullable                        |
+| total_iva                   | BigDecimal(8,2)    | nullable                        |
+| with_iva                    | Boolean            | default: false                  |
+| expiration_date             | LocalDate          | nullable — vencimiento de la reserva de stock |
+| state                       | QuoteState (enum)  | default: PENDING                |
+| created_at                  | LocalDateTime      | auto                             |
+| updated_at                  | LocalDateTime      | auto                             |
+
+**Enum QuoteState:** `PENDING` (Pendiente) · `APPROVED` (Aprobada) · `REJECTED` (Rechazada) · `EXPIRED` (Expirada) · `CONVERTED` (Convertida) · `CANCELED` (Anulada)
+
+**Relaciones:**
+- Many-to-One → `Customer`
+- Many-to-One → `Vehicle`
+- Many-to-One → `User`
+- Many-to-One → `ServiceOrder` (vía `converted_service_order_id`; varias cotizaciones pueden apuntar a la misma orden)
+- One-to-Many → `QuoteService`
+- One-to-Many → `QuoteBatch`
+- One-to-Many → `QuoteExternalService`
+
+---
+
+## 2. QuoteService
+
+**Tabla:** `quote_services`
+
+| Columna    | Tipo            | Restricciones           |
+| ---------- | --------------- | ------------------------ |
+| id         | UUID            | PK, auto-generated       |
+| quote_id   | UUID (FK)       | not null → quotes.id     |
+| service_id | UUID (FK)       | nullable → services.id   |
+| discount   | BigDecimal(8,2) | nullable                 |
+| price      | BigDecimal(8,2) | nullable                 |
+| quantity   | BigDecimal      | nullable                 |
+| subtotal   | BigDecimal(8,2) | nullable                 |
+| created_at | LocalDateTime   | auto                     |
+| updated_at | LocalDateTime   | auto                     |
+
+---
+
+## 3. QuoteBatch
+
+**Tabla:** `quote_batches`
+
+| Columna       | Tipo                | Restricciones                  |
+| ------------- | -------------------- | -------------------------------- |
+| id            | UUID                 | PK, auto-generated               |
+| quote_id      | UUID (FK)            | not null → quotes.id             |
+| batch_id      | UUID (FK)            | nullable → batches.id — null si el repuesto no está en inventario |
+| description   | String               | nullable — requerido si `batch_id` es null |
+| delivery_time | DeliveryTime (enum)  | default: IMMEDIATE               |
+| quantity      | BigDecimal           | nullable                         |
+| price         | BigDecimal(8,2)      | nullable                         |
+| discount      | BigDecimal(8,2)      | nullable                         |
+| subtotal      | BigDecimal(8,2)      | nullable                         |
+| created_at    | LocalDateTime        | auto                              |
+| updated_at    | LocalDateTime        | auto                              |
+
+> Reutiliza el enum `DeliveryTime` ya definido para `ServiceOrderBatch`. Solo `IMMEDIATE` + `batch_id` no nulo genera una reserva (`BatchReservation`) — `ORDER` (a pedir a proveedor) o `batch_id` nulo (repuesto no catalogado) son puramente una estimación de costo, sin reserva de stock.
+
+**Relaciones:**
+- Many-to-One → `Quote`
+- Many-to-One → `Batch`
+- One-to-One → `BatchReservation` (si aplica)
+
+---
+
+## 4. QuoteExternalService
+
+**Tabla:** `quote_external_services`
+
+| Columna             | Tipo            | Restricciones                    |
+| -------------------- | --------------- | ---------------------------------- |
+| id                   | UUID            | PK, auto-generated                 |
+| quote_id             | UUID (FK)       | not null → quotes.id               |
+| external_service_id  | UUID (FK)       | nullable → external_services.id    |
+| cost                 | BigDecimal(8,2) | nullable                           |
+| price                | BigDecimal(8,2) | nullable                           |
+| quantity             | BigDecimal      | nullable                           |
+| subtotal             | BigDecimal(8,2) | nullable                           |
+| created_at           | LocalDateTime   | auto                                |
+| updated_at           | LocalDateTime   | auto                                |
+
+---
+
+## 5. BatchReservation
+
+**Tabla:** `batch_reservations`
+
+**No es un CRUD de usuario** — se crea/libera/consume únicamente vía las RPCs descritas en `.claude/commands/quote-module.md` (`reserve_quote_batches`, `release_quote_reservations`, `convert_quote_to_order`).
+
+| Columna         | Tipo                    | Restricciones                        |
+| ---------------- | ------------------------ | -------------------------------------- |
+| id               | UUID                     | PK, auto-generated                     |
+| quote_batch_id   | UUID (FK)                | not null → quote_batches.id            |
+| batch_id         | UUID (FK)                | not null → batches.id                  |
+| quantity         | BigDecimal               | not null                               |
+| reserved_until   | LocalDate                | not null — copiado de `quotes.expiration_date` al aprobar |
+| state            | ReservationState (enum)  | default: ACTIVE                        |
+| created_at       | LocalDateTime            | auto                                    |
+| updated_at       | LocalDateTime            | auto                                    |
+
+**Enum ReservationState:** `ACTIVE` (Activa) · `CONSUMED` (Consumida) · `RELEASED` (Liberada) · `EXPIRED` (Expirada)
+
+**Uso — stock disponible sin tocar `batches.stock`:**
+```
+available_stock(batch) = batch.stock
+  - SUM(batch_reservations.quantity WHERE state='ACTIVE' AND reserved_until >= CURRENT_DATE)
+  - SUM(service_order_batches.quantity WHERE service_order.state='IN_PROGRESS')
+```
+El primer término son cotizaciones aprobadas vigentes (reserva blanda, con vencimiento); el segundo son órdenes ya en curso (compromiso firme, sin vencimiento — ninguna de las dos resta de `batches.stock`, que sigue siendo el stock físico real ajustado solo por compras de lote).
+
+---
+
 # Service Orders Module
 
 ---
@@ -475,6 +608,7 @@ Al registrar un pago de una orden de servicio se inserta un registro aquí con `
 **Enum OrderState:** `IN_PROGRESS` (EN_CURSO) · `COMPLETED` (COMPLETADO) · `CANCELED` (CANCELADO)
 **Enum PaymentType:** `CASH` (CONTADO) · `CREDIT` (CREDITO)
 
+> `draft_expiration_date` quedó sin uso en la UI (ver `service-order-flow.md`). Con el módulo de Cotizaciones, el vencimiento de la reserva vive en `quotes.expiration_date`, NO aquí — no reutilizar esta columna para eso. `ServiceOrder` deliberadamente **no** tiene un `quote_id` de cabecera: una orden puede originarse en varias cotizaciones (y puede recibir cotizaciones adicionales estando `IN_PROGRESS`), así que el vínculo vive a nivel de línea (`quote_id` en las 3 tablas pivot de abajo) y a nivel de cotización (`quotes.converted_service_order_id`). Ver `.claude/commands/quote-module.md`.
 
 ---
 
@@ -487,6 +621,7 @@ Al registrar un pago de una orden de servicio se inserta un registro aquí con `
 | id               | UUID                | PK, auto-generated           |
 | batch_id         | UUID (FK)           | nullable → batches.id        |
 | service_order_id | UUID (FK)           | nullable → service_orders.id |
+| quote_id         | UUID (FK)           | nullable → quotes.id — cotización de origen (null si la línea se agregó directo en la orden) |
 | quantity         | BigDecimal          | nullable                     |
 | delivery_time    | DeliveryTime (enum) | default: IMMEDIATE           |
 | price            | BigDecimal(8,2)     | nullable                     |
@@ -507,6 +642,7 @@ Al registrar un pago de una orden de servicio se inserta un registro aquí con `
 | id               | UUID            | PK, auto-generated           |
 | service_id       | UUID (FK)       | nullable → services.id       |
 | service_order_id | UUID (FK)       | nullable → service_orders.id |
+| quote_id         | UUID (FK)       | nullable → quotes.id — cotización de origen |
 | discount         | BigDecimal(8,2) | nullable                     |
 | price            | BigDecimal(8,2) | nullable                     |
 | quantity         | BigDecimal      | nullable                     |
@@ -525,6 +661,7 @@ Al registrar un pago de una orden de servicio se inserta un registro aquí con `
 | id                      | UUID            | PK, auto-generated                 |
 | external_service_id     | UUID (FK)       | nullable → external_services.id    |
 | service_order_id        | UUID (FK)       | nullable → service_orders.id       |
+| quote_id                | UUID (FK)       | nullable → quotes.id — cotización de origen |
 | bank_account_id         | UUID (FK)       | nullable → bank_accounts.id        |
 | cost                    | BigDecimal(8,2) | nullable                           |
 | price                   | BigDecimal(8,2) | nullable                           |

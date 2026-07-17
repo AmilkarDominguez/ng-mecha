@@ -94,6 +94,18 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/users/user-dashboard').then(m => m.UserDashboard),
       },
       {
+        path: 'cotizaciones/activas',
+        loadComponent: () => import('./features/quote/quote-dashboard/quote-dashboard').then(m => m.QuoteDashboard),
+      },
+      {
+        path: 'cotizaciones/nueva',
+        loadComponent: () => import('./features/quote/quote-form/quote-form').then(m => m.QuoteForm),
+      },
+      {
+        path: 'cotizaciones/editar/:id',
+        loadComponent: () => import('./features/quote/quote-form/quote-form').then(m => m.QuoteForm),
+      },
+      {
         path: 'ordenes/en-curso',
         loadComponent: () => import('./features/service-order/service-order-dashboard/service-order-dashboard').then(m => m.ServiceOrderDashboard),
       },

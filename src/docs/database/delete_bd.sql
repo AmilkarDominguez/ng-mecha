@@ -10,10 +10,16 @@
 -- TABLAS — en orden de dependencia (hijos primero)
 -- CASCADE elimina FK constraints y políticas asociadas
 -- ============================================================
+DROP VIEW  IF EXISTS batch_available_stock           CASCADE;
+DROP TABLE IF EXISTS batch_reservations              CASCADE;
+DROP TABLE IF EXISTS quote_external_services         CASCADE;
+DROP TABLE IF EXISTS quote_batches                   CASCADE;
+DROP TABLE IF EXISTS quote_services                  CASCADE;
 DROP TABLE IF EXISTS service_order_external_services CASCADE;
 DROP TABLE IF EXISTS service_order_batches           CASCADE;
 DROP TABLE IF EXISTS service_order_services          CASCADE;
 DROP TABLE IF EXISTS service_orders                  CASCADE;
+DROP TABLE IF EXISTS quotes                          CASCADE;
 DROP TABLE IF EXISTS users                           CASCADE;
 DROP TABLE IF EXISTS bank_account_histories CASCADE;
 DROP TABLE IF EXISTS bank_transaction_types CASCADE;
@@ -47,6 +53,10 @@ DROP FUNCTION IF EXISTS reconcile_batch_purchase(UUID, UUID, NUMERIC, NUMERIC, T
 DROP FUNCTION IF EXISTS reverse_batch_purchase(UUID) CASCADE;
 DROP FUNCTION IF EXISTS apply_external_service_expense(UUID, UUID, NUMERIC, NUMERIC, TEXT, UUID) CASCADE;
 DROP FUNCTION IF EXISTS reverse_external_service_expenses_for_order(UUID) CASCADE;
+DROP FUNCTION IF EXISTS reserve_quote_batches(UUID) CASCADE;
+DROP FUNCTION IF EXISTS release_quote_reservations(UUID, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS convert_quote_to_order(UUID, UUID) CASCADE;
+DROP FUNCTION IF EXISTS expire_overdue_quote_reservations() CASCADE;
 
 
 -- ============================================================
@@ -58,6 +68,8 @@ DROP TYPE IF EXISTS external_services_rating_enum CASCADE;
 DROP TYPE IF EXISTS contact_type_enum             CASCADE;
 DROP TYPE IF EXISTS customer_rating_enum          CASCADE;
 DROP TYPE IF EXISTS delivery_time_enum             CASCADE;
+DROP TYPE IF EXISTS quote_state_enum               CASCADE;
+DROP TYPE IF EXISTS reservation_state_enum         CASCADE;
 DROP TYPE IF EXISTS payment_type_enum              CASCADE;
 DROP TYPE IF EXISTS order_state_enum               CASCADE;
 DROP TYPE IF EXISTS state_enum                     CASCADE;

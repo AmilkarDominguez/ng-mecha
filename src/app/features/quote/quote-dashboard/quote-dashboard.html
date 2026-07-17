@@ -1,0 +1,134 @@
+<div class="dashboard-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Cotizaciones</h1>
+      <span class="page-subtitle">Gestión de cotizaciones del taller</span>
+    </div>
+    <button mat-flat-button color="primary" class="add-button" (click)="onNew()">
+      Nueva Cotización
+    </button>
+  </div>
+
+  <div class="toolbar-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar cotización</mat-label>
+      <input matInput (input)="onSearch($event)" placeholder="Número o cliente..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <mat-tab-group animationDuration="200ms" color="primary">
+
+    <mat-tab label="Cotizaciones">
+      <ng-template matTabContent>
+        <ng-container [ngTemplateOutlet]="quotesTable" [ngTemplateOutletContext]="{ rows: activeQuotes(), emptyText: 'Sin cotizaciones registradas' }" />
+      </ng-template>
+    </mat-tab>
+
+    <mat-tab label="Anuladas">
+      <ng-template matTabContent>
+        <ng-container [ngTemplateOutlet]="quotesTable" [ngTemplateOutletContext]="{ rows: voidedQuotes(), emptyText: 'Sin cotizaciones anuladas' }" />
+      </ng-template>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>
+
+<ng-template #quotesTable let-rows="rows" let-emptyText="emptyText">
+  <div class="table-scroll">
+    <table mat-table [dataSource]="rows" class="quotes-table">
+
+      <ng-container matColumnDef="number">
+        <th mat-header-cell *matHeaderCellDef>Número</th>
+        <td mat-cell *matCellDef="let row">{{ row.number ?? '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="customer">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let row">{{ customerLabel(row) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="vehicle">
+        <th mat-header-cell *matHeaderCellDef>Vehículo</th>
+        <td mat-cell *matCellDef="let row">{{ vehicleLabel(row) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef>Total</th>
+        <td mat-cell *matCellDef="let row" class="cell-amount">
+          @if (row.total != null) {
+            Bs. {{ row.total | number:'1.2-2' }}
+          } @else {
+            —
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="state">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let row">
+          <span class="state-chip" [attr.data-state]="row.state">
+            {{ stateLabel(row.state) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="expiration_date">
+        <th mat-header-cell *matHeaderCellDef>Vencimiento</th>
+        <td mat-cell *matCellDef="let row">{{ row.expiration_date ?? '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let row">
+          @if (row.state === 'PENDING') {
+            <button mat-icon-button matTooltip="Editar cotización" (click)="onEdit(row)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          }
+          <button mat-icon-button matTooltip="Ver detalle" (click)="onView(row)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          @if (row.state === 'PENDING' || row.state === 'APPROVED') {
+            <button mat-icon-button matTooltip="Más acciones" [matMenuTriggerFor]="menu">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              @if (row.state === 'PENDING') {
+                <button mat-menu-item (click)="onApprove(row)">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Aprobar (reservar stock)</span>
+                </button>
+                <button mat-menu-item (click)="onReject(row)">
+                  <mat-icon>cancel</mat-icon>
+                  <span>Rechazar</span>
+                </button>
+              }
+              @if (row.state === 'APPROVED') {
+                <button mat-menu-item (click)="onConvert(row)">
+                  <mat-icon>receipt_long</mat-icon>
+                  <span>Convertir a Orden de Servicio</span>
+                </button>
+              }
+              <button mat-menu-item (click)="onCancelQuote(row)">
+                <mat-icon>block</mat-icon>
+                <span>Anular</span>
+              </button>
+            </mat-menu>
+          }
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-row" [attr.colspan]="columns.length">
+          {{ emptyText }}
+        </td>
+      </tr>
+    </table>
+  </div>
+</ng-template>

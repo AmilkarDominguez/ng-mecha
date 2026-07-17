@@ -1,0 +1,137 @@
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.page-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+}
+
+.page-subtitle {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted, #757575);
+}
+
+.add-button {
+  height: 2.75rem;
+  padding: 0 1.25rem;
+  white-space: nowrap;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 1;
+  min-width: 18rem;
+  max-width: 30rem;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  padding-top: 1rem;
+}
+
+.quotes-table {
+  width: 100%;
+  min-width: 52rem;
+
+  th.mat-header-cell {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text-muted, #757575);
+    white-space: nowrap;
+  }
+
+  td.mat-cell {
+    font-size: 0.875rem;
+  }
+}
+
+.cell-amount {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.state-chip {
+  display: inline-block;
+  padding: 0.125rem 0.625rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &[data-state="PENDING"] {
+    background: #fff3e0;
+    color: #e65100;
+  }
+
+  &[data-state="APPROVED"] {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+
+  &[data-state="CONVERTED"] {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &[data-state="REJECTED"],
+  &[data-state="CANCELED"] {
+    background: #ffebee;
+    color: #c62828;
+  }
+
+  &[data-state="EXPIRED"] {
+    background: var(--mat-sys-surface-container);
+    color: var(--color-text-muted, #757575);
+  }
+}
+
+.empty-row {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted, #757575);
+}
+
+@media (max-width: 48rem) {
+  .page-title {
+    font-size: 1.375rem;
+  }
+}
+
+@media (max-width: 36rem) {
+  .toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .search-field {
+    min-width: 0;
+    width: 100%;
+    max-width: none;
+  }
+}

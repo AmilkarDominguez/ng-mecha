@@ -1,6 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { forkJoin, Observable, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { forkJoin, from, Observable, of } from 'rxjs';
+import { catchError, concatMap, switchMap } from 'rxjs/operators';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -33,6 +33,7 @@ import {
 } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
 import { SPServiceOrderExternalExpense } from '../../../core/services/supabase/sb-service-order-external-expense';
+import { SPQuoteConversion } from '../../../core/services/supabase/sb-quote-conversion';
 import { AuthService } from '../../../core/auth/services/auth.service';
 
 const IVA_RATE = 0.13;
@@ -65,6 +66,7 @@ const IVA_RATE = 0.13;
 export class ServiceOrderForm implements OnInit {
   private serviceOrderProvider = inject(SPServiceOrder);
   private externalExpenseService = inject(SPServiceOrderExternalExpense);
+  private quoteConversion = inject(SPQuoteConversion);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -122,6 +124,20 @@ export class ServiceOrderForm implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      const quoteId = this.route.snapshot.queryParamMap.get('quoteId');
+      if (quoteId) {
+        this.customerTabValue.set({
+          customer_id:  null,
+          vehicle_id:   null,
+          mechanic_id:  null,
+          mileage:      null,
+          started_date: null,
+          ended_date:   null,
+          quote_ids:    [quoteId],
+        });
+      }
+    }
     if (id) {
       this.isEditMode.set(true);
       this.editOrderId.set(id);
@@ -143,6 +159,7 @@ export class ServiceOrderForm implements OnInit {
             mileage:      order.mileage,
             started_date: order.started_date,
             ended_date:   order.ended_date,
+            quote_ids:    [],
           });
           this.serviceRows.set(order.order_services.map((l) => this.toServiceRow(l)));
           this.batchRows.set(order.order_batches.map((l) => this.toBatchRow(l)));
@@ -310,8 +327,7 @@ export class ServiceOrderForm implements OnInit {
     }
 
     if (saves.length === 0) {
-      this.snackBar.open(successMessage, 'Cerrar', { duration: 3000 });
-      this.router.navigate(['/dashboard/ordenes/en-curso']);
+      this.finalizeWithQuotes(orderId, successMessage);
       return;
     }
 
@@ -321,8 +337,7 @@ export class ServiceOrderForm implements OnInit {
         next: () => {
           pending--;
           if (pending === 0) {
-            this.snackBar.open(successMessage, 'Cerrar', { duration: 3000 });
-            this.router.navigate(['/dashboard/ordenes/en-curso']);
+            this.finalizeWithQuotes(orderId, successMessage);
           }
         },
         error: (err: unknown) => {
@@ -331,6 +346,43 @@ export class ServiceOrderForm implements OnInit {
         },
       });
     }
+  }
+
+  /**
+   * Convierte secuencialmente (concatMap, no forkJoin) cada cotizacion
+   * APPROVED seleccionada hacia esta orden — ver quote-module.md #4.3. Se
+   * llama DESPUES de guardar las lineas ad-hoc, porque cada conversion
+   * recalcula el total de la orden sumando TODAS sus lineas existentes.
+   * Si una conversion falla, las anteriores ya aplicadas quedan intactas
+   * (el error se atribuye a esa cotizacion puntual, sin bloquear al resto).
+   */
+  private finalizeWithQuotes(orderId: string, successMessage: string): void {
+    const quoteIds = this.customerTabValue()?.quote_ids ?? [];
+    if (quoteIds.length === 0) {
+      this.snackBar.open(successMessage, 'Cerrar', { duration: 3000 });
+      this.router.navigate(['/dashboard/ordenes/en-curso']);
+      return;
+    }
+
+    from(quoteIds).pipe(
+      concatMap((quoteId) =>
+        this.quoteConversion.convertToOrder(quoteId, orderId).pipe(
+          catchError((err: unknown) => {
+            this.snackBar.open(
+              (err as Error)?.message ?? 'No se pudo convertir una de las cotizaciones seleccionadas',
+              'Cerrar',
+              { duration: 5000 },
+            );
+            return of(null);
+          }),
+        ),
+      ),
+    ).subscribe({
+      complete: () => {
+        this.snackBar.open(successMessage, 'Cerrar', { duration: 3000 });
+        this.router.navigate(['/dashboard/ordenes/en-curso']);
+      },
+    });
   }
 
   private applyExternalExpenses(rows: ServiceOrderExternalService[]): Observable<unknown> {
