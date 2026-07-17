@@ -91,6 +91,9 @@
           <button mat-icon-button matTooltip="Ver detalle" (click)="onView(row)">
             <mat-icon>visibility</mat-icon>
           </button>
+          <button mat-icon-button matTooltip="Imprimir cotización" (click)="onPrint(row)">
+            <mat-icon>print</mat-icon>
+          </button>
           @if (row.state === 'PENDING' || row.state === 'APPROVED') {
             <button mat-icon-button matTooltip="Más acciones" [matMenuTriggerFor]="menu">
               <mat-icon>more_vert</mat-icon>

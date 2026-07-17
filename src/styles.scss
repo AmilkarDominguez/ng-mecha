@@ -33,7 +33,8 @@
     display: none !important;
   }
 
-  .service-order-print-panel {
+  .service-order-print-panel,
+  .quote-print-panel {
     .mat-mdc-dialog-surface {
       box-shadow: none !important;
       border-radius: 0 !important;
