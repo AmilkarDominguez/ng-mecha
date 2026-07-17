@@ -5,7 +5,7 @@ Utiliza un razonamiento: adaptive thinking
 **Instrucción:** Lee este documento completo antes de tocar cualquier archivo. Antes de implementar, lee también:
 > - `.claude/docs/entities.md` — sección "Quotes Module" (ya actualizada) y sección "Service Orders Module" (columnas `quote_id` ya agregadas a las 3 tablas pivote)
 > - `.claude/docs/features.md` — módulo "Cotizaciones" ya está en el menú planificado (`Cotizaciones/Cotizaciones`, `Cotizaciones/Anuladas`)
-> - `.claude/docs/service-order-flow.md` — estado real del módulo de Órdenes de Servicio: estructura de tabs, patrón de guardado en 2 fases, modales `DialogFrame`
+> - `.claude/rules/service-order-flow.md` — estado real del módulo de Órdenes de Servicio: estructura de tabs, patrón de guardado en 2 fases, modales `DialogFrame`
 > - `.claude/commands/create-crud.md` — patrón base de CRUD (dashboard/tabla/modal) a seguir para las pantallas simples
 > - `.claude/commands/service-order-requires-quote.md` — **su diseño original (1 quote_id NOT NULL en `service_orders`) queda superado por este documento.** No lo implementes; ya tiene una nota al respecto.
 

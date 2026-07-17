@@ -1,0 +1,270 @@
+$print-border:      #999999;
+$print-border-dark: #333333;
+$doc-font:          'Arial', sans-serif;
+
+// ── Modal wrapper ──────────────────────────────────────────────────
+
+.print-modal-wrapper {
+  padding: 0;
+  background: #e0e0e0;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.modal-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem;
+  background: #e0e0e0;
+}
+
+// ── Documento ─────────────────────────────────────────────────────
+
+.print-document {
+  width: 210mm;
+  min-height: 148mm;
+  margin: 1rem auto;
+  padding: 8mm 10mm;
+  background: #fff;
+  font-family: $doc-font;
+  font-size: 8pt;
+  color: #000;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+// ── Titulos ───────────────────────────────────────────────────────
+
+.doc-title {
+  text-align: center;
+  font-size: 13pt;
+  font-weight: 700;
+  color: #000;
+  margin: 0 0 1.5mm;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.doc-subtitle {
+  text-align: center;
+  font-size: 10pt;
+  font-weight: 700;
+  color: var(--color-print-red);
+  text-decoration: underline;
+  margin: 0 0 1.5mm;
+  text-transform: uppercase;
+}
+
+.doc-slogan {
+  text-align: center;
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--color-print-red);
+  margin: 0 0 4mm;
+  text-transform: uppercase;
+}
+
+// ── Encabezado ────────────────────────────────────────────────────
+
+.header-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 3mm;
+
+  td {
+    padding: 0.75mm 2mm;
+    vertical-align: middle;
+  }
+}
+
+.header-label {
+  font-weight: 700;
+  font-size: 8pt;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.header-value {
+  border-bottom: 1px solid $print-border-dark;
+  font-size: 8pt;
+  min-width: 30mm;
+  padding-bottom: 0.5mm;
+}
+
+// ── Tabla principal ───────────────────────────────────────────────
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 7.5pt;
+  border: 1px solid $print-border-dark;
+
+  th,
+  td {
+    border: 1px solid $print-border;
+    padding: 1mm 1.5mm;
+    vertical-align: middle;
+  }
+}
+
+.col-header-row th {
+  background: #f2f2f2;
+  color: #000;
+  font-weight: 700;
+  text-align: center;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+}
+
+.quote-table {
+  .col-qty   { width: 12%; text-align: center; }
+  .col-desc  { width: 42%; }
+  .col-unit  { width: 14%; text-align: center; }
+  .col-price { width: 16%; text-align: right; }
+  .col-total { width: 16%; text-align: right; }
+}
+
+.section-row td {
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  background: #fff;
+}
+
+.empty-row {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 2mm;
+}
+
+// ── Nota de advertencia ───────────────────────────────────────────
+
+.note-bar {
+  margin-top: 2mm;
+  padding: 1.5mm 2mm;
+  background: var(--color-print-yellow-bg);
+  border: 1px solid $print-border-dark;
+  font-size: 7.5pt;
+  font-weight: 600;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+// ── Logo ──────────────────────────────────────────────────────────
+
+.doc-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1mm;
+  margin: 5mm 0 3mm;
+}
+
+.logo-icon {
+  width: 16mm;
+  height: 16mm;
+  background: var(--color-print-red);
+  border-radius: 2.5mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .logo-letters {
+    color: #fff;
+    font-size: 13pt;
+    font-weight: 900;
+    font-family: $doc-font;
+  }
+}
+
+.logo-name {
+  font-size: 12pt;
+  font-weight: 900;
+  color: var(--color-print-red);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.1;
+}
+
+.logo-sub {
+  font-size: 7pt;
+  color: #555;
+}
+
+// ── Validez / contacto / ubicacion ────────────────────────────────
+
+.doc-footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+  margin-bottom: 4mm;
+}
+
+.validez-row {
+  font-size: 8pt;
+  font-weight: 600;
+}
+
+.contact-row {
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+.address-row {
+  font-size: 7.5pt;
+  color: var(--color-print-red);
+  line-height: 1.4;
+}
+
+// ── Firma ─────────────────────────────────────────────────────────
+
+.doc-signature {
+  font-size: 8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 6mm;
+}
+
+// ── Impresión ─────────────────────────────────────────────────────
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-modal-wrapper {
+    background: none;
+  }
+
+  .print-document {
+    margin: 0;
+    border: none;
+    padding: 5mm 8mm;
+    width: 100%;
+  }
+}

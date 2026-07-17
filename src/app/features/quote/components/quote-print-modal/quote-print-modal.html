@@ -1,0 +1,133 @@
+<div class="print-modal-wrapper">
+
+  <!-- Barra de acciones -->
+  <div class="modal-actions no-print">
+    <span class="modal-title">Vista previa de impresión</span>
+    <div class="action-buttons">
+      <button mat-stroked-button (click)="onClose()">Cerrar</button>
+      <button mat-flat-button color="primary" (click)="onPrint()">
+        <mat-icon>print</mat-icon>
+        Imprimir
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state no-print">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+    </div>
+  }
+
+  @if (hasError()) {
+    <div class="error-state no-print">Error al cargar los datos de la cotización.</div>
+  }
+
+  @if (detail(); as d) {
+    <div class="print-document">
+
+      <!-- Título -->
+      <h1 class="doc-title">MECATRONICA TALLER MECÁNICO ELECTRÓNICO</h1>
+      <h2 class="doc-subtitle">COTIZACION DE MANO DE OBRA, REPUESTOS Y SERVICIOS DE TERCEROS</h2>
+      <div class="doc-slogan">ESPECIALIZADOS EN TU VEHÍCULO, PRIORIZANDO TU VIDA.</div>
+
+      <!-- Encabezado -->
+      <table class="header-table">
+        <tbody>
+          <tr>
+            <td class="header-label">CLIENTE:</td>
+            <td class="header-value" colspan="3">{{ customerName() }}</td>
+          </tr>
+          <tr>
+            <td class="header-label">VEHICULO:</td>
+            <td class="header-value">{{ vehicleDesc() }}</td>
+            <td class="header-label">FECHA:</td>
+            <td class="header-value">{{ d.created_at | date:'d/M/yyyy' }}</td>
+          </tr>
+          <tr>
+            <td class="header-label">PLACA:</td>
+            <td class="header-value" colspan="3">{{ d.vehicle?.license_plate ?? '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Tabla unica: repuestos + descripcion de servicio -->
+      <table class="data-table quote-table">
+        <thead>
+          <tr class="col-header-row">
+            <th class="col-qty">CANTIDAD</th>
+            <th class="col-desc">DESCRIPCION DEL REPUESTO</th>
+            <th class="col-unit">UNIDAD</th>
+            <th class="col-price">PRECIO UNITARIO</th>
+            <th class="col-total">PRECIO TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of d.lines_batches; track line.id) {
+            <tr>
+              <td class="col-qty">{{ line.quantity }}</td>
+              <td class="col-desc">{{ batchName(line) }}</td>
+              <td class="col-unit">PIEZA</td>
+              <td class="col-price">{{ line.price | number:'1.2-2' }}</td>
+              <td class="col-total">{{ line.subtotal | number:'1.2-2' }}</td>
+            </tr>
+          }
+
+          @if (d.lines_services.length > 0 || d.lines_externals.length > 0) {
+            <tr class="section-row">
+              <td colspan="5">DESCRIPCION DE SERVICIO</td>
+            </tr>
+          }
+
+          @for (line of d.lines_services; track line.id) {
+            <tr>
+              <td class="col-qty">{{ line.quantity }}</td>
+              <td class="col-desc">{{ serviceName(line) }}</td>
+              <td class="col-unit">SERVICIO</td>
+              <td class="col-price">{{ line.price | number:'1.2-2' }}</td>
+              <td class="col-total">{{ line.subtotal | number:'1.2-2' }}</td>
+            </tr>
+          }
+
+          @for (line of d.lines_externals; track line.id) {
+            <tr>
+              <td class="col-qty">{{ line.quantity }}</td>
+              <td class="col-desc">{{ externalServiceName(line) }}</td>
+              <td class="col-unit">SERVICIO</td>
+              <td class="col-price">{{ line.price | number:'1.2-2' }}</td>
+              <td class="col-total">{{ line.subtotal | number:'1.2-2' }}</td>
+            </tr>
+          }
+
+          @if (d.lines_batches.length === 0 && d.lines_services.length === 0 && d.lines_externals.length === 0) {
+            <tr><td colspan="5" class="empty-row">Sin líneas registradas</td></tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Nota de advertencia -->
+      <div class="note-bar">EL PRECIO PUEDE VARIAR UNA VES DESARMADO EL VEHICULO</div>
+
+      <!-- Logo -->
+      <div class="doc-logo">
+        <div class="logo-icon"><span class="logo-letters">M</span></div>
+        <div class="logo-name">MECATRÓNICA</div>
+        <div class="logo-sub">Taller Mecánico Electrónico</div>
+      </div>
+
+      <!-- Validez / contacto / ubicacion -->
+      <div class="doc-footer-info">
+        <div class="validez-row">VALIDEZ: {{ validezDias() }} DIAS</div>
+        <div class="contact-row">CONTACTO: 77877890 - 73246276</div>
+        <div class="address-row">
+          UBICADOS: BARRIO SAN JORGE I, SOBRE AV. PANAMERICANA, CUADRA Y MEDIA ANTES DE LA
+          ROTONDA DE LA COCA COLA AL LADO DE FINNIC CAT
+        </div>
+      </div>
+
+      <!-- Firma -->
+      <div class="doc-signature">ASESOR DE SERVICIO</div>
+
+    </div>
+  }
+
+</div>

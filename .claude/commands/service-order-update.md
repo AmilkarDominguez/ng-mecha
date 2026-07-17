@@ -2,7 +2,7 @@ Agrega el modo edición a las órdenes de servicio reutilizando el formulario ex
 
 Utiliza un razonamiento: adaptive thinking
 
-Lee `.claude/docs/service-order-flow.md` antes de comenzar. Contiene el estado actual completo del módulo.
+Lee `.claude/rules/service-order-flow.md` antes de comenzar. Contiene el estado actual completo del módulo.
 
 ---
 

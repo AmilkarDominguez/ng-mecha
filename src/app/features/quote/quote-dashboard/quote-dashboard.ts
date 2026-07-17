@@ -16,6 +16,7 @@ import { Quote, QuoteState } from '../../../core/models/quote.model';
 import { SPQuote } from '../../../core/services/supabase/sb-quote';
 import { SPQuoteConversion } from '../../../core/services/supabase/sb-quote-conversion';
 import { QuoteDetailModal } from '../components/quote-detail-modal/quote-detail-modal';
+import { QuotePrintModal } from '../components/quote-print-modal/quote-print-modal';
 
 const ACTIVE_STATES: QuoteState[] = ['PENDING', 'APPROVED', 'CONVERTED'];
 const VOIDED_STATES: QuoteState[] = ['REJECTED', 'EXPIRED', 'CANCELED'];
@@ -78,6 +79,17 @@ export class QuoteDashboard {
       hasBackdrop: false,
       panelClass: 'floating-dialog-panel',
       data: quote,
+    });
+  }
+
+  onPrint(quote: Quote): void {
+    this.dialog.open(QuotePrintModal, {
+      data: quote,
+      width: '840px',      // ancho A4 (210mm ≈ 794px) + margen lateral
+      maxWidth: '95vw',
+      maxHeight: '95vh',
+      autoFocus: false,
+      panelClass: 'quote-print-panel',
     });
   }
 
