@@ -1,16 +1,14 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDividerModule } from '@angular/material/divider';
 import { DecimalPipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ServiceOrder } from '../../../../core/models/service-order.model';
 import {
   Quote,
   QuoteBatchLine,
@@ -19,15 +17,9 @@ import {
   QuoteWithLines,
 } from '../../../../core/models/quote.model';
 import { SPQuote } from '../../../../core/services/supabase/sb-quote';
-import { SPQuoteConversion } from '../../../../core/services/supabase/sb-quote-conversion';
-import { DialogFrame } from '../../../../shared/components/dialog-frame/dialog-frame';
-
-export interface AddQuoteToOrderModalData {
-  order: ServiceOrder;
-}
 
 @Component({
-  selector: 'app-add-quote-to-order-modal',
+  selector: 'app-tab-quote',
   imports: [
     ReactiveFormsModule,
     MatAutocompleteModule,
@@ -36,37 +28,36 @@ export interface AddQuoteToOrderModalData {
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatDividerModule,
     DecimalPipe,
-    DialogFrame,
   ],
-  templateUrl: './add-quote-to-order-modal.html',
-  styleUrl: './add-quote-to-order-modal.scss',
+  templateUrl: './tab-quote.html',
+  styleUrl: './tab-quote.scss',
 })
-export class AddQuoteToOrderModal {
-  private dialogRef = inject(MatDialogRef<AddQuoteToOrderModal>);
+export class TabQuote {
   private quoteService = inject(SPQuote);
-  private quoteConversion = inject(SPQuoteConversion);
-  private snackBar = inject(MatSnackBar);
-  readonly data: AddQuoteToOrderModalData = inject(MAT_DIALOG_DATA);
 
-  readonly saving = signal(false);
+  customerId = input<string | null>(null);
+  vehicleId = input<string | null>(null);
+  excludeIds = input<string[]>([]);
+
+  addQuote = output<Quote>();
+
+  readonly allQuotes = toSignal(this.quoteService.get(), { initialValue: [] });
+
   readonly quoteCtrl = new FormControl<Quote | string | null>(null);
-
-  private readonly allQuotes = toSignal(this.quoteService.get(), { initialValue: [] });
   private readonly quoteCtrlValue = toSignal(this.quoteCtrl.valueChanges, { initialValue: null });
 
-  readonly selectedQuote = signal<Quote | null>(null);
-  readonly preview = signal<QuoteWithLines | null>(null);
-  readonly loadingPreview = signal(false);
-  readonly previewError = signal(false);
-
   readonly eligibleQuotes = computed(() => {
-    const orderVehicleId = this.data.order.vehicle_id;
+    const customerId = this.customerId();
+    const vehicleId = this.vehicleId();
+    const exclude = new Set(this.excludeIds());
     return this.allQuotes().filter(
       (q) =>
         q.state === 'APPROVED' &&
-        q.customer_id === this.data.order.customer_id &&
-        (!orderVehicleId || q.vehicle_id === orderVehicleId),
+        !exclude.has(q.id) &&
+        (!customerId || q.customer_id === customerId) &&
+        (!vehicleId || q.vehicle_id === vehicleId),
     );
   });
 
@@ -77,6 +68,11 @@ export class AddQuoteToOrderModal {
     const term = val.toLowerCase().trim();
     return all.filter((q) => this.quoteLabel(q).toLowerCase().includes(term));
   });
+
+  readonly selectedQuote = signal<Quote | null>(null);
+  readonly preview = signal<QuoteWithLines | null>(null);
+  readonly loadingPreview = signal(false);
+  readonly previewError = signal(false);
 
   displayQuote = (value: Quote | string | null): string => {
     if (!value) return '';
@@ -107,6 +103,20 @@ export class AddQuoteToOrderModal {
     });
   }
 
+  onCancelPreview(): void {
+    this.selectedQuote.set(null);
+    this.preview.set(null);
+    this.previewError.set(false);
+    this.quoteCtrl.setValue(null);
+  }
+
+  onConfirmAdd(): void {
+    const quote = this.selectedQuote();
+    if (!quote) return;
+    this.addQuote.emit(quote);
+    this.onCancelPreview();
+  }
+
   serviceName(line: QuoteServiceLine): string {
     return line.service?.name ?? '—';
   }
@@ -117,34 +127,5 @@ export class AddQuoteToOrderModal {
 
   externalServiceName(line: QuoteExternalLine): string {
     return line.external_service?.name ?? '—';
-  }
-
-  onConfirm(): void {
-    const quote = this.selectedQuote();
-    if (!quote) {
-      this.snackBar.open('Seleccione una cotización aprobada', 'Cerrar', { duration: 2500 });
-      return;
-    }
-
-    this.saving.set(true);
-    this.quoteConversion.convertToOrder(quote.id, this.data.order.id).subscribe({
-      next: () => {
-        this.saving.set(false);
-        this.snackBar.open('Cotización agregada a la orden', 'Cerrar', { duration: 3000 });
-        this.dialogRef.close(true);
-      },
-      error: (err: unknown) => {
-        this.saving.set(false);
-        this.snackBar.open(
-          (err as Error)?.message ?? 'No se pudo agregar la cotización a la orden',
-          'Cerrar',
-          { duration: 5000 },
-        );
-      },
-    });
-  }
-
-  onCancel(): void {
-    this.dialogRef.close(false);
   }
 }

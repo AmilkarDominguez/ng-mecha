@@ -1,8 +1,16 @@
-.modal-body {
+.tab-quote {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  padding: 1rem 1.5rem;
+  padding: 1rem 0;
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--mat-sys-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .hint {
@@ -11,18 +19,25 @@
   margin: 0;
 }
 
-.field-full {
-  width: 100%;
-}
-
 .hint-warn {
   color: var(--mat-sys-error);
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.field-full {
+  flex: 1;
 }
 
 .preview-loading {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  padding: 1rem;
   color: var(--color-text-muted, #757575);
   font-size: 0.875rem;
 }
@@ -35,6 +50,25 @@
   border-radius: 0.5rem;
   padding: 1rem;
   background: var(--mat-sys-surface-container-low);
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.preview-number {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--mat-sys-primary);
+}
+
+.preview-expiration {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted, #757575);
 }
 
 .lines-section {
@@ -76,6 +110,12 @@
   }
 }
 
+.cell-idx {
+  color: var(--color-text-muted, #757575);
+  font-size: 0.75rem;
+  width: 2rem;
+}
+
 .cell-num {
   text-align: right;
   white-space: nowrap;
@@ -102,4 +142,10 @@
   font-size: 1rem;
   font-weight: 700;
   color: var(--mat-sys-primary);
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }

@@ -18,9 +18,11 @@ import { TabCustomer, CustomerTabValue } from '../components/tab-customer/tab-cu
 import { TabLabor } from '../components/tab-labor/tab-labor';
 import { TabParts } from '../components/tab-parts/tab-parts';
 import { TabExternal } from '../components/tab-external/tab-external';
+import { TabQuote } from '../components/tab-quote/tab-quote';
 import { ServiceOrderServicesTable } from '../components/service-order-services-table/service-order-services-table';
 import { ServiceOrderBatchesTable } from '../components/service-order-batches-table/service-order-batches-table';
 import { ServiceOrderExternalServicesTable } from '../components/service-order-external-services-table/service-order-external-services-table';
+import { ServiceOrderQuotesTable } from '../components/service-order-quotes-table/service-order-quotes-table';
 import {
   ServiceOrder,
   ServiceOrderServiceRow,
@@ -31,8 +33,10 @@ import {
   OrderBatchLine,
   OrderExternalLine,
 } from '../../../core/models/service-order.model';
+import { Quote } from '../../../core/models/quote.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
 import { SPServiceOrderExternalExpense } from '../../../core/services/supabase/sb-service-order-external-expense';
+import { SPQuote } from '../../../core/services/supabase/sb-quote';
 import { SPQuoteConversion } from '../../../core/services/supabase/sb-quote-conversion';
 import { AuthService } from '../../../core/auth/services/auth.service';
 
@@ -56,9 +60,11 @@ const IVA_RATE = 0.13;
     TabLabor,
     TabParts,
     TabExternal,
+    TabQuote,
     ServiceOrderServicesTable,
     ServiceOrderBatchesTable,
     ServiceOrderExternalServicesTable,
+    ServiceOrderQuotesTable,
   ],
   templateUrl: './service-order-form.html',
   styleUrl: './service-order-form.scss',
@@ -66,6 +72,7 @@ const IVA_RATE = 0.13;
 export class ServiceOrderForm implements OnInit {
   private serviceOrderProvider = inject(SPServiceOrder);
   private externalExpenseService = inject(SPServiceOrderExternalExpense);
+  private quoteProvider = inject(SPQuote);
   private quoteConversion = inject(SPQuoteConversion);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
@@ -82,6 +89,9 @@ export class ServiceOrderForm implements OnInit {
   readonly serviceRows  = signal<ServiceOrderServiceRow[]>([]);
   readonly batchRows    = signal<ServiceOrderBatchRow[]>([]);
   readonly externalRows = signal<ServiceOrderExternalServiceRow[]>([]);
+  readonly selectedQuotes = signal<Quote[]>([]);
+
+  readonly selectedQuoteIds = computed(() => this.selectedQuotes().map((q) => q.id));
 
   readonly summaryForm = new FormGroup({
     number:       new FormControl<string>(''),
@@ -111,6 +121,13 @@ export class ServiceOrderForm implements OnInit {
     this.externalRows().reduce((acc, r) => acc + (r.price ?? 0) * (r.quantity ?? 1), 0),
   );
 
+  // Informativo: no se suma a total()/payload.total. El total real de la
+  // orden lo recalcula convert_quote_to_order() desde cero (todas las
+  // lineas de la orden) al procesar cada cotizacion en finalizeWithQuotes().
+  readonly subtotalQuotes = computed(() =>
+    this.selectedQuotes().reduce((acc, q) => acc + (q.total ?? 0), 0),
+  );
+
   readonly total = computed(
     () => this.subtotalServices() + this.subtotalBatches() + this.subtotalExternal(),
   );
@@ -127,14 +144,21 @@ export class ServiceOrderForm implements OnInit {
     if (!id) {
       const quoteId = this.route.snapshot.queryParamMap.get('quoteId');
       if (quoteId) {
-        this.customerTabValue.set({
-          customer_id:  null,
-          vehicle_id:   null,
-          mechanic_id:  null,
-          mileage:      null,
-          started_date: null,
-          ended_date:   null,
-          quote_ids:    [quoteId],
+        this.quoteProvider.getById(quoteId).subscribe({
+          next: (quote) => {
+            this.selectedQuotes.set([quote]);
+            this.customerTabValue.set({
+              customer_id:  quote.customer_id,
+              vehicle_id:   quote.vehicle_id,
+              mechanic_id:  null,
+              mileage:      null,
+              started_date: null,
+              ended_date:   null,
+            });
+          },
+          error: () => {
+            this.snackBar.open('No se pudo cargar la cotización seleccionada', 'Cerrar', { duration: 4000 });
+          },
         });
       }
     }
@@ -159,7 +183,6 @@ export class ServiceOrderForm implements OnInit {
             mileage:      order.mileage,
             started_date: order.started_date,
             ended_date:   order.ended_date,
-            quote_ids:    [],
           });
           this.serviceRows.set(order.order_services.map((l) => this.toServiceRow(l)));
           this.batchRows.set(order.order_batches.map((l) => this.toBatchRow(l)));
@@ -200,6 +223,16 @@ export class ServiceOrderForm implements OnInit {
 
   onRemoveExternal(id: string): void {
     this.externalRows.update((rows) => rows.filter((r) => r.id !== id));
+  }
+
+  onAddQuote(quote: Quote): void {
+    this.selectedQuotes.update((quotes) =>
+      quotes.some((q) => q.id === quote.id) ? quotes : [...quotes, quote],
+    );
+  }
+
+  onRemoveQuote(id: string): void {
+    this.selectedQuotes.update((quotes) => quotes.filter((q) => q.id !== id));
   }
 
   onSave(): void {
@@ -289,6 +322,7 @@ export class ServiceOrderForm implements OnInit {
     const servicesToSave = this.serviceRows().map((r) => ({
       service_id:       r.service_id,
       service_order_id: orderId,
+      quote_id:         r.quote_id,
       price:            r.price,
       quantity:         r.quantity,
       discount:         r.discount,
@@ -298,6 +332,7 @@ export class ServiceOrderForm implements OnInit {
     const batchesToSave = this.batchRows().map((r) => ({
       batch_id:         r.batch_id,
       service_order_id: orderId,
+      quote_id:         r.quote_id,
       quantity:         r.quantity,
       delivery_time:    r.delivery_time,
       price:            r.price,
@@ -309,6 +344,7 @@ export class ServiceOrderForm implements OnInit {
       external_service_id: r.external_service_id,
       service_order_id:    orderId,
       bank_account_id:     r.bank_account_id,
+      quote_id:            r.quote_id,
       cost:                r.cost,
       price:               r.price,
       quantity:            r.quantity,
@@ -357,7 +393,7 @@ export class ServiceOrderForm implements OnInit {
    * (el error se atribuye a esa cotizacion puntual, sin bloquear al resto).
    */
   private finalizeWithQuotes(orderId: string, successMessage: string): void {
-    const quoteIds = this.customerTabValue()?.quote_ids ?? [];
+    const quoteIds = this.selectedQuoteIds();
     if (quoteIds.length === 0) {
       this.snackBar.open(successMessage, 'Cerrar', { duration: 3000 });
       this.router.navigate(['/dashboard/ordenes/en-curso']);
@@ -423,6 +459,7 @@ export class ServiceOrderForm implements OnInit {
       id:               l.id,
       service_id:       l.service_id,
       service_order_id: null,
+      quote_id:         l.quote_id,
       price:            l.price,
       quantity:         l.quantity,
       discount:         l.discount,
@@ -436,6 +473,7 @@ export class ServiceOrderForm implements OnInit {
       id:               l.id,
       batch_id:         l.batch_id,
       service_order_id: null,
+      quote_id:         l.quote_id,
       quantity:         l.quantity,
       delivery_time:    l.delivery_time,
       price:            l.price,
@@ -452,6 +490,7 @@ export class ServiceOrderForm implements OnInit {
       external_service_id:   l.external_service_id,
       service_order_id:      null,
       bank_account_id:       l.bank_account_id,
+      quote_id:              l.quote_id,
       cost:                  l.cost,
       price:                 l.price,
       quantity:              l.quantity,

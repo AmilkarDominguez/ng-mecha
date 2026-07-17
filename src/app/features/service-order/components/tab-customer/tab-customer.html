@@ -1,22 +1,5 @@
 <div class="tab-customer">
 
-  <div class="section-title">Cotizaciones Aprobadas (opcional)</div>
-
-  <mat-form-field appearance="outline" class="field-full">
-    <mat-label>Cotizaciones a convertir en esta orden</mat-label>
-    <mat-select multiple [value]="selectedQuoteIds()" (selectionChange)="onQuotesChange($event.value)">
-      @for (q of quotesForCustomer(); track q.id) {
-        <mat-option [value]="q.id">{{ quoteLabel(q) }}</mat-option>
-      }
-      @if (quotesForCustomer().length === 0) {
-        <mat-option disabled>Sin cotizaciones aprobadas disponibles</mat-option>
-      }
-    </mat-select>
-    <mat-hint>Al elegir una cotización se precargan cliente y vehículo. Sus montos se suman al guardar.</mat-hint>
-  </mat-form-field>
-
-  <mat-divider class="section-divider" />
-
   <div class="section-title">Datos del Cliente</div>
 
   <div class="search-row">

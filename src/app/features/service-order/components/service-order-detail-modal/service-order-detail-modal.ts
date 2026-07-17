@@ -5,6 +5,7 @@ import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dial
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   OrderBatchLine,
   OrderExternalLine,
@@ -27,6 +28,7 @@ import { AddQuoteToOrderModal } from '../add-quote-to-order-modal/add-quote-to-o
     MatDividerModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
   ],
   templateUrl: './service-order-detail-modal.html',
   styleUrl: './service-order-detail-modal.scss',
@@ -113,6 +115,11 @@ export class ServiceOrderDetailModal implements OnInit {
 
   externalServiceName(line: OrderExternalLine): string {
     return line.external_service?.name ?? '—';
+  }
+
+  quoteTag(line: { quote_id: string | null; quote: { number: string | null } | null }): string | null {
+    if (!line.quote_id) return null;
+    return line.quote?.number ?? line.quote_id.slice(0, 8);
   }
 
   onClose(): void {

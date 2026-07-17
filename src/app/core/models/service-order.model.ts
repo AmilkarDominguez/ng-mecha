@@ -37,6 +37,7 @@ export interface ServiceOrderService {
   id: string;
   service_id: string | null;
   service_order_id: string | null;
+  quote_id: string | null;
   discount: number | null;
   price: number | null;
   quantity: number | null;
@@ -49,6 +50,7 @@ export interface ServiceOrderBatch {
   id: string;
   batch_id: string | null;
   service_order_id: string | null;
+  quote_id: string | null;
   quantity: number | null;
   delivery_time: DeliveryTime;
   price: number | null;
@@ -63,6 +65,7 @@ export interface ServiceOrderExternalService {
   external_service_id: string | null;
   service_order_id: string | null;
   bank_account_id: string | null;
+  quote_id: string | null;
   cost: number | null;
   price: number | null;
   quantity: number | null;
@@ -87,16 +90,19 @@ export interface ServiceOrderExternalServiceRow extends ServiceOrderExternalServ
 export interface OrderServiceLine {
   id: string;
   service_id: string | null;
+  quote_id: string | null;
   price: number | null;
   quantity: number | null;
   discount: number | null;
   subtotal: number | null;
   service: { name: string | null; code: string | null } | null;
+  quote: { number: string | null } | null;
 }
 
 export interface OrderBatchLine {
   id: string;
   batch_id: string | null;
+  quote_id: string | null;
   price: number | null;
   quantity: number | null;
   discount: number | null;
@@ -107,17 +113,20 @@ export interface OrderBatchLine {
     product: { name: string | null } | null;
     industry: { name: string | null } | null;
   } | null;
+  quote: { number: string | null } | null;
 }
 
 export interface OrderExternalLine {
   id: string;
   external_service_id: string | null;
   bank_account_id: string | null;
+  quote_id: string | null;
   cost: number | null;
   price: number | null;
   quantity: number | null;
   subtotal: number | null;
   external_service: { name: string | null; company_name: string | null } | null;
+  quote: { number: string | null } | null;
 }
 
 export interface ServiceOrderWithLines extends ServiceOrder {
