@@ -1589,6 +1589,12 @@ CREATE POLICY "auth_delete_bank_accounts"
 CREATE POLICY "auth_all_bank_account_histories"
   ON bank_account_histories FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
+-- Service Orders Module
+CREATE POLICY "auth_all_service_orders"                  ON service_orders                  FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all_service_order_services"          ON service_order_services          FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all_service_order_batches"           ON service_order_batches           FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all_service_order_external_services" ON service_order_external_services FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- Quotes Module
 CREATE POLICY "auth_all_quotes"                  ON quotes                  FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "auth_all_quote_services"          ON quote_services          FOR ALL TO authenticated USING (true) WITH CHECK (true);
@@ -1787,6 +1793,12 @@ CREATE POLICY "anon_delete_bank_accounts"
 CREATE POLICY "anon_all_bank_account_histories"
   ON bank_account_histories FOR ALL TO anon USING (true) WITH CHECK (true);
 
+-- Service Orders Module
+CREATE POLICY "anon_all_service_orders"                  ON service_orders                  FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_service_order_services"          ON service_order_services          FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_service_order_batches"           ON service_order_batches           FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_service_order_external_services" ON service_order_external_services FOR ALL TO anon USING (true) WITH CHECK (true);
+
 -- Quotes Module
 CREATE POLICY "anon_all_quotes"                  ON quotes                  FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_quote_services"          ON quote_services          FOR ALL TO anon USING (true) WITH CHECK (true);
@@ -1822,6 +1834,10 @@ BEGIN
     'bank_transaction_types',
     'bank_accounts',
     'bank_account_histories',
+    'service_orders',
+    'service_order_services',
+    'service_order_batches',
+    'service_order_external_services',
     'quotes'
   ] LOOP
     -- Add table to the supabase_realtime publication if not already present
