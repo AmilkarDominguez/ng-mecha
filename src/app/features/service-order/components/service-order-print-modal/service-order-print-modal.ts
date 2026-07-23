@@ -6,6 +6,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { DatePipe, DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ServiceOrder, ServiceOrderWithLines } from '../../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../../core/services/supabase/sb-service-order';
+import { WorkshopSettings } from '../../../../core/models/workshop-settings.model';
+import { SPWorkshopSettings } from '../../../../core/services/supabase/sb-workshop-settings';
 
 const IVA_RATE = 0.13;
 
@@ -23,13 +25,15 @@ const IVA_RATE = 0.13;
   styleUrl: './service-order-print-modal.scss',
 })
 export class ServiceOrderPrintModal implements OnInit {
-  private orderService = inject(SPServiceOrder);
-  private dialogRef    = inject(MatDialogRef<ServiceOrderPrintModal>);
-  readonly data        = inject<ServiceOrder>(MAT_DIALOG_DATA);
+  private orderService     = inject(SPServiceOrder);
+  private settingsService  = inject(SPWorkshopSettings);
+  private dialogRef        = inject(MatDialogRef<ServiceOrderPrintModal>);
+  readonly data            = inject<ServiceOrder>(MAT_DIALOG_DATA);
 
   readonly loading  = signal(true);
   readonly hasError = signal(false);
   readonly detail   = signal<ServiceOrderWithLines | null>(null);
+  readonly settings = signal<WorkshopSettings | null>(null);
 
   readonly subtotalServices = computed(() =>
     (this.detail()?.order_services ?? []).reduce((s, l) => s + (l.subtotal ?? 0), 0),
@@ -71,6 +75,8 @@ export class ServiceOrderPrintModal implements OnInit {
         this.loading.set(false);
       },
     });
+
+    this.settingsService.get().subscribe((settings) => this.settings.set(settings));
   }
 
   customerName(): string {

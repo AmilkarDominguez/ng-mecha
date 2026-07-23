@@ -94,6 +94,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/users/user-dashboard').then(m => m.UserDashboard),
       },
       {
+        path: 'admin/configuracion',
+        loadComponent: () => import('./features/admin/settings/settings-form').then(m => m.SettingsForm),
+      },
+      {
         path: 'cotizaciones/activas',
         loadComponent: () => import('./features/quote/quote-dashboard/quote-dashboard').then(m => m.QuoteDashboard),
       },

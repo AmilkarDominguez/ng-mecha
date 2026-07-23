@@ -12,6 +12,8 @@ import {
   QuoteWithLines,
 } from '../../../../core/models/quote.model';
 import { SPQuote } from '../../../../core/services/supabase/sb-quote';
+import { WorkshopSettings } from '../../../../core/models/workshop-settings.model';
+import { SPWorkshopSettings } from '../../../../core/services/supabase/sb-workshop-settings';
 
 const DEFAULT_VALIDEZ_DIAS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -24,12 +26,14 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 })
 export class QuotePrintModal implements OnInit {
   private quoteService = inject(SPQuote);
+  private settingsService = inject(SPWorkshopSettings);
   private dialogRef = inject(MatDialogRef<QuotePrintModal>);
   readonly data = inject<Quote>(MAT_DIALOG_DATA);
 
   readonly loading = signal(true);
   readonly hasError = signal(false);
   readonly detail = signal<QuoteWithLines | null>(null);
+  readonly settings = signal<WorkshopSettings | null>(null);
 
   // Dias de validez = diferencia real entre created_at y expiration_date de
   // la cotizacion (por defecto 3, igual que el valor inicial de quote-form.ts).
@@ -54,6 +58,8 @@ export class QuotePrintModal implements OnInit {
         this.loading.set(false);
       },
     });
+
+    this.settingsService.get().subscribe((settings) => this.settings.set(settings));
   }
 
   customerName(): string {

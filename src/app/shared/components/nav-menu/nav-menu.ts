@@ -46,6 +46,7 @@ export class NavMenu {
       icon: 'admin_panel_settings',
       items: [
         { label: 'Usuarios', icon: 'people', route: '/dashboard/admin/usuarios' },
+        { label: 'Configuración', icon: 'settings', route: '/dashboard/admin/configuracion' },
       ],
     },
     {

@@ -179,41 +179,14 @@ $doc-font:          'Arial', sans-serif;
 
 .doc-logo {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1mm;
+  justify-content: center;
   margin: 5mm 0 3mm;
 }
 
-.logo-icon {
-  width: 16mm;
+.logo-image {
   height: 16mm;
-  background: var(--color-print-red);
-  border-radius: 2.5mm;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .logo-letters {
-    color: #fff;
-    font-size: 13pt;
-    font-weight: 900;
-    font-family: $doc-font;
-  }
-}
-
-.logo-name {
-  font-size: 12pt;
-  font-weight: 900;
-  color: var(--color-print-red);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1.1;
-}
-
-.logo-sub {
-  font-size: 7pt;
-  color: #555;
+  max-width: 40mm;
+  object-fit: contain;
 }
 
 // ── Validez / contacto / ubicacion ────────────────────────────────

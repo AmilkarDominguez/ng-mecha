@@ -118,6 +118,74 @@ INSERT INTO users (name, lastname, email, password, allow_deletion, rol, state) 
   ('Inventario', 'Prueba',  'inventario@mecha.test','Inventario123!',true,  'INVENTORY', 'ACTIVE')
 ON CONFLICT (email) DO NOTHING;
 
+-- 0bis. workshop_settings (Admin Module)
+-- Entidad singleton: una sola fila para todo el sistema (datos de la
+-- empresa que alimentan los documentos impresos). "singleton" + su UNIQUE
+-- + CHECK garantizan que nunca exista una segunda fila.
+CREATE TABLE IF NOT EXISTS workshop_settings (
+  id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  singleton         BOOLEAN     NOT NULL DEFAULT true,
+  name              TEXT        NOT NULL,
+  slogan            TEXT,
+  email             TEXT,
+  address           TEXT,
+  contact_phone_1   TEXT,
+  contact_phone_2   TEXT,
+  facebook_url      TEXT,
+  instagram_url     TEXT,
+  website_url       TEXT,
+  tiktok_url        TEXT,
+  extra_url_1       TEXT,
+  extra_url_2       TEXT,
+  next_order_number INTEGER,
+  logo_url          TEXT,
+  show_in_print     BOOLEAN     NOT NULL DEFAULT true,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT workshop_settings_singleton_unique UNIQUE (singleton),
+  CONSTRAINT workshop_settings_singleton_true CHECK (singleton)
+);
+
+-- Seed: fila unica con los datos actuales del taller.
+INSERT INTO workshop_settings (
+  name, slogan, email, address, contact_phone_1, contact_phone_2,
+  facebook_url, instagram_url, website_url, tiktok_url, next_order_number, show_in_print
+) VALUES (
+  'Macatrónica',
+  'ESPECIALIZADOS EN TU VEHÍCULO, PRIORIZANDO TU VIDA',
+  'mecatronica.t.m.e@gmail.com',
+  'Barrio San Jorge 1 Sobre Av. Panamericana Una Cuadra Y Media Antes De La Rotonda De La Coca Cola.',
+  '68710817',
+  '00000000',
+  'www.facebook.com/DIRTYRACINGTARIJA',
+  'www.instagram.com/taller_mecatronica_',
+  'www.tallermacatronica.com',
+  'www.tiktok.com/@taller_mecanico_electro',
+  1001,
+  true
+)
+ON CONFLICT (singleton) DO NOTHING;
+
+-- Bucket de Storage para el logo del taller (primer bucket usado en el proyecto).
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('workshop-logo', 'workshop-logo', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "public_read_workshop_logo" ON storage.objects
+  FOR SELECT TO public USING (bucket_id = 'workshop-logo');
+CREATE POLICY "auth_write_workshop_logo" ON storage.objects
+  FOR INSERT TO authenticated WITH CHECK (bucket_id = 'workshop-logo');
+CREATE POLICY "auth_update_workshop_logo" ON storage.objects
+  FOR UPDATE TO authenticated USING (bucket_id = 'workshop-logo');
+CREATE POLICY "anon_write_workshop_logo" ON storage.objects
+  FOR INSERT TO anon WITH CHECK (bucket_id = 'workshop-logo');
+CREATE POLICY "anon_update_workshop_logo" ON storage.objects
+  FOR UPDATE TO anon USING (bucket_id = 'workshop-logo');
+
+-- Trigger, RLS y realtime de workshop_settings se registran junto con el
+-- resto de tablas en las secciones centralizadas al final de este archivo
+-- (no inline aqui) — mismo patron que bank_account_histories/quotes/service_orders.
+
 -- 1. product_categories
 CREATE TABLE IF NOT EXISTS product_categories (
   id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1327,6 +1395,7 @@ DO $$ DECLARE
 BEGIN
   FOREACH tbl IN ARRAY ARRAY[
     'users',
+    'workshop_settings',
     'product_categories',
     'product_presentations',
     'products',
@@ -1370,6 +1439,7 @@ END $$;
 -- ROW LEVEL SECURITY (RLS)
 -- ============================================================
 ALTER TABLE users                  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE workshop_settings      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_categories    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE product_presentations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products              ENABLE ROW LEVEL SECURITY;
@@ -1585,6 +1655,10 @@ CREATE POLICY "auth_update_bank_accounts"
 CREATE POLICY "auth_delete_bank_accounts"
   ON bank_accounts FOR DELETE TO authenticated USING (true);
 
+-- workshop_settings
+CREATE POLICY "auth_all_workshop_settings"
+  ON workshop_settings FOR ALL TO authenticated USING (true) WITH CHECK (true);
+
 -- bank_account_histories
 CREATE POLICY "auth_all_bank_account_histories"
   ON bank_account_histories FOR ALL TO authenticated USING (true) WITH CHECK (true);
@@ -1789,6 +1863,10 @@ CREATE POLICY "anon_update_bank_accounts"
 CREATE POLICY "anon_delete_bank_accounts"
   ON bank_accounts FOR DELETE TO anon USING (true);
 
+-- workshop_settings
+CREATE POLICY "anon_all_workshop_settings"
+  ON workshop_settings FOR ALL TO anon USING (true) WITH CHECK (true);
+
 -- bank_account_histories
 CREATE POLICY "anon_all_bank_account_histories"
   ON bank_account_histories FOR ALL TO anon USING (true) WITH CHECK (true);
@@ -1816,6 +1894,7 @@ DECLARE
 BEGIN
   FOREACH tbl IN ARRAY ARRAY[
     'users',
+    'workshop_settings',
     'product_categories',
     'product_presentations',
     'products',

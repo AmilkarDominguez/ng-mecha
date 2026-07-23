@@ -108,46 +108,13 @@ $doc-font:          'Arial', sans-serif;
 
 .company-logo {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 1mm;
+  justify-content: flex-end;
 }
 
-.logo-icon {
-  width: 13mm;
+.logo-image {
   height: 13mm;
-  background: var(--color-print-red);
-  border-radius: 2mm;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .logo-letters {
-    color: #fff;
-    font-size: 11pt;
-    font-weight: 900;
-    font-family: $doc-font;
-  }
-}
-
-.logo-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.logo-name {
-  font-size: 10pt;
-  font-weight: 900;
-  color: var(--color-print-red);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  line-height: 1.1;
-}
-
-.logo-sub {
-  font-size: 6pt;
-  color: #555;
+  max-width: 42mm;
+  object-fit: contain;
 }
 
 // ── Eslogan ───────────────────────────────────────────────────────

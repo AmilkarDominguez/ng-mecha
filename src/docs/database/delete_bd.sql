@@ -7,6 +7,20 @@
 
 
 -- ============================================================
+-- STORAGE — bucket de logo (workshop_settings)
+-- storage.objects/buckets no se eliminan con DROP TABLE de las tablas de
+-- negocio (viven en el schema storage), hay que limpiarlos aparte.
+-- ============================================================
+DROP POLICY IF EXISTS "public_read_workshop_logo" ON storage.objects;
+DROP POLICY IF EXISTS "auth_write_workshop_logo"   ON storage.objects;
+DROP POLICY IF EXISTS "auth_update_workshop_logo"  ON storage.objects;
+DROP POLICY IF EXISTS "anon_write_workshop_logo"   ON storage.objects;
+DROP POLICY IF EXISTS "anon_update_workshop_logo"  ON storage.objects;
+DELETE FROM storage.objects WHERE bucket_id = 'workshop-logo';
+DELETE FROM storage.buckets WHERE id = 'workshop-logo';
+
+
+-- ============================================================
 -- TABLAS — en orden de dependencia (hijos primero)
 -- CASCADE elimina FK constraints y políticas asociadas
 -- ============================================================
@@ -21,6 +35,7 @@ DROP TABLE IF EXISTS service_order_services          CASCADE;
 DROP TABLE IF EXISTS service_orders                  CASCADE;
 DROP TABLE IF EXISTS quotes                          CASCADE;
 DROP TABLE IF EXISTS users                           CASCADE;
+DROP TABLE IF EXISTS workshop_settings               CASCADE;
 DROP TABLE IF EXISTS bank_account_histories CASCADE;
 DROP TABLE IF EXISTS bank_transaction_types CASCADE;
 DROP TABLE IF EXISTS bank_accounts         CASCADE;

@@ -19,6 +19,7 @@ deben romperse al tocarlos:
 | `.claude/rules/quotes-service-orders.md` | Módulo de Cotizaciones (`quotes`) y su integración con Órdenes de Servicio: modelo de relación N:1, RPCs de reserva/aprobación/conversión, trazabilidad `quote_id` en las líneas de orden. |
 | `.claude/rules/service-order-flow.md` | Módulo de Órdenes de Servicio: formulario (crear/editar), tabs, guardado en cascada, pagos, egresos de servicios externos, impresión. |
 | `.claude/rules/features-navigation.md` | Mapa real de módulos/rutas/menú (`app.routes.ts` + `nav-menu.ts`) contra el plan en `.claude/docs/features.md` — qué existe, qué falta, y la convención a seguir para agregar un módulo nuevo. |
+| `.claude/rules/admin-settings.md` | Módulo de Configuración (Admin → Configuración): entidad singleton `workshop_settings`, upload de logo a Supabase Storage, y su conexión con los modales de impresión de Órdenes y Cotizaciones. |
 
 ---
 

@@ -26,9 +26,11 @@
     <div class="print-document">
 
       <!-- Título -->
-      <h1 class="doc-title">MECATRONICA TALLER MECÁNICO ELECTRÓNICO</h1>
+      <h1 class="doc-title">{{ settings()?.name ?? 'MECATRONICA' }} TALLER MECÁNICO ELECTRÓNICO</h1>
       <h2 class="doc-subtitle">COTIZACION DE MANO DE OBRA, REPUESTOS Y SERVICIOS DE TERCEROS</h2>
-      <div class="doc-slogan">ESPECIALIZADOS EN TU VEHÍCULO, PRIORIZANDO TU VIDA.</div>
+      @if ((!settings() || settings()?.show_in_print) && settings()?.slogan) {
+        <div class="doc-slogan">{{ settings()!.slogan }}</div>
+      }
 
       <!-- Encabezado -->
       <table class="header-table">
@@ -108,20 +110,24 @@
       <div class="note-bar">EL PRECIO PUEDE VARIAR UNA VES DESARMADO EL VEHICULO</div>
 
       <!-- Logo -->
-      <div class="doc-logo">
-        <div class="logo-icon"><span class="logo-letters">M</span></div>
-        <div class="logo-name">MECATRÓNICA</div>
-        <div class="logo-sub">Taller Mecánico Electrónico</div>
-      </div>
+      @if ((!settings() || settings()?.show_in_print) && settings()?.logo_url) {
+        <div class="doc-logo">
+          <img [src]="settings()!.logo_url" alt="Logo" class="logo-image" />
+        </div>
+      }
 
       <!-- Validez / contacto / ubicacion -->
       <div class="doc-footer-info">
         <div class="validez-row">VALIDEZ: {{ validezDias() }} DIAS</div>
-        <div class="contact-row">CONTACTO: 77877890 - 73246276</div>
-        <div class="address-row">
-          UBICADOS: BARRIO SAN JORGE I, SOBRE AV. PANAMERICANA, CUADRA Y MEDIA ANTES DE LA
-          ROTONDA DE LA COCA COLA AL LADO DE FINNIC CAT
-        </div>
+        @if (settings()?.contact_phone_1 || settings()?.contact_phone_2) {
+          <div class="contact-row">
+            CONTACTO: {{ settings()?.contact_phone_1 }}
+            @if (settings()?.contact_phone_2) { - {{ settings()?.contact_phone_2 }} }
+          </div>
+        }
+        @if (settings()?.address) {
+          <div class="address-row">UBICADOS: {{ settings()!.address }}</div>
+        }
       </div>
 
       <!-- Firma -->

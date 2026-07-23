@@ -1,0 +1,152 @@
+<div class="form-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Configuración del Sistema</h1>
+      <span class="page-subtitle">Datos del taller usados en los documentos impresos</span>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button [disabled]="saving()" (click)="onReset()">Restablecer</button>
+      <button mat-flat-button color="primary" [disabled]="saving()" (click)="onSave()">
+        <mat-icon>save</mat-icon>
+        Guardar
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+    </div>
+  } @else {
+
+    <form [formGroup]="form" class="form-layout">
+
+      <div class="main-panel">
+        <div class="form-card">
+
+          <span class="form-card-title">Datos generales</span>
+          <div class="form-grid">
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Nombre *</mat-label>
+              <input matInput formControlName="name" placeholder="Ej. Macatrónica" />
+              @if (getFieldError('name')) {
+                <mat-error>{{ getFieldError('name') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Eslogan</mat-label>
+              <input matInput formControlName="slogan" placeholder="Ej. Especializados en tu vehículo" />
+              @if (getFieldError('slogan')) {
+                <mat-error>{{ getFieldError('slogan') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Correo</mat-label>
+              <input matInput formControlName="email" placeholder="Ej. contacto@taller.com" />
+              @if (getFieldError('email')) {
+                <mat-error>{{ getFieldError('email') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Nro. de orden de servicio</mat-label>
+              <input matInput type="number" formControlName="next_order_number" placeholder="Ej. 1001" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Dirección</mat-label>
+              <textarea matInput formControlName="address" rows="2" placeholder="Dirección del taller"></textarea>
+              @if (getFieldError('address')) {
+                <mat-error>{{ getFieldError('address') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Num. de Contacto 1</mat-label>
+              <input matInput formControlName="contact_phone_1" placeholder="Ej. 70000000" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Num. de Contacto 2</mat-label>
+              <input matInput formControlName="contact_phone_2" placeholder="Ej. 70000000" />
+            </mat-form-field>
+
+          </div>
+
+          <span class="form-card-title">Redes sociales y web</span>
+          <div class="form-grid">
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Facebook</mat-label>
+              <input matInput formControlName="facebook_url" placeholder="www.facebook.com/tu-pagina" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Instagram</mat-label>
+              <input matInput formControlName="instagram_url" placeholder="www.instagram.com/tu-cuenta" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Sitio Web</mat-label>
+              <input matInput formControlName="website_url" placeholder="www.tutaller.com" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Tik Tok</mat-label>
+              <input matInput formControlName="tiktok_url" placeholder="www.tiktok.com/@tu-cuenta" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>URL extra</mat-label>
+              <input matInput formControlName="extra_url_1" placeholder="Enlace adicional" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>URL extra</mat-label>
+              <input matInput formControlName="extra_url_2" placeholder="Enlace adicional" />
+            </mat-form-field>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="side-panel">
+        <div class="form-card">
+          <span class="form-card-title">Logo</span>
+
+          <div class="logo-preview">
+            @if (logoPreviewUrl()) {
+              <img [src]="logoPreviewUrl()" alt="Logo actual" />
+            } @else {
+              <mat-icon class="logo-placeholder-icon">image</mat-icon>
+            }
+          </div>
+
+          <input #logoInput type="file" accept="image/png" hidden (change)="onLogoSelected($event)" />
+          <button mat-stroked-button type="button" (click)="logoInput.click()">
+            <mat-icon>upload</mat-icon>
+            Seleccionar archivo
+          </button>
+          <span class="field-hint">Solo formato PNG hasta 10MB</span>
+
+          @if (logoError()) {
+            <span class="logo-error">{{ logoError() }}</span>
+          }
+
+          <div class="toggle-field">
+            <span class="toggle-label">Mostrar en impresión</span>
+            <mat-slide-toggle formControlName="show_in_print" color="primary">
+              {{ form.get('show_in_print')?.value ? 'Sí' : 'No' }}
+            </mat-slide-toggle>
+          </div>
+        </div>
+      </div>
+
+    </form>
+  }
+
+</div>

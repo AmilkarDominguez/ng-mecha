@@ -26,6 +26,37 @@
 **Enum UserRole:** `ADMIN` (Admin) · `SALES` (Ventas) · `INVENTORY` (Inventario)
 ---
 
+## 2. WorkshopSettings
+
+> Entidad singleton (una sola fila para todo el sistema, sin listado ni eliminación). Detalle completo en `.claude/rules/admin-settings.md`.
+
+**Tabla:** `workshop_settings`
+
+| Columna            | Tipo            | Restricciones                                    |
+| ------------------- | --------------- | ------------------------------------------------- |
+| id                  | UUID            | PK, auto-generated                                 |
+| name                | String          | not null                                           |
+| slogan              | String          | nullable                                           |
+| email               | String          | nullable                                           |
+| address             | String          | nullable                                           |
+| contact_phone_1     | String          | nullable                                           |
+| contact_phone_2     | String          | nullable                                           |
+| facebook_url        | String          | nullable                                           |
+| instagram_url       | String          | nullable                                           |
+| website_url         | String          | nullable                                           |
+| tiktok_url          | String          | nullable                                           |
+| extra_url_1         | String          | nullable                                           |
+| extra_url_2         | String          | nullable                                           |
+| next_order_number   | Integer         | nullable — correlativo sugerido para `service_orders.number` |
+| logo_url            | String          | nullable — path/URL en Supabase Storage            |
+| show_in_print       | Boolean         | default: true                                      |
+| created_at          | LocalDateTime   | auto                                                |
+| updated_at          | LocalDateTime   | auto                                                |
+
+**Uso:** alimenta el bloque de datos de empresa (nombre, logo, eslogan) hoy hardcodeado y duplicado en `service-order-print-modal.html` y `quote-print-modal.html`. `show_in_print` controla si ese bloque se renderiza en ambos documentos impresos. Ver `.claude/rules/admin-settings.md` para el detalle de por qué es singleton (no sigue el CRUD estándar de `.claude/commands/create-crud.md`), el manejo del upload de logo (primer upload real de archivo del proyecto) y la relación de `next_order_number` con el campo manual `service_orders.number`.
+
+---
+
 ---
 # Inventory Module
 

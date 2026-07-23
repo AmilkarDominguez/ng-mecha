@@ -11,7 +11,7 @@ Documentos relacionados:
 - `.claude/docs/features.md` — árbol de menú planificado (aspiracional, desactualizado en detalles).
 - `.claude/docs/entities.md` — esquema de entidades.
 - `.claude/commands/create-crud.md` — patrón base de CRUD (dashboard/tabla/modal) que sigue casi todo módulo listado abajo.
-- `[[quotes-service-orders]]` y `[[service-order-flow]]` — detalle profundo de esos dos módulos, no lo repitas aquí.
+- `[[quotes-service-orders]]`, `[[service-order-flow]]` y `[[admin-settings]]` — detalle profundo de esos módulos, no lo repitas aquí.
 
 ---
 
@@ -31,7 +31,8 @@ Todas las rutas reales viven bajo `path: 'dashboard'` (`AdminLayout`, `canActiva
 
 | Grupo en `nav-menu.ts` | Item | Ruta | Carpeta (`src/app/features/`) | Notas |
 |---|---|---|---|---|
-| **Admin** | Usuarios | `/dashboard/admin/usuarios` | `admin/users/` | Único item — no existe "Configuración" (planificada en `features.md`, nunca implementada). |
+| **Admin** | Usuarios | `/dashboard/admin/usuarios` | `admin/users/` | CRUD estándar (dashboard + tabla + modales). |
+| | Configuración | `/dashboard/admin/configuracion` | `admin/settings/` | Entidad singleton (una sola fila, tabla `workshop_settings`) — sin dashboard/tabla/modal de eliminar, un único formulario (`settings-form.ts`). Alimenta los datos de empresa de `service-order-print-modal` y `quote-print-modal`. Ver `[[admin-settings]]`. |
 | **Inventario** | Categorías | `/dashboard/inventario/categorias` | `inventory/product-category/` | |
 | | Presentaciones | `/dashboard/inventario/presentaciones` | `inventory/product-presentation/` | |
 | | Productos | `/dashboard/inventario/productos` | `inventory/product/` | |

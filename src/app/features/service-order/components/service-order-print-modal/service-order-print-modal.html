@@ -46,15 +46,11 @@
           <td class="header-label">Fecha Ing:</td>
           <td class="header-value">{{ d.started_date | date:'d/M/yyyy' }}</td>
           <td class="logo-cell" rowspan="2">
-            <div class="company-logo">
-              <div class="logo-icon">
-                <span class="logo-letters">M</span>
+            @if ((!settings() || settings()?.show_in_print) && settings()?.logo_url) {
+              <div class="company-logo">
+                <img [src]="settings()!.logo_url" alt="Logo" class="logo-image" />
               </div>
-              <div class="logo-text">
-                <span class="logo-name">MECATRÓNICA</span>
-                <span class="logo-sub">Taller Mecánico Electrónico</span>
-              </div>
-            </div>
+            }
           </td>
         </tr>
         <tr>
@@ -69,7 +65,9 @@
     </table>
 
     <!-- Eslogan -->
-    <div class="doc-slogan">"ESPECIALIZADOS EN TU VEHÍCULO, PRIORIZANDO TU VIDA"</div>
+    @if ((!settings() || settings()?.show_in_print) && settings()?.slogan) {
+      <div class="doc-slogan">"{{ settings()!.slogan }}"</div>
+    }
 
     <!-- Tablas principales -->
     <div class="doc-tables">

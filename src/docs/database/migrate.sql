@@ -1433,3 +1433,88 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE quotes;
   END IF;
 END $$;
+
+
+-- ============================================================
+-- v23 — Admin Module: crear tabla workshop_settings (Configuracion del sistema)
+-- ============================================================
+-- Entidad singleton: una sola fila para todo el sistema, con los datos de
+-- la empresa (nombre, logo, contacto, redes) que alimentan los documentos
+-- impresos (Hoja de Servicios, Cotizacion), hoy hardcodeados y duplicados
+-- en service-order-print-modal.html y quote-print-modal.html.
+-- La columna "singleton" + su UNIQUE + CHECK impiden que exista una
+-- segunda fila.
+CREATE TABLE IF NOT EXISTS workshop_settings (
+  id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  singleton         BOOLEAN     NOT NULL DEFAULT true,
+  name              TEXT        NOT NULL,
+  slogan            TEXT,
+  email             TEXT,
+  address           TEXT,
+  contact_phone_1   TEXT,
+  contact_phone_2   TEXT,
+  facebook_url      TEXT,
+  instagram_url     TEXT,
+  website_url       TEXT,
+  tiktok_url        TEXT,
+  extra_url_1       TEXT,
+  extra_url_2       TEXT,
+  next_order_number INTEGER,
+  logo_url          TEXT,
+  show_in_print     BOOLEAN     NOT NULL DEFAULT true,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT workshop_settings_singleton_unique UNIQUE (singleton),
+  CONSTRAINT workshop_settings_singleton_true CHECK (singleton)
+);
+
+INSERT INTO workshop_settings (
+  name, slogan, email, address, contact_phone_1, contact_phone_2,
+  facebook_url, instagram_url, website_url, tiktok_url, next_order_number, show_in_print
+) VALUES (
+  'Macatrónica',
+  'ESPECIALIZADOS EN TU VEHÍCULO, PRIORIZANDO TU VIDA',
+  'mecatronica.t.m.e@gmail.com',
+  'Barrio San Jorge 1 Sobre Av. Panamericana Una Cuadra Y Media Antes De La Rotonda De La Coca Cola.',
+  '68710817',
+  '00000000',
+  'www.facebook.com/DIRTYRACINGTARIJA',
+  'www.instagram.com/taller_mecatronica_',
+  'www.tallermacatronica.com',
+  'www.tiktok.com/@taller_mecanico_electro',
+  1001,
+  true
+)
+ON CONFLICT (singleton) DO NOTHING;
+
+-- Bucket de Storage para el logo del taller (primer bucket usado en el proyecto).
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('workshop-logo', 'workshop-logo', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "public_read_workshop_logo" ON storage.objects
+  FOR SELECT TO public USING (bucket_id = 'workshop-logo');
+CREATE POLICY "auth_write_workshop_logo" ON storage.objects
+  FOR INSERT TO authenticated WITH CHECK (bucket_id = 'workshop-logo');
+CREATE POLICY "auth_update_workshop_logo" ON storage.objects
+  FOR UPDATE TO authenticated USING (bucket_id = 'workshop-logo');
+CREATE POLICY "anon_write_workshop_logo" ON storage.objects
+  FOR INSERT TO anon WITH CHECK (bucket_id = 'workshop-logo');
+CREATE POLICY "anon_update_workshop_logo" ON storage.objects
+  FOR UPDATE TO anon USING (bucket_id = 'workshop-logo');
+
+DROP TRIGGER IF EXISTS trg_set_updated_at ON workshop_settings;
+CREATE TRIGGER trg_set_updated_at BEFORE UPDATE ON workshop_settings
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+ALTER TABLE workshop_settings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "auth_all_workshop_settings" ON workshop_settings FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_workshop_settings" ON workshop_settings FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_publication_tables WHERE pubname = 'supabase_realtime' AND tablename = 'workshop_settings') THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE workshop_settings;
+  END IF;
+END $$;
