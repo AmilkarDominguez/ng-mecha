@@ -11,7 +11,7 @@ Documentos relacionados:
 - `.claude/docs/features.md` — árbol de menú planificado (aspiracional, desactualizado en detalles).
 - `.claude/docs/entities.md` — esquema de entidades.
 - `.claude/commands/create-crud.md` — patrón base de CRUD (dashboard/tabla/modal) que sigue casi todo módulo listado abajo.
-- `[[quotes-service-orders]]`, `[[service-order-flow]]` y `[[admin-settings]]` — detalle profundo de esos módulos, no lo repitas aquí.
+- `[[quotes-service-orders]]`, `[[service-order-flow]]`, `[[admin-settings]]` y `[[bank-manual-movements]]` — detalle profundo de esos módulos, no lo repitas aquí.
 
 ---
 
@@ -43,8 +43,10 @@ Todas las rutas reales viven bajo `path: 'dashboard'` (`AdminLayout`, `canActiva
 | | Lotes | `/dashboard/inventario/lotes` | `inventory/batches/` | |
 | **Cuentas** (features.md lo llama "Contabilidad") | Cuentas Bancarias | `/dashboard/cuentas/cuentas-bancarias` | `accounting/bank-accounts/` | |
 | | Tipos de Transacción | `/dashboard/cuentas/tipos-transaccion` | `accounting/bank-transaction-types/` | |
-| | Ingresos | `/dashboard/cuentas/ingresos` | `accounting/income-report/` | Es un reporte (filtra `bank_account_histories` tipo INCOME), no un CRUD — ver `.claude/commands/income-report.md`. |
-| | Egresos | `/dashboard/cuentas/egresos` | `accounting/expense-report/` | Idem, tipo EXPENSE — ver `.claude/commands/expense-report.md`. |
+| | Ingresos | `/dashboard/cuentas/ingresos` | `accounting/income-report/` | Es un reporte (filtra `bank_account_histories` tipo INCOME, incluye TODOS los ingresos: manuales y automáticos), no un CRUD — ver `.claude/commands/income-report.md`. |
+| | Registrar Ingreso | `/dashboard/cuentas/registro-ingresos` | `accounting/income-register/` | CRUD de ingresos **manuales** (depósitos u otro tipo INCOME no reservado) — complementa al reporte de arriba, no lo reemplaza. Ver `[[bank-manual-movements]]`. |
+| | Egresos | `/dashboard/cuentas/egresos` | `accounting/expense-report/` | Idem Ingresos (reporte), tipo EXPENSE — ver `.claude/commands/expense-report.md`. |
+| | Registrar Egreso | `/dashboard/cuentas/registro-egresos` | `accounting/expense-register/` | CRUD de egresos **manuales** (retiros u otro tipo EXPENSE no reservado) — módulo gemelo de "Registrar Ingreso". Ver `[[bank-manual-movements]]`. |
 | **Taller** | Clientes | `/dashboard/taller/clientes` | `workshop/customers/` | |
 | | Mecánicos | `/dashboard/taller/mecanicos` | `workshop/mechanics/` | |
 | | Servicios | `/dashboard/taller/servicios` | `workshop/services/` | |

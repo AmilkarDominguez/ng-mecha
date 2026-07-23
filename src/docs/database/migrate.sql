@@ -1518,3 +1518,326 @@ BEGIN
     ALTER PUBLICATION supabase_realtime ADD TABLE workshop_settings;
   END IF;
 END $$;
+
+
+-- ============================================================
+-- v24 — Accounts Module: RPCs atomicas para el registro manual
+-- de ingresos (modulo "Registro de Ingresos")
+-- ============================================================
+-- Hasta esta version, "Deposito a cuenta bancaria" (INCOME) estaba
+-- sembrado en el catalogo de bank_transaction_types pero nunca se usaba:
+-- no habia ningun flujo para registrar un ingreso manual (todo INCOME
+-- venia solo de pagos de orden de servicio). Estas RPCs habilitan un
+-- CRUD de ingresos manuales, con el mismo criterio de atomicidad que
+-- register/edit/delete_service_order_payment: 1 transaccion, FOR UPDATE,
+-- balance recalculado en Postgres, nunca en el cliente.
+CREATE OR REPLACE FUNCTION register_bank_income(
+  p_bank_account_id     UUID,
+  p_transaction_type_id UUID,
+  p_amount              NUMERIC,
+  p_concept             TEXT,
+  p_user_id             UUID
+)
+RETURNS bank_account_histories
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_account     bank_accounts%ROWTYPE;
+  v_type        bank_transaction_types%ROWTYPE;
+  v_new_balance NUMERIC(10,2);
+  v_history     bank_account_histories%ROWTYPE;
+BEGIN
+  IF p_amount IS NULL OR p_amount <= 0 THEN
+    RAISE EXCEPTION 'El monto debe ser mayor a 0.';
+  END IF;
+
+  SELECT * INTO v_account FROM bank_accounts WHERE id = p_bank_account_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cuenta bancaria no encontrada.';
+  END IF;
+
+  SELECT * INTO v_type FROM bank_transaction_types WHERE id = p_transaction_type_id;
+  IF NOT FOUND OR v_type.type <> 'INCOME' THEN
+    RAISE EXCEPTION 'El tipo de transaccion debe ser un ingreso valido.';
+  END IF;
+
+  v_new_balance := COALESCE(v_account.balance, 0) + p_amount;
+
+  -- transaction_reference NULL: es un ingreso manual, no esta ligado a
+  -- una orden de servicio ni a ningun otro registro.
+  INSERT INTO bank_account_histories (
+    bank_account_id, user_id, transaction_type_id, amount, balance, transaction_reference, concept
+  ) VALUES (
+    p_bank_account_id, p_user_id, p_transaction_type_id, p_amount, v_new_balance, NULL, p_concept
+  ) RETURNING * INTO v_history;
+
+  UPDATE bank_accounts SET balance = v_new_balance WHERE id = p_bank_account_id;
+
+  RETURN v_history;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION register_bank_income(UUID, UUID, NUMERIC, TEXT, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION register_bank_income(UUID, UUID, NUMERIC, TEXT, UUID) TO anon, authenticated;
+
+
+CREATE OR REPLACE FUNCTION edit_bank_income(
+  p_history_id          UUID,
+  p_bank_account_id     UUID,
+  p_transaction_type_id UUID,
+  p_amount              NUMERIC,
+  p_concept             TEXT
+)
+RETURNS bank_account_histories
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_history     bank_account_histories%ROWTYPE;
+  v_type        bank_transaction_types%ROWTYPE;
+  v_new_account bank_accounts%ROWTYPE;
+BEGIN
+  IF p_amount IS NULL OR p_amount <= 0 THEN
+    RAISE EXCEPTION 'El monto debe ser mayor a 0.';
+  END IF;
+
+  SELECT * INTO v_history FROM bank_account_histories WHERE id = p_history_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Ingreso no encontrado.';
+  END IF;
+
+  IF v_history.transaction_reference IS NOT NULL THEN
+    RAISE EXCEPTION 'Este movimiento pertenece a otro proceso y no se puede editar desde aqui.';
+  END IF;
+
+  SELECT * INTO v_type FROM bank_transaction_types WHERE id = p_transaction_type_id;
+  IF NOT FOUND OR v_type.type <> 'INCOME' THEN
+    RAISE EXCEPTION 'El tipo de transaccion debe ser un ingreso valido.';
+  END IF;
+
+  -- Bloquea ambas cuentas involucradas (actual y destino) en orden
+  -- deterministico por id para evitar deadlocks entre ediciones cruzadas.
+  PERFORM 1 FROM bank_accounts WHERE id IN (v_history.bank_account_id, p_bank_account_id) ORDER BY id FOR UPDATE;
+
+  IF p_bank_account_id = v_history.bank_account_id THEN
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) - COALESCE(v_history.amount, 0) + p_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+  ELSE
+    UPDATE bank_accounts SET balance = COALESCE(balance, 0) - COALESCE(v_history.amount, 0) WHERE id = v_history.bank_account_id;
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) + p_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Cuenta bancaria destino no encontrada.';
+    END IF;
+  END IF;
+
+  UPDATE bank_account_histories
+    SET bank_account_id = p_bank_account_id,
+        transaction_type_id = p_transaction_type_id,
+        amount = p_amount,
+        concept = p_concept,
+        balance = v_new_account.balance
+    WHERE id = p_history_id
+    RETURNING * INTO v_history;
+
+  RETURN v_history;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION edit_bank_income(UUID, UUID, UUID, NUMERIC, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION edit_bank_income(UUID, UUID, UUID, NUMERIC, TEXT) TO anon, authenticated;
+
+
+CREATE OR REPLACE FUNCTION delete_bank_income(p_history_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_history bank_account_histories%ROWTYPE;
+BEGIN
+  SELECT * INTO v_history FROM bank_account_histories WHERE id = p_history_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Ingreso no encontrado.';
+  END IF;
+
+  IF v_history.transaction_reference IS NOT NULL THEN
+    RAISE EXCEPTION 'Este movimiento pertenece a otro proceso y no se puede eliminar desde aqui.';
+  END IF;
+
+  PERFORM 1 FROM bank_accounts WHERE id = v_history.bank_account_id FOR UPDATE;
+
+  DELETE FROM bank_account_histories WHERE id = p_history_id;
+  UPDATE bank_accounts SET balance = COALESCE(balance, 0) - COALESCE(v_history.amount, 0) WHERE id = v_history.bank_account_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION delete_bank_income(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION delete_bank_income(UUID) TO anon, authenticated;
+
+
+-- ============================================================
+-- v25 — Accounts Module: RPCs atomicas para el registro manual
+-- de egresos (modulo "Registro de Egresos")
+-- ============================================================
+-- Espejo de v24 (register/edit/delete_bank_income) para "Retiro de
+-- cuenta bancaria" (EXPENSE), restando del balance en vez de sumar.
+CREATE OR REPLACE FUNCTION register_bank_expense(
+  p_bank_account_id     UUID,
+  p_transaction_type_id UUID,
+  p_amount              NUMERIC,
+  p_concept             TEXT,
+  p_user_id             UUID
+)
+RETURNS bank_account_histories
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_account     bank_accounts%ROWTYPE;
+  v_type        bank_transaction_types%ROWTYPE;
+  v_new_balance NUMERIC(10,2);
+  v_history     bank_account_histories%ROWTYPE;
+BEGIN
+  IF p_amount IS NULL OR p_amount <= 0 THEN
+    RAISE EXCEPTION 'El monto debe ser mayor a 0.';
+  END IF;
+
+  SELECT * INTO v_account FROM bank_accounts WHERE id = p_bank_account_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cuenta bancaria no encontrada.';
+  END IF;
+
+  SELECT * INTO v_type FROM bank_transaction_types WHERE id = p_transaction_type_id;
+  IF NOT FOUND OR v_type.type <> 'EXPENSE' THEN
+    RAISE EXCEPTION 'El tipo de transaccion debe ser un egreso valido.';
+  END IF;
+
+  v_new_balance := COALESCE(v_account.balance, 0) - p_amount;
+
+  -- transaction_reference NULL: es un egreso manual, no esta ligado a
+  -- una orden de servicio, lote ni a ningun otro registro.
+  INSERT INTO bank_account_histories (
+    bank_account_id, user_id, transaction_type_id, amount, balance, transaction_reference, concept
+  ) VALUES (
+    p_bank_account_id, p_user_id, p_transaction_type_id, p_amount, v_new_balance, NULL, p_concept
+  ) RETURNING * INTO v_history;
+
+  UPDATE bank_accounts SET balance = v_new_balance WHERE id = p_bank_account_id;
+
+  RETURN v_history;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION register_bank_expense(UUID, UUID, NUMERIC, TEXT, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION register_bank_expense(UUID, UUID, NUMERIC, TEXT, UUID) TO anon, authenticated;
+
+
+CREATE OR REPLACE FUNCTION edit_bank_expense(
+  p_history_id          UUID,
+  p_bank_account_id     UUID,
+  p_transaction_type_id UUID,
+  p_amount              NUMERIC,
+  p_concept             TEXT
+)
+RETURNS bank_account_histories
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_history     bank_account_histories%ROWTYPE;
+  v_type        bank_transaction_types%ROWTYPE;
+  v_new_account bank_accounts%ROWTYPE;
+BEGIN
+  IF p_amount IS NULL OR p_amount <= 0 THEN
+    RAISE EXCEPTION 'El monto debe ser mayor a 0.';
+  END IF;
+
+  SELECT * INTO v_history FROM bank_account_histories WHERE id = p_history_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Egreso no encontrado.';
+  END IF;
+
+  IF v_history.transaction_reference IS NOT NULL THEN
+    RAISE EXCEPTION 'Este movimiento pertenece a otro proceso y no se puede editar desde aqui.';
+  END IF;
+
+  SELECT * INTO v_type FROM bank_transaction_types WHERE id = p_transaction_type_id;
+  IF NOT FOUND OR v_type.type <> 'EXPENSE' THEN
+    RAISE EXCEPTION 'El tipo de transaccion debe ser un egreso valido.';
+  END IF;
+
+  -- Bloquea ambas cuentas involucradas (actual y destino) en orden
+  -- deterministico por id para evitar deadlocks entre ediciones cruzadas.
+  PERFORM 1 FROM bank_accounts WHERE id IN (v_history.bank_account_id, p_bank_account_id) ORDER BY id FOR UPDATE;
+
+  IF p_bank_account_id = v_history.bank_account_id THEN
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) + COALESCE(v_history.amount, 0) - p_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+  ELSE
+    UPDATE bank_accounts SET balance = COALESCE(balance, 0) + COALESCE(v_history.amount, 0) WHERE id = v_history.bank_account_id;
+    UPDATE bank_accounts
+      SET balance = COALESCE(balance, 0) - p_amount
+      WHERE id = p_bank_account_id
+      RETURNING * INTO v_new_account;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Cuenta bancaria destino no encontrada.';
+    END IF;
+  END IF;
+
+  UPDATE bank_account_histories
+    SET bank_account_id = p_bank_account_id,
+        transaction_type_id = p_transaction_type_id,
+        amount = p_amount,
+        concept = p_concept,
+        balance = v_new_account.balance
+    WHERE id = p_history_id
+    RETURNING * INTO v_history;
+
+  RETURN v_history;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION edit_bank_expense(UUID, UUID, UUID, NUMERIC, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION edit_bank_expense(UUID, UUID, UUID, NUMERIC, TEXT) TO anon, authenticated;
+
+
+CREATE OR REPLACE FUNCTION delete_bank_expense(p_history_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_history bank_account_histories%ROWTYPE;
+BEGIN
+  SELECT * INTO v_history FROM bank_account_histories WHERE id = p_history_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Egreso no encontrado.';
+  END IF;
+
+  IF v_history.transaction_reference IS NOT NULL THEN
+    RAISE EXCEPTION 'Este movimiento pertenece a otro proceso y no se puede eliminar desde aqui.';
+  END IF;
+
+  PERFORM 1 FROM bank_accounts WHERE id = v_history.bank_account_id FOR UPDATE;
+
+  DELETE FROM bank_account_histories WHERE id = p_history_id;
+  UPDATE bank_accounts SET balance = COALESCE(balance, 0) + COALESCE(v_history.amount, 0) WHERE id = v_history.bank_account_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION delete_bank_expense(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION delete_bank_expense(UUID) TO anon, authenticated;

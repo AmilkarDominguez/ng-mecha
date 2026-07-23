@@ -1,0 +1,30 @@
+<div class="expense-register-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Registro de Egresos</h1>
+      <span class="page-subtitle">Registro manual de egresos (retiros y similares) de cuentas bancarias</span>
+    </div>
+    <button mat-flat-button color="primary" class="add-button" (click)="openCreateModal()">
+      <mat-icon>remove_circle</mat-icon>
+      Registrar Egreso
+    </button>
+  </div>
+
+  <div class="toolbar-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar egreso</mat-label>
+      <input matInput (input)="onSearch($event)" placeholder="Cuenta, tipo o concepto..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <span class="result-count">{{ filteredExpenses().length }} resultado(s)</span>
+    <span class="total-amount">Total: {{ totalAmount() | number:'1.2-2' }} Bs.</span>
+  </div>
+
+  <app-expense-register-table
+    [data]="filteredExpenses()"
+    (edit)="onEdit($event)"
+    (delete)="onDelete($event)"
+  />
+
+</div>

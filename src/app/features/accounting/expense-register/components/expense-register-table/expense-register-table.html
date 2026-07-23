@@ -1,0 +1,68 @@
+<div class="table-wrapper">
+  <table mat-table [dataSource]="dataSource" matSort class="expense-table">
+
+    <!-- Column: created_at -->
+    <ng-container matColumnDef="created_at">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
+      <td mat-cell *matCellDef="let row" class="cell-date">{{ row.created_at | date:'d/M/yyyy HH:mm' }}</td>
+    </ng-container>
+
+    <!-- Column: bank_account -->
+    <ng-container matColumnDef="bank_account">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cuenta Bancaria</th>
+      <td mat-cell *matCellDef="let row" class="cell-name">{{ row.bank_account?.name ?? '—' }}</td>
+    </ng-container>
+
+    <!-- Column: transaction_type -->
+    <ng-container matColumnDef="transaction_type">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
+      <td mat-cell *matCellDef="let row">{{ row.transaction_type?.name ?? '—' }}</td>
+    </ng-container>
+
+    <!-- Column: concept -->
+    <ng-container matColumnDef="concept">
+      <th mat-header-cell *matHeaderCellDef>Concepto</th>
+      <td mat-cell *matCellDef="let row" class="cell-concept">{{ row.concept || '—' }}</td>
+    </ng-container>
+
+    <!-- Column: amount -->
+    <ng-container matColumnDef="amount">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Monto</th>
+      <td mat-cell *matCellDef="let row" class="cell-amount">
+        {{ row.amount | currency:'BOB':'symbol':'1.2-2' }}
+      </td>
+    </ng-container>
+
+    <!-- Column: actions -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef class="col-actions">Acciones</th>
+      <td mat-cell *matCellDef="let row" class="col-actions">
+        <button mat-icon-button matTooltip="Editar" (click)="edit.emit(row)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="delete.emit(row)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+
+    <tr class="mat-mdc-row" *matNoDataRow>
+      <td class="no-data-cell" [attr.colspan]="displayedColumns.length">
+        <mat-icon>search_off</mat-icon>
+        <span>No se encontraron egresos registrados</span>
+      </td>
+    </tr>
+
+  </table>
+
+  <mat-paginator
+    [pageSizeOptions]="[5, 10, 25]"
+    [pageSize]="10"
+    showFirstLastButtons
+    aria-label="Paginación de egresos">
+  </mat-paginator>
+
+</div>

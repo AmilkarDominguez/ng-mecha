@@ -1,0 +1,59 @@
+<app-dialog-frame
+  [title]="isEditMode ? 'Editar Egreso' : 'Registrar Egreso'"
+  [icon]="isEditMode ? 'edit' : 'money_off'"
+  initialSize="sm">
+
+  <form [formGroup]="form" class="form-grid">
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Cuenta Bancaria *</mat-label>
+      <mat-select formControlName="bank_account_id">
+        @for (a of activeBankAccounts(); track a.id) {
+          <mat-option [value]="a.id">{{ a.name }} {{ a.number ? '(' + a.number + ')' : '' }}</mat-option>
+        }
+      </mat-select>
+      @if (getFieldError('bank_account_id')) {
+        <mat-error>{{ getFieldError('bank_account_id') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Tipo de Egreso *</mat-label>
+      <mat-select formControlName="transaction_type_id">
+        @for (t of transactionTypes(); track t.id) {
+          <mat-option [value]="t.id">{{ t.name }}</mat-option>
+        }
+      </mat-select>
+      @if (getFieldError('transaction_type_id')) {
+        <mat-error>{{ getFieldError('transaction_type_id') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Monto (Bs.) *</mat-label>
+      <input matInput type="number" formControlName="amount" placeholder="0.00" min="0.01" step="0.01" />
+      @if (getFieldError('amount')) {
+        <mat-error>{{ getFieldError('amount') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-full">
+      <mat-label>Concepto</mat-label>
+      <textarea matInput formControlName="concept" rows="2"
+        placeholder="Ej. Retiro en efectivo."></textarea>
+      @if (getFieldError('concept')) {
+        <mat-error>{{ getFieldError('concept') }}</mat-error>
+      }
+    </mat-form-field>
+
+  </form>
+
+  <ng-container dialog-actions>
+    <button mat-stroked-button (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" (click)="onSave()">
+      <mat-icon>save</mat-icon>
+      {{ isEditMode ? 'Guardar cambios' : 'Registrar' }}
+    </button>
+  </ng-container>
+
+</app-dialog-frame>

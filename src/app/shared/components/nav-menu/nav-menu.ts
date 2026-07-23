@@ -70,7 +70,9 @@ export class NavMenu {
         { label: 'Cuentas Bancarias', icon: 'account_balance', route: '/dashboard/cuentas/cuentas-bancarias' },
         { label: 'Tipos de Transacción', icon: 'swap_horiz', route: '/dashboard/cuentas/tipos-transaccion' },
         { label: 'Ingresos', icon: 'trending_up', route: '/dashboard/cuentas/ingresos' },
+        { label: 'Registrar Ingreso', icon: 'add_card', route: '/dashboard/cuentas/registro-ingresos' },
         { label: 'Egresos', icon: 'trending_down', route: '/dashboard/cuentas/egresos' },
+        { label: 'Registrar Egreso', icon: 'remove_circle', route: '/dashboard/cuentas/registro-egresos' },
       ],
     },
     {

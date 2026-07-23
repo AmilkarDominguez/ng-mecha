@@ -86,8 +86,16 @@ export const routes: Routes = [
         loadComponent: () => import('./features/accounting/income-report/income-report-dashboard').then(m => m.IncomeReportDashboard),
       },
       {
+        path: 'cuentas/registro-ingresos',
+        loadComponent: () => import('./features/accounting/income-register/income-register-dashboard').then(m => m.IncomeRegisterDashboard),
+      },
+      {
         path: 'cuentas/egresos',
         loadComponent: () => import('./features/accounting/expense-report/expense-report-dashboard').then(m => m.ExpenseReportDashboard),
+      },
+      {
+        path: 'cuentas/registro-egresos',
+        loadComponent: () => import('./features/accounting/expense-register/expense-register-dashboard').then(m => m.ExpenseRegisterDashboard),
       },
       {
         path: 'admin/usuarios',

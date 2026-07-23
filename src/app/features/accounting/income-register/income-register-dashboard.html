@@ -1,0 +1,30 @@
+<div class="income-register-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Registro de Ingresos</h1>
+      <span class="page-subtitle">Registro manual de ingresos (depósitos y similares) a cuentas bancarias</span>
+    </div>
+    <button mat-flat-button color="primary" class="add-button" (click)="openCreateModal()">
+      <mat-icon>add_circle</mat-icon>
+      Registrar Ingreso
+    </button>
+  </div>
+
+  <div class="toolbar-row">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar ingreso</mat-label>
+      <input matInput (input)="onSearch($event)" placeholder="Cuenta, tipo o concepto..." />
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+    <span class="result-count">{{ filteredIncomes().length }} resultado(s)</span>
+    <span class="total-amount">Total: {{ totalAmount() | number:'1.2-2' }} Bs.</span>
+  </div>
+
+  <app-income-register-table
+    [data]="filteredIncomes()"
+    (edit)="onEdit($event)"
+    (delete)="onDelete($event)"
+  />
+
+</div>

@@ -20,6 +20,7 @@ deben romperse al tocarlos:
 | `.claude/rules/service-order-flow.md` | Módulo de Órdenes de Servicio: formulario (crear/editar), tabs, guardado en cascada, pagos, egresos de servicios externos, impresión. |
 | `.claude/rules/features-navigation.md` | Mapa real de módulos/rutas/menú (`app.routes.ts` + `nav-menu.ts`) contra el plan en `.claude/docs/features.md` — qué existe, qué falta, y la convención a seguir para agregar un módulo nuevo. |
 | `.claude/rules/admin-settings.md` | Módulo de Configuración (Admin → Configuración): entidad singleton `workshop_settings`, upload de logo a Supabase Storage, y su conexión con los modales de impresión de Órdenes y Cotizaciones. |
+| `.claude/rules/bank-manual-movements.md` | Módulos de Registro de Ingresos y Egresos (Cuentas → Registrar Ingreso / Registrar Egreso): RPCs atómicas para movimientos manuales, y el invariante de seguridad que impide editar/eliminar movimientos de otros flujos (pagos de orden, compra de lote, servicios externos). |
 
 ---
 

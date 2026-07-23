@@ -468,6 +468,8 @@ Al registrar un pago de una orden de servicio se inserta un registro aquí con `
 
 **Atomicidad:** registrar/editar/eliminar un pago se ejecuta mediante RPCs de Postgres (`register_service_order_payment`, `edit_service_order_payment`, `delete_service_order_payment`, ver `migrate.sql` v19) — no con llamadas REST separadas desde el cliente. Un pago toca 3 tablas; sin una transacción real, una falla a mitad de camino deja el balance desincronizado (bug real detectado y corregido el 2026-07-10).
 
+**Uso — Ingreso/Egreso manual (depósito/retiro):** los módulos Registrar Ingreso (`accounting/income-register/`) y Registrar Egreso (`accounting/expense-register/`) insertan registros aquí con `transaction_reference = NULL` (sin entidad relacionada) — así se distinguen de un pago de orden de servicio, compra de lote o pago de servicio externo. RPCs `register/edit/delete_bank_income` (`migrate.sql` v24) y `register/edit/delete_bank_expense` (v25); las de editar/eliminar **rechazan** operar sobre una fila con `transaction_reference` no nulo, para no editar/eliminar por error un movimiento que pertenece a otro flujo. Ver `.claude/rules/bank-manual-movements.md`.
+
 ---
 
 # Quotes Module

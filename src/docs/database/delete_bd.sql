@@ -72,6 +72,12 @@ DROP FUNCTION IF EXISTS reserve_quote_batches(UUID) CASCADE;
 DROP FUNCTION IF EXISTS release_quote_reservations(UUID, TEXT) CASCADE;
 DROP FUNCTION IF EXISTS convert_quote_to_order(UUID, UUID) CASCADE;
 DROP FUNCTION IF EXISTS expire_overdue_quote_reservations() CASCADE;
+DROP FUNCTION IF EXISTS register_bank_income(UUID, UUID, NUMERIC, TEXT, UUID) CASCADE;
+DROP FUNCTION IF EXISTS edit_bank_income(UUID, UUID, UUID, NUMERIC, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS delete_bank_income(UUID) CASCADE;
+DROP FUNCTION IF EXISTS register_bank_expense(UUID, UUID, NUMERIC, TEXT, UUID) CASCADE;
+DROP FUNCTION IF EXISTS edit_bank_expense(UUID, UUID, UUID, NUMERIC, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS delete_bank_expense(UUID) CASCADE;
 
 
 -- ============================================================
