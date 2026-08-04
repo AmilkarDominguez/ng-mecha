@@ -10,9 +10,15 @@ import {
   ServiceOrderExternalService,
   ServiceOrderWithLines,
   ServiceOrderUtilityRow,
+  ProductSalesReportRow,
 } from '../../models/service-order.model';
 
 export interface UtilityReportFilters {
+  from?: string;
+  to?: string;
+}
+
+export interface ProductSalesReportFilters {
   from?: string;
   to?: string;
 }
@@ -194,6 +200,52 @@ export class SPServiceOrder {
       cost,
       utility: income - cost,
     };
+  }
+
+  /**
+   * Reporte de Productos / Lotes (reports.md A.2): agrupa
+   * service_order_batches por producto en un rango de fechas (filtrado
+   * por service_orders.started_date via join !inner, mismo patron que
+   * SPBankAccountHistory.getByTransactionKind), sumando cantidad vendida
+   * e ingreso (subtotal). Ordenado por cantidad descendente — sirve a la
+   * vez como el ranking "que lotes se venden mas" (ver nota de
+   * solapamiento con C.6 en reports.md).
+   */
+  public getProductSalesReport(filters: ProductSalesReportFilters): Observable<ProductSalesReportRow[]> {
+    let query = this.supabase
+      .from(this.TABLE_BATCHES)
+      .select('quantity, subtotal, batch:batches(product_id, product:products(id,name)), service_order:service_orders!inner(started_date)');
+
+    if (filters.from) query = query.gte('service_order.started_date', filters.from);
+    if (filters.to) query = query.lte('service_order.started_date', filters.to);
+
+    return from(query).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return this.groupByProduct(data ?? []);
+      }),
+    );
+  }
+
+  private groupByProduct(rows: any[]): ProductSalesReportRow[] {
+    const byProduct = new Map<string, ProductSalesReportRow>();
+    for (const row of rows) {
+      const productId = row.batch?.product_id;
+      if (!productId) continue;
+      const existing = byProduct.get(productId);
+      if (existing) {
+        existing.quantity += row.quantity ?? 0;
+        existing.income += row.subtotal ?? 0;
+      } else {
+        byProduct.set(productId, {
+          product_id: productId,
+          product_name: row.batch?.product?.name ?? 'Sin producto',
+          quantity: row.quantity ?? 0,
+          income: row.subtotal ?? 0,
+        });
+      }
+    }
+    return Array.from(byProduct.values()).sort((a, b) => b.quantity - a.quantity);
   }
 
   // Service Order Services

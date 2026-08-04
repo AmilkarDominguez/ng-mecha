@@ -156,3 +156,17 @@ export interface ServiceOrderUtilityRow {
   cost: number;
   utility: number;
 }
+
+// Fila agregada para el Reporte de Productos / Lotes (reports.md A.2):
+// una fila por producto, con la cantidad total vendida y el ingreso
+// generado (suma de subtotal) a traves de todas sus lineas de
+// service_order_batches en el rango de fechas. Ordenado por cantidad
+// descendente por defecto, lo que tambien sirve como el ranking "que
+// lotes se venden mas por producto" (C.6) — ver nota de solapamiento en
+// reports.md, no se implemento un reporte C.6 separado.
+export interface ProductSalesReportRow {
+  product_id: string;
+  product_name: string;
+  quantity: number;
+  income: number;
+}

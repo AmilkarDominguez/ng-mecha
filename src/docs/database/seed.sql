@@ -254,7 +254,18 @@ INSERT INTO service_orders (
    'OS-0002', 'Cambio de aceite y bateria, pago a credito.',
    555.00, 200.00, 355.00, NULL, NULL, false, '42000',
    CURRENT_DATE, NULL, NULL,
-   'IN_PROGRESS', 'CREDIT')
+   'IN_PROGRESS', 'CREDIT'),
+  -- OS-0003: orden adicional solo para dar variedad al Reporte de Productos
+  -- (A.2, reports.md) — repite "Filtro de aceite" y "Pastillas de freno
+  -- delanteras" con cantidades distintas a OS-0001/OS-0002 para que el
+  -- ranking por cantidad vendida no quede trivial (todo empatado en 1).
+  ('00000000-0000-0000-0021-000000000003',
+   '00000000-0000-0000-0010-000000000001', '00000000-0000-0000-0011-000000000001',
+   '00000000-0000-0000-0012-000000000003', (SELECT id FROM users WHERE email = 'ventas@mecha.test'),
+   'OS-0003', 'Cambio de aceite con filtros y pastillas de freno.',
+   585.00, 0.00, 585.00, NULL, NULL, false, '86500',
+   (CURRENT_DATE - INTERVAL '10 days')::date, (CURRENT_DATE - INTERVAL '9 days')::date, NULL,
+   'COMPLETED', 'CASH')
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -325,7 +336,8 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO service_order_services (id, service_id, service_order_id, quote_id, discount, price, quantity, subtotal) VALUES
   ('00000000-0000-0000-0022-000000000001', '00000000-0000-0000-0013-000000000003', '00000000-0000-0000-0021-000000000001', '00000000-0000-0000-0016-000000000003', 0, 60.00, 1, 60.00),
   ('00000000-0000-0000-0022-000000000002', '00000000-0000-0000-0013-000000000001', '00000000-0000-0000-0021-000000000002', NULL, 0, 80.00, 1, 80.00),
-  ('00000000-0000-0000-0022-000000000003', '00000000-0000-0000-0013-000000000005', '00000000-0000-0000-0021-000000000002', NULL, 0, 50.00, 1, 50.00)
+  ('00000000-0000-0000-0022-000000000003', '00000000-0000-0000-0013-000000000005', '00000000-0000-0000-0021-000000000002', NULL, 0, 50.00, 1, 50.00),
+  ('00000000-0000-0000-0022-000000000004', '00000000-0000-0000-0013-000000000001', '00000000-0000-0000-0021-000000000003', NULL, 0, 80.00, 1, 80.00)
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -333,12 +345,19 @@ ON CONFLICT (id) DO NOTHING;
 -- 24. service_order_batches
 -- ============================================================
 -- cost_at_sale = batches.cost del lote correspondiente al momento de este
--- seed (90.00 / 25.00 / 250.00 — ver seccion 9), congelado en la linea
--- para que el reporte de Utilidades (A.1) no dependa del costo actual.
+-- seed (90.00 / 25.00 / 250.00 / 20.00 — ver seccion 9), congelado en la
+-- linea para que el reporte de Utilidades (A.1) no dependa del costo
+-- actual. Las lineas de OS-0003 repiten productos ya vendidos en
+-- OS-0001/OS-0002 con cantidades distintas (Filtro de aceite: 1 + 3,
+-- Pastillas de freno: 1 + 2) para que el Reporte de Productos (A.2,
+-- reports.md) tenga un ranking por cantidad no trivial.
 INSERT INTO service_order_batches (id, batch_id, service_order_id, quote_id, quantity, delivery_time, price, discount, subtotal, cost_at_sale) VALUES
   ('00000000-0000-0000-0023-000000000001', '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0021-000000000001', '00000000-0000-0000-0016-000000000003', 1, 'IMMEDIATE', 150.00, 0, 150.00, 90.00),
   ('00000000-0000-0000-0023-000000000002', '00000000-0000-0000-0008-000000000001', '00000000-0000-0000-0021-000000000002', NULL, 1, 'IMMEDIATE', 45.00,  0, 45.00,  25.00),
-  ('00000000-0000-0000-0023-000000000003', '00000000-0000-0000-0008-000000000006', '00000000-0000-0000-0021-000000000002', NULL, 1, 'IMMEDIATE', 380.00, 0, 380.00, 250.00)
+  ('00000000-0000-0000-0023-000000000003', '00000000-0000-0000-0008-000000000006', '00000000-0000-0000-0021-000000000002', NULL, 1, 'IMMEDIATE', 380.00, 0, 380.00, 250.00),
+  ('00000000-0000-0000-0023-000000000004', '00000000-0000-0000-0008-000000000001', '00000000-0000-0000-0021-000000000003', NULL, 3, 'IMMEDIATE', 45.00,  0, 135.00, 25.00),
+  ('00000000-0000-0000-0023-000000000005', '00000000-0000-0000-0008-000000000002', '00000000-0000-0000-0021-000000000003', NULL, 2, 'IMMEDIATE', 35.00,  0, 70.00,  20.00),
+  ('00000000-0000-0000-0023-000000000006', '00000000-0000-0000-0008-000000000004', '00000000-0000-0000-0021-000000000003', NULL, 2, 'IMMEDIATE', 150.00, 0, 300.00, 90.00)
 ON CONFLICT (id) DO NOTHING;
 
 

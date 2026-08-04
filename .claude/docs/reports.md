@@ -83,23 +83,35 @@ productos?", que es el mismo cálculo pero acotado solo a repuestos y ahora pued
 
 ### A.2 — [Reporte] Productos (Lotes)
 
-**Estado:** no implementado.
+**Estado:** implementado (2026-08-03). Ruta `/dashboard/reportes/productos-lotes`, menú
+"Reportes → Productos (Lotes)", carpeta `src/app/features/reports/product-sales-report/`
+(`ProductSalesReportDashboard`).
 
 **Definición:** reporte de movimiento de inventario que lista productos/lotes vendidos en
-órdenes de servicio (`service_order_batches`) en un rango de fechas, con cantidad vendida e
-ingreso generado por producto.
+órdenes de servicio (`service_order_batches`) en un rango de fechas (filtro opcional por
+`service_orders.started_date`), agrupado por producto, con cantidad vendida total e ingreso
+generado (suma de `subtotal`) por producto.
 
 **Finalidad:** saber qué productos rotan más, como insumo para decisiones de compra y
 reposición — complementa (no reemplaza) al reporte de Stock (A.4): este mira **movimiento**
 (qué se vendió), Stock mira **existencia actual** (qué queda).
 
-**Datos/entidades:** `service_order_batches` (`batch_id`, `quantity`, `price`, `subtotal`) →
-join a `batches.product_id` → `products.name`.
+**Datos/entidades:** `service_order_batches` (`batch_id`, `quantity`, `subtotal`) → join a
+`batches.product_id` → `products.name`; filtro de fecha vía join `!inner` a
+`service_orders.started_date` (mismo patrón que `SPBankAccountHistory.getByTransactionKind`).
 
-**Nota de solapamiento:** este reporte es conceptualmente muy cercano al extra B.6 ("qué
-lotes se venden más por producto" — ranking). Si se implementan ambos, dejar claro en el UI
-cuál es el listado general (A.2) y cuál el ranking/top (B.6) para no duplicar pantallas — o
-fusionarlos en un solo reporte con una vista de tabla y otra de ranking.
+**Resolución de la nota de solapamiento (C.6):** el documento original marcaba este reporte
+como "cercano al extra C.6" (texto corregido — decía "B.6" por error de tipeo, no existe grupo
+B.6; el ranking al que se refiere es C.6 "qué lotes se venden más por producto"). Se decidió
+**no implementar C.6 como reporte separado**: `getProductSalesReport()` ya devuelve las filas
+**ordenadas por cantidad vendida descendente** por defecto, así que la tabla de A.2 sirve
+directamente como el ranking/top que pedía C.6, sin una segunda pantalla. Si en el futuro se
+necesita un "top N" recortado o una vista visualmente distinta (ej. gráfico de barras), es una
+variación de la UI de A.2, no una nueva fuente de datos — reutilizar
+`SPServiceOrder.getProductSalesReport()`.
+
+**Cambio de esquema:** no se requirió — `quantity`, `subtotal` y el join a `products.name` ya
+existían.
 
 ### A.3 — [Reporte] Cumpleañeros
 

@@ -133,6 +133,10 @@ export const routes: Routes = [
         path: 'reportes/utilidades',
         loadComponent: () => import('./features/reports/utility-report/utility-report-dashboard').then(m => m.UtilityReportDashboard),
       },
+      {
+        path: 'reportes/productos-lotes',
+        loadComponent: () => import('./features/reports/product-sales-report/product-sales-report-dashboard').then(m => m.ProductSalesReportDashboard),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }

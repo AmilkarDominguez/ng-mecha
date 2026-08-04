@@ -105,6 +105,7 @@ export class NavMenu {
       icon: 'fact_check',
       items: [
         { label: 'Utilidades', icon: 'trending_up', route: '/dashboard/reportes/utilidades' },
+        { label: 'Productos (Lotes)', icon: 'inventory_2', route: '/dashboard/reportes/productos-lotes' },
       ],
     },
   ];
