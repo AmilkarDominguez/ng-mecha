@@ -173,11 +173,17 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- 11. customers
 -- ============================================================
+-- Patricia (5) tiene cumpleanos en el mes en curso al momento de este seed
+-- (agosto) para que el Reporte de Cumpleanos (A.3, reports.md) muestre
+-- datos no vacios al abrir con el filtro por defecto (mes actual). Los
+-- otros 4 clientes ya cubren marzo/julio/noviembre/enero como casos
+-- "fuera de rango" para probar que el filtro de mes efectivamente excluye.
 INSERT INTO customers (id, name, lastname, ci, nit, address, birthdate, phone, rating, state) VALUES
   ('00000000-0000-0000-0010-000000000001', 'Juan',    'Perez Rocha',    '4521367',  '4521367011', 'Av. America 123, Cochabamba',    '1985-03-12', '70011122', 'GOOD',    'ACTIVE'),
   ('00000000-0000-0000-0010-000000000002', 'Maria',   'Fernandez Vega', '5834721',  '5834721011', 'Calle Espana 456, Cochabamba',   '1990-07-25', '70022233', 'GOOD',    'ACTIVE'),
   ('00000000-0000-0000-0010-000000000003', 'Carlos',  'Mamani Condori', '3298471',  '3298471011', 'Av. Heroinas 789, Cochabamba',   '1978-11-02', '70033344', 'REGULAR', 'ACTIVE'),
-  ('00000000-0000-0000-0010-000000000004', 'Ana',     'Quispe Torrez',  '6127349',  '6127349011', 'Calle Junin 321, Cochabamba',    '1995-01-30', '70044455', 'BAD',     'ACTIVE')
+  ('00000000-0000-0000-0010-000000000004', 'Ana',     'Quispe Torrez',  '6127349',  '6127349011', 'Calle Junin 321, Cochabamba',    '1995-01-30', '70044455', 'BAD',     'ACTIVE'),
+  ('00000000-0000-0000-0010-000000000005', 'Patricia','Gutierrez Salazar', '7345612', '7345612011', 'Calle Sucre 234, Cochabamba', '1988-08-15', '70088899', 'GOOD',    'ACTIVE')
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -195,10 +201,15 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- 13. mechanics
 -- ============================================================
+-- Diego (4) tiene cumpleanos en el mes en curso al momento de este seed
+-- (agosto) — mismo motivo que Patricia en customers: el Reporte de
+-- Cumpleanos (A.3) combina clientes Y mecanicos, algo que el widget de
+-- Dashboard (B.1) nunca hizo (solo customers).
 INSERT INTO mechanics (id, name, lastname, ci, nit, address, email, birthdate, phone, incorporated_at, retired_at, state) VALUES
   ('00000000-0000-0000-0012-000000000001', 'Roberto', 'Choque Flores', '4123890', '4123890011', 'Zona Sarco, Cochabamba',    'roberto.choque@mecha.test', '1982-05-10', '70055566', (CURRENT_DATE - INTERVAL '3 years'), NULL, 'ACTIVE'),
   ('00000000-0000-0000-0012-000000000002', 'Luis',    'Vargas Rios',   '5219034', '5219034011', 'Zona Queru Queru, Cochabamba', 'luis.vargas@mecha.test',  '1988-09-18', '70066677', (CURRENT_DATE - INTERVAL '2 years'), NULL, 'ACTIVE'),
-  ('00000000-0000-0000-0012-000000000003', 'Fernando','Rojas Guzman',  '6023481', '6023481011', 'Zona Tupuraya, Cochabamba', 'fernando.rojas@mecha.test',  '1991-12-04', '70077788', (CURRENT_DATE - INTERVAL '1 years'), NULL, 'ACTIVE')
+  ('00000000-0000-0000-0012-000000000003', 'Fernando','Rojas Guzman',  '6023481', '6023481011', 'Zona Tupuraya, Cochabamba', 'fernando.rojas@mecha.test',  '1991-12-04', '70077788', (CURRENT_DATE - INTERVAL '1 years'), NULL, 'ACTIVE'),
+  ('00000000-0000-0000-0012-000000000004', 'Diego',   'Salvatierra Rojas', '5432198', '5432198011', 'Zona Cala Cala, Cochabamba', 'diego.salvatierra@mecha.test', '1993-08-22', '70099910', (CURRENT_DATE - INTERVAL '6 months'), NULL, 'ACTIVE')
 ON CONFLICT (id) DO NOTHING;
 
 

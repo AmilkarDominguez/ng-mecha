@@ -115,19 +115,42 @@ existían.
 
 ### A.3 — [Reporte] Cumpleañeros
 
-**Estado:** no implementado como reporte completo (existe una versión reducida como widget de
-Dashboard — ver B.1).
+**Estado:** implementado (2026-08-03). Ruta `/dashboard/reportes/cumpleaneros`, menú
+"Reportes → Cumpleañeros", carpeta `src/app/features/reports/birthday-report/`
+(`BirthdayReportDashboard`). `B.1` (`BirthdayCard` en el Dashboard) **sigue existiendo tal
+cual** — no fue reemplazado ni modificado; A.3 es el reporte completo y filtrable, B.1 sigue
+siendo la alerta rápida de un vistazo al entrar al sistema (ver relación abajo).
 
-**Definición:** listado completo y filtrable (por mes o rango de fechas, no limitado al mes
-actual) de clientes y mecánicos cuyo cumpleaños cae en el periodo seleccionado.
+**Definición:** listado completo de clientes y mecánicos cuyo cumpleaños cae en un **mes**
+seleccionado (selector de mes, no limitado al mes actual — se puede consultar cualquier mes
+del año, incluyendo meses futuros). Se optó por filtro de mes en vez de rango de fechas
+arbitrario: un cumpleaños es una recurrencia anual (solo importa día+mes, no el año), y un
+rango de fechas libre complicaría el cruce de año (ej. 15-dic a 15-ene) sin aportar valor real
+sobre "planificar el próximo mes" — la definición original permitía "por mes **o** rango de
+fechas", se tomó la opción más simple y suficiente para la finalidad declarada.
 
 **Finalidad:** permitir planificar campañas de fidelización o saludos con anticipación
-(cualquier mes futuro), a diferencia del widget de Dashboard que solo muestra el mes en curso.
+(cualquier mes, incluyendo futuros), a diferencia del widget de Dashboard que solo muestra el
+mes en curso.
 
-**Datos/entidades:** `customers.birthdate`, `mechanics.birthdate` (ambas entidades tienen el
-campo). El widget actual (B.1) **solo usa `customers`** — si se implementa este reporte
-completo, es la oportunidad natural de incluir también mecánicos, cosa que el widget nunca
-hizo (ver `[[features-navigation]]` §3).
+**Datos/entidades:** `customers.birthdate`, `mechanics.birthdate`. A diferencia del widget
+B.1 (solo `customers`), A.3 combina **ambas** entidades en una sola tabla con columna "Tipo"
+(Cliente/Mecánico), tal como este documento ya anticipaba.
+
+**Cambio de esquema:** no se requirió — ambas columnas `birthdate` ya existían.
+
+**Capa de datos:** no se creó ningún método nuevo en `core/services/supabase/` — se
+reutilizan `SPCustomer.listen()` y `SPMechanic.listen()` ya existentes (mismos que usa
+`BirthdayCard`), filtrando por mes y combinando ambas listas en el propio componente
+(`computed()`), igual que la lógica ya usada en `birthday-card.ts` pero generalizada a mes
+seleccionable + dos entidades.
+
+**Seed:** se agregó una clienta (`Patricia`, id `...-0010-000000000005`) y un mecánico
+(`Diego`, id `...-0012-000000000004`) con `birthdate` en agosto (mes en curso al momento de
+esta implementación), para que el reporte muestre datos no vacíos con el filtro por defecto
+(mes actual). Los clientes/mecánicos ya sembrados (marzo/julio/noviembre/enero/mayo/
+septiembre/diciembre) sirven como casos "fuera de rango" para verificar que el filtro de mes
+excluye correctamente.
 
 ### A.4 — [Reporte] Lotes - Stock
 

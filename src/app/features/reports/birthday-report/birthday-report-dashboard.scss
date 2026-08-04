@@ -1,4 +1,4 @@
-.utility-report-page {
+.birthday-report-page {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -38,7 +38,7 @@
   flex-wrap: wrap;
 }
 
-.filter-date {
+.filter-month {
   width: 12rem;
 }
 
@@ -52,33 +52,14 @@
 .summary-row {
   display: flex;
   align-items: baseline;
-  gap: 2rem;
+  gap: 1rem;
   flex-wrap: wrap;
 }
 
-.summary-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
 .summary-label {
-  font-size: 0.875rem;
-  color: var(--color-text-muted);
-}
-
-.summary-value {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--mat-sys-primary);
-}
-
-.summary-cost {
-  color: var(--color-danger);
-}
-
-.summary-utility {
-  color: var(--color-price-final);
 }
 
 .result-count {
@@ -92,9 +73,14 @@
   overflow-x: auto;
 }
 
-.utility-table {
+.birthday-table {
   width: 100%;
-  min-width: 56rem;
+  min-width: 36rem;
+  // Filas mas compactas que el default de Material (52px) — con solo
+  // texto corto + una pill de tipo, el default se veia con demasiado
+  // aire vertical.
+  --mat-table-header-container-height: 2.75rem;
+  --mat-table-row-item-container-height: 2.75rem;
 
   th.mat-header-cell {
     font-size: 0.75rem;
@@ -108,17 +94,40 @@
   }
 }
 
-.cell-amount {
+.cell-day {
   font-weight: 600;
-  white-space: nowrap;
+  line-height: 1;
 }
 
-.cell-cost {
-  color: var(--color-danger);
+.today-icon {
+  font-size: 1.125rem;
+  width: 1.125rem;
+  height: 1.125rem;
+  line-height: 1.125rem;
+  flex-shrink: 0;
+  // Mismo naranja que BirthdayCard (birthday-card.scss) — no hay token
+  // --color-accent definido en _variables.scss, ese componente tampoco
+  // usa uno.
+  color: #e65100;
 }
 
-.cell-utility {
-  color: var(--color-price-final);
+.type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+
+  &[data-type='CUSTOMER'] {
+    background: color-mix(in srgb, var(--mat-sys-primary) 15%, transparent);
+    color: var(--mat-sys-primary);
+  }
+
+  &[data-type='MECHANIC'] {
+    background: var(--color-badge-presentation-bg);
+    color: var(--color-badge-presentation-text);
+  }
 }
 
 .empty-row {
@@ -132,7 +141,7 @@
     font-size: 1.375rem;
   }
 
-  .filter-date {
+  .filter-month {
     width: 100%;
     max-width: none;
   }

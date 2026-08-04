@@ -137,6 +137,10 @@ export const routes: Routes = [
         path: 'reportes/productos-lotes',
         loadComponent: () => import('./features/reports/product-sales-report/product-sales-report-dashboard').then(m => m.ProductSalesReportDashboard),
       },
+      {
+        path: 'reportes/cumpleaneros',
+        loadComponent: () => import('./features/reports/birthday-report/birthday-report-dashboard').then(m => m.BirthdayReportDashboard),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }
