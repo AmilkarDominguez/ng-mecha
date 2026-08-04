@@ -636,6 +636,15 @@ ALTER TABLE service_order_services          ADD COLUMN IF NOT EXISTS quote_id UU
 ALTER TABLE service_order_batches           ADD COLUMN IF NOT EXISTS quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL;
 ALTER TABLE service_order_external_services ADD COLUMN IF NOT EXISTS quote_id UUID REFERENCES quotes(id) ON DELETE SET NULL;
 
+-- cost_at_sale: costo del lote congelado al momento de vender la linea
+-- (copiado de batches.cost al insertar, tanto desde el formulario de orden
+-- como desde convert_quote_to_order). Nullable: filas insertadas antes de
+-- esta columna quedan en NULL; el reporte de Utilidades cae a batches.cost
+-- (costo actual) para esas filas historicas. Sin esto, el reporte de
+-- Utilidades recalcularia margenes pasados con el costo de hoy si el lote
+-- cambio de precio despues de la venta (ver reports.md A.1).
+ALTER TABLE service_order_batches ADD COLUMN IF NOT EXISTS cost_at_sale NUMERIC(8,2);
+
 -- Vista: stock disponible = stock fisico - reservas activas de cotizaciones
 -- vigentes - compromisos de ordenes ya en curso. batches.stock NUNCA se
 -- descuenta por cotizaciones ni por ordenes.
@@ -1594,9 +1603,10 @@ BEGIN
   SELECT p_service_order_id, p_quote_id, service_id, discount, price, quantity, subtotal
   FROM quote_services WHERE quote_id = p_quote_id;
 
-  INSERT INTO service_order_batches (service_order_id, quote_id, batch_id, quantity, delivery_time, price, discount, subtotal)
-  SELECT p_service_order_id, p_quote_id, batch_id, quantity, delivery_time, price, discount, subtotal
-  FROM quote_batches WHERE quote_id = p_quote_id;
+  INSERT INTO service_order_batches (service_order_id, quote_id, batch_id, quantity, delivery_time, price, discount, subtotal, cost_at_sale)
+  SELECT p_service_order_id, p_quote_id, qb.batch_id, qb.quantity, qb.delivery_time, qb.price, qb.discount, qb.subtotal, b.cost
+  FROM quote_batches qb LEFT JOIN batches b ON b.id = qb.batch_id
+  WHERE qb.quote_id = p_quote_id;
 
   INSERT INTO service_order_external_services (service_order_id, quote_id, external_service_id, cost, price, quantity, subtotal)
   SELECT p_service_order_id, p_quote_id, external_service_id, cost, price, quantity, subtotal

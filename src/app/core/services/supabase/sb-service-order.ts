@@ -9,7 +9,13 @@ import {
   ServiceOrderService,
   ServiceOrderExternalService,
   ServiceOrderWithLines,
+  ServiceOrderUtilityRow,
 } from '../../models/service-order.model';
+
+export interface UtilityReportFilters {
+  from?: string;
+  to?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class SPServiceOrder {
@@ -135,6 +141,59 @@ export class SPServiceOrder {
         order_externals: externals,
       })),
     );
+  }
+
+  /**
+   * Reporte de Utilidades (reports.md A.1): una fila por orden en el rango
+   * de fechas (started_date), con ingreso (total, sin IVA), costo (suma de
+   * repuestos + servicios externos; mano de obra no tiene costo) y
+   * utilidad. Una sola query con embeds one-to-many de PostgREST — no
+   * requiere RPC ni forkJoin, el agregado se calcula en el cliente sobre
+   * las lineas ya embebidas.
+   */
+  public getUtilityReport(filters: UtilityReportFilters): Observable<ServiceOrderUtilityRow[]> {
+    let query = this.supabase
+      .from(this.TABLE)
+      .select(
+        '*, customer:customers(id,name,lastname), vehicle:vehicles(id,license_plate,brand,model), ' +
+        'order_batches:service_order_batches(quantity, cost_at_sale, batch:batches(cost)), ' +
+        'order_externals:service_order_external_services(quantity, cost)',
+      )
+      .order('started_date', { ascending: false });
+
+    if (filters.from) query = query.gte('started_date', filters.from);
+    if (filters.to) query = query.lte('started_date', filters.to);
+
+    return from(query).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? []).map((row: any) => this.toUtilityRow(row));
+      }),
+    );
+  }
+
+  private toUtilityRow(row: any): ServiceOrderUtilityRow {
+    const batchesCost = (row.order_batches ?? []).reduce(
+      (acc: number, b: any) => acc + (b.cost_at_sale ?? b.batch?.cost ?? 0) * (b.quantity ?? 0),
+      0,
+    );
+    const externalsCost = (row.order_externals ?? []).reduce(
+      (acc: number, e: any) => acc + (e.cost ?? 0) * (e.quantity ?? 0),
+      0,
+    );
+    const income = row.total ?? 0;
+    const cost = batchesCost + externalsCost;
+    return {
+      id: row.id,
+      number: row.number,
+      started_date: row.started_date,
+      state: row.state,
+      customer: row.customer,
+      vehicle: row.vehicle,
+      income,
+      cost,
+      utility: income - cost,
+    };
   }
 
   // Service Order Services

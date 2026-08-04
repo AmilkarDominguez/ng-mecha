@@ -54,7 +54,7 @@ Todas las rutas reales viven bajo `path: 'dashboard'` (`AdminLayout`, `canActiva
 | | Vehículos | `/dashboard/inventario/vehiculos` ⚠️ | `workshop/vehicles/` | Agrupado en menú bajo "Taller" pero con prefijo de ruta `inventario/` y carpeta bajo `workshop/` — tres convenciones distintas para el mismo módulo. No lo tomes como plantilla. |
 | **Cotizaciones** | Cotizaciones | `/dashboard/cotizaciones/activas` | `quote/` | Rutas reales también incluyen `cotizaciones/nueva` y `cotizaciones/editar/:id` (formulario), sin entrada propia de menú — se navega ahí desde el dashboard. La pestaña "Anuladas" (`REJECTED\|EXPIRED\|CANCELED`) vive **dentro** de `quote-dashboard` (tab), no como segundo item de menú, aunque `features.md` lo dibuja como sub-item separado. Ver [[quotes-service-orders]]. |
 | **Órdenes de Servicio** | En Curso | `/dashboard/ordenes/en-curso` | `service-order/` | Rutas reales también incluyen `ordenes/nueva` y `ordenes/editar/:id`, sin entrada de menú. `features.md` planifica sub-items "Completados"/"Canceladas" — **no existen**: el dashboard lista TODAS las órdenes (`SPServiceOrder.listen()`) sin filtro de tab por estado; el estado se ve como chip por fila. Ver [[service-order-flow]]. |
-| **Auditoría y Reportes** | *(ninguno)* | — | — | Grupo declarado con `items: []` — placeholder visual, sin ruta ni feature. Todo lo que `features.md` planifica bajo "Reportes" (Utilidades, Productos, Cumpleañeros, Stock, Servicios por técnico) **no está implementado**, excepto Ingresos/Egresos que terminaron viviendo dentro de "Cuentas" (arriba), no aquí. |
+| **Reportes** | *(ninguno)* | — | — | Grupo declarado con `items: []` — placeholder visual, sin ruta ni feature (renombrado de "Auditoría y Reportes" a "Reportes" — nombre original de `features.md` §"Reportes/"). Todo lo que `.claude/docs/reports.md` planifica (Utilidades, Productos, Cumpleañeros, Stock, más 2 widgets de Dashboard y 8 reportes extra) **no está implementado**, excepto Ingresos/Egresos que terminaron viviendo dentro de "Cuentas" (arriba) por decisión previa — **cualquier reporte nuevo debe agregarse aquí, en el grupo "Reportes"**, no en "Cuentas" ni en ningún otro grupo de dominio. |
 
 ## 3. Lo que existe en código pero no aparece en ningún menú
 
@@ -77,7 +77,7 @@ Sigue el patrón mayoritario (Inventario/Taller/Cuentas), **no** las excepciones
    `compras/` salvo que el grupo de menú también se llame así.
 3. **Menú:** agrega el item en el array `modules` de `nav-menu.ts`, dentro del grupo que
    corresponda (o crea un grupo nuevo `{ title, icon, items: [] }` si es un dominio nuevo,
-   como ya existe vacío "Auditoría y Reportes" esperando contenido).
+   como ya existe vacío "Reportes" esperando contenido).
 4. **Modales:** si el módulo abre modales con `DialogFrame`, sigue el patrón de apertura
    documentado en [[service-order-flow]] §"Patrón de apertura de modales" (`hasBackdrop:
    false`, `panelClass: 'floating-dialog-panel'`, sin `width` explícito).
@@ -90,8 +90,18 @@ Sigue el patrón mayoritario (Inventario/Taller/Cuentas), **no** las excepciones
 
 Si vas a planificar un módulo nuevo del árbol "Reportes" (Utilidades, Stock, Cumpleañeros,
 Servicios por técnico) o "Configuración" de Admin, **antes de implementarlo** verifica en este
-documento (§3) que efectivamente no existe ya con otro nombre — Ingresos/Egresos ya cubren
-parte de lo planificado bajo "Contabilidad"/"Reportes" con nombres distintos
-(`income-report`/`expense-report`), así que un reporte nuevo debería seguir ese mismo patrón
-de carpeta (`accounting/<algo>-report/`) en vez de crear un dominio "Reportes" separado, salvo
-que el usuario pida explícitamente esa reorganización.
+documento (§3) que efectivamente no existe ya con otro nombre.
+
+**Decisión explícita del usuario (2026-08-03): todo reporte nuevo va en el dominio/grupo de
+menú "Reportes"**, carpeta `src/app/features/reports/<algo>-report/`, ruta
+`reportes/<algo>-report`. Esto **no aplica retroactivamente** a Ingresos/Egresos
+(`accounting/income-report/`, `accounting/expense-report/`) — esos dos quedan donde están, ya
+viven dentro del grupo "Cuentas" y no se mueven — pero sí es la regla para cualquier reporte
+nuevo de aquí en adelante, aunque conceptualmente se parezca a uno financiero. No repitas el
+patrón `accounting/<algo>-report/` para reportes nuevos.
+
+**Para el detalle de cada reporte planificado** (definición, finalidad, entidades que
+consume, riesgos de datos conocidos) — incluyendo los 4 reportes principales, los 2 widgets de
+Dashboard y 8 reportes extra de backlog — ver `.claude/docs/reports.md`. Ese documento es la
+fuente de verdad al implementar cualquier ítem del grupo de menú vacío `'Reportes'` (§2 de
+este archivo).

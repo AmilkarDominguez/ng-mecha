@@ -101,9 +101,11 @@ export class NavMenu {
       ],
     },
     {
-      title: 'Auditoría y Reportes',
+      title: 'Reportes',
       icon: 'fact_check',
-      items: [],
+      items: [
+        { label: 'Utilidades', icon: 'trending_up', route: '/dashboard/reportes/utilidades' },
+      ],
     },
   ];
 

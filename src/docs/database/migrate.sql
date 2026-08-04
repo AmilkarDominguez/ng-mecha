@@ -1841,3 +1841,85 @@ $$;
 
 REVOKE ALL ON FUNCTION delete_bank_expense(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION delete_bank_expense(UUID) TO anon, authenticated;
+
+
+-- ============================================================
+-- v26 — Service Orders: costo congelado en repuestos vendidos
+-- (Reporte de Utilidades, reports.md A.1)
+-- ============================================================
+-- batches.cost es el costo ACTUAL del lote, no el costo real al momento
+-- de la venta. cost_at_sale congela ese costo en cada linea, copiado de
+-- batches.cost al insertar (formulario de orden y convert_quote_to_order).
+-- Nullable: filas insertadas antes de esta columna quedan en NULL; el
+-- reporte de Utilidades cae a batches.cost (costo actual) para esas filas
+-- historicas via LEFT JOIN.
+ALTER TABLE service_order_batches ADD COLUMN IF NOT EXISTS cost_at_sale NUMERIC(8,2);
+
+CREATE OR REPLACE FUNCTION convert_quote_to_order(p_quote_id UUID, p_service_order_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_quote     quotes%ROWTYPE;
+  v_order     service_orders%ROWTYPE;
+  v_total     NUMERIC(10,2);
+  v_iva       NUMERIC(10,2);
+  v_total_iva NUMERIC(10,2);
+  v_must      NUMERIC(10,2);
+BEGIN
+  SELECT * INTO v_quote FROM quotes WHERE id = p_quote_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Cotizacion no encontrada.';
+  END IF;
+  IF v_quote.state <> 'APPROVED' THEN
+    RAISE EXCEPTION 'Solo se puede convertir una cotizacion en estado Aprobada.';
+  END IF;
+
+  SELECT * INTO v_order FROM service_orders WHERE id = p_service_order_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Orden de servicio no encontrada.';
+  END IF;
+
+  INSERT INTO service_order_services (service_order_id, quote_id, service_id, discount, price, quantity, subtotal)
+  SELECT p_service_order_id, p_quote_id, service_id, discount, price, quantity, subtotal
+  FROM quote_services WHERE quote_id = p_quote_id;
+
+  -- cost_at_sale se congela aqui tambien: costo del lote al momento de
+  -- convertir la cotizacion, no el costo que tenga el lote cuando se
+  -- corra el reporte de Utilidades mas adelante.
+  INSERT INTO service_order_batches (service_order_id, quote_id, batch_id, quantity, delivery_time, price, discount, subtotal, cost_at_sale)
+  SELECT p_service_order_id, p_quote_id, qb.batch_id, qb.quantity, qb.delivery_time, qb.price, qb.discount, qb.subtotal, b.cost
+  FROM quote_batches qb LEFT JOIN batches b ON b.id = qb.batch_id
+  WHERE qb.quote_id = p_quote_id;
+
+  INSERT INTO service_order_external_services (service_order_id, quote_id, external_service_id, cost, price, quantity, subtotal)
+  SELECT p_service_order_id, p_quote_id, external_service_id, cost, price, quantity, subtotal
+  FROM quote_external_services WHERE quote_id = p_quote_id;
+
+  UPDATE batch_reservations
+    SET state = 'CONSUMED'
+    WHERE quote_batch_id IN (SELECT id FROM quote_batches WHERE quote_id = p_quote_id)
+      AND state = 'ACTIVE';
+
+  SELECT
+    COALESCE((SELECT SUM(subtotal) FROM service_order_services WHERE service_order_id = p_service_order_id), 0)
+    + COALESCE((SELECT SUM(subtotal) FROM service_order_batches WHERE service_order_id = p_service_order_id), 0)
+    + COALESCE((SELECT SUM(subtotal) FROM service_order_external_services WHERE service_order_id = p_service_order_id), 0)
+  INTO v_total;
+
+  v_iva       := CASE WHEN v_order.with_iva THEN v_total * 0.13 ELSE 0 END;
+  v_total_iva := v_total + v_iva;
+  v_must      := GREATEST((CASE WHEN v_order.with_iva THEN v_total_iva ELSE v_total END) - COALESCE(v_order.have, 0), 0);
+
+  UPDATE service_orders
+    SET total = v_total, iva = v_iva, total_iva = v_total_iva, must = v_must
+    WHERE id = p_service_order_id;
+
+  UPDATE quotes SET state = 'CONVERTED', converted_service_order_id = p_service_order_id WHERE id = p_quote_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION convert_quote_to_order(UUID, UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION convert_quote_to_order(UUID, UUID) TO anon, authenticated;

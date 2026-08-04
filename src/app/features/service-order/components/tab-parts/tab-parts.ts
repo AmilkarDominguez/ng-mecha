@@ -163,6 +163,7 @@ export class TabParts {
       price,
       discount: 0,
       subtotal: price * quantity,
+      cost_at_sale: batch.cost ?? null,
       product_name: batch.product?.name ?? batch.description ?? batch.id,
       industry_name: batch.industry?.name ?? '—',
     });

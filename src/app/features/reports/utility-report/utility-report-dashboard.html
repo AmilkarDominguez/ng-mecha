@@ -1,0 +1,101 @@
+<div class="utility-report-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">Reporte de Utilidades</h1>
+      <span class="page-subtitle">Ingreso, costo y utilidad de las órdenes de servicio por rango de fechas</span>
+    </div>
+  </div>
+
+  <form [formGroup]="filterForm" class="filters-row">
+    <mat-form-field appearance="outline" class="filter-date">
+      <mat-label>Desde</mat-label>
+      <input matInput [matDatepicker]="fromPicker" formControlName="from" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-date">
+      <mat-label>Hasta</mat-label>
+      <input matInput [matDatepicker]="toPicker" formControlName="to" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+
+    <div class="filter-actions">
+      <button mat-flat-button color="primary" type="button" (click)="search()">
+        <mat-icon>search</mat-icon>
+        Buscar
+      </button>
+      <button mat-stroked-button type="button" (click)="onClearFilters()">
+        Limpiar filtros
+      </button>
+    </div>
+  </form>
+
+  <div class="summary-row">
+    <div class="summary-item">
+      <span class="summary-label">Ingreso</span>
+      <span class="summary-value">Bs. {{ totalIncome() | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Costo</span>
+      <span class="summary-value summary-cost">Bs. {{ totalCost() | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Utilidad</span>
+      <span class="summary-value summary-utility">Bs. {{ totalUtility() | number:'1.2-2' }}</span>
+    </div>
+    <span class="result-count">{{ rows().length }} resultado(s)</span>
+  </div>
+
+  <div class="table-scroll">
+    <table mat-table [dataSource]="rows()" class="utility-table">
+
+      <ng-container matColumnDef="started_date">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let row">{{ row.started_date | date:'dd/MM/yyyy' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="number">
+        <th mat-header-cell *matHeaderCellDef>Orden</th>
+        <td mat-cell *matCellDef="let row">{{ row.number ?? '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="customer">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let row">{{ customerLabel(row) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="vehicle">
+        <th mat-header-cell *matHeaderCellDef>Vehículo</th>
+        <td mat-cell *matCellDef="let row">{{ vehicleLabel(row) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="income">
+        <th mat-header-cell *matHeaderCellDef>Ingreso</th>
+        <td mat-cell *matCellDef="let row" class="cell-amount">Bs. {{ row.income | number:'1.2-2' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="cost">
+        <th mat-header-cell *matHeaderCellDef>Costo</th>
+        <td mat-cell *matCellDef="let row" class="cell-amount cell-cost">Bs. {{ row.cost | number:'1.2-2' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="utility">
+        <th mat-header-cell *matHeaderCellDef>Utilidad</th>
+        <td mat-cell *matCellDef="let row" class="cell-amount cell-utility">Bs. {{ row.utility | number:'1.2-2' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-row" [attr.colspan]="columns.length">
+          Sin órdenes registradas en el rango seleccionado.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+</div>

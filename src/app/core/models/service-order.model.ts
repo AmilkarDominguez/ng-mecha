@@ -56,6 +56,7 @@ export interface ServiceOrderBatch {
   price: number | null;
   discount: number | null;
   subtotal: number | null;
+  cost_at_sale: number | null;
   created_at?: string | Date;
   updated_at?: string | Date;
 }
@@ -107,6 +108,7 @@ export interface OrderBatchLine {
   quantity: number | null;
   discount: number | null;
   subtotal: number | null;
+  cost_at_sale: number | null;
   delivery_time: DeliveryTime;
   batch: {
     description: string | null;
@@ -135,4 +137,22 @@ export interface ServiceOrderWithLines extends ServiceOrder {
   order_services: OrderServiceLine[];
   order_batches: OrderBatchLine[];
   order_externals: OrderExternalLine[];
+}
+
+// Fila calculada para el Reporte de Utilidades (reports.md A.1). income =
+// service_orders.total (sin IVA — el IVA no es ganancia del taller, es un
+// impuesto de paso). cost = suma de costos de repuestos (cost_at_sale,
+// con fallback a batches.cost para lineas anteriores a esa columna) +
+// costo de servicios externos. La mano de obra no tiene costo asociado:
+// es 100% utilidad.
+export interface ServiceOrderUtilityRow {
+  id: string;
+  number: string | null;
+  started_date: string | null;
+  state: OrderState;
+  customer: { id: string; name: string | null; lastname: string | null } | null;
+  vehicle: { id: string; license_plate: string | null; brand: string | null; model: string | null } | null;
+  income: number;
+  cost: number;
+  utility: number;
 }

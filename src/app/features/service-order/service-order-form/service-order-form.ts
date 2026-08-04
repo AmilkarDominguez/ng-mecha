@@ -338,6 +338,7 @@ export class ServiceOrderForm implements OnInit {
       price:            r.price,
       discount:         r.discount,
       subtotal:         r.subtotal,
+      cost_at_sale:     r.cost_at_sale,
     }));
 
     const externalToSave = this.externalRows().map((r) => ({
@@ -479,6 +480,7 @@ export class ServiceOrderForm implements OnInit {
       price:            l.price,
       discount:         l.discount,
       subtotal:         l.subtotal,
+      cost_at_sale:     l.cost_at_sale,
       product_name:     l.batch?.product?.name ?? '',
       industry_name:    l.batch?.industry?.name ?? '',
     };
