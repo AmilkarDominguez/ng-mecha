@@ -12,6 +12,7 @@ import {
   ServiceOrderUtilityRow,
   ProductSalesReportRow,
 } from '../../models/service-order.model';
+import { Vehicle } from '../../models/vehicle.model';
 
 export interface UtilityReportFilters {
   from?: string;
@@ -19,6 +20,11 @@ export interface UtilityReportFilters {
 }
 
 export interface ProductSalesReportFilters {
+  from?: string;
+  to?: string;
+}
+
+export interface VehicleFrequencyFilters {
   from?: string;
   to?: string;
 }
@@ -246,6 +252,33 @@ export class SPServiceOrder {
       }
     }
     return Array.from(byProduct.values()).sort((a, b) => b.quantity - a.quantity);
+  }
+
+  /**
+   * Reporte "Que tipo de vehiculo/marca/año entra mas" (reports.md C.1):
+   * una fila por cada orden con vehiculo asignado en el rango de fechas
+   * (started_date), con brand/model/year del vehiculo. La agrupacion por
+   * marca/modelo/año y su normalizacion (vehicles.brand/model/year son
+   * texto libre, no catalogo) se hacen en el cliente (componente), no
+   * aqui — este metodo solo trae las filas crudas.
+   */
+  public getVehicleFrequency(filters: VehicleFrequencyFilters): Observable<Pick<Vehicle, 'brand' | 'model' | 'year'>[]> {
+    let query = this.supabase
+      .from(this.TABLE)
+      .select('vehicle:vehicles(brand,model,year)')
+      .not('vehicle_id', 'is', null);
+
+    if (filters.from) query = query.gte('started_date', filters.from);
+    if (filters.to) query = query.lte('started_date', filters.to);
+
+    return from(query).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return (data ?? [])
+          .map((row: any) => row.vehicle as Pick<Vehicle, 'brand' | 'model' | 'year'> | null)
+          .filter((v): v is Pick<Vehicle, 'brand' | 'model' | 'year'> => v !== null);
+      }),
+    );
   }
 
   // Service Order Services

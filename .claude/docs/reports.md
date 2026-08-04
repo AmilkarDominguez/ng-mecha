@@ -262,18 +262,47 @@ implementar alguno, ya exista el análisis de qué tabla/columna usar.
 
 ### C.1 — [Reporte] ¿Qué tipo de vehículo / marca / año entra más?
 
+**Estado:** implementado (2026-08-04). Ruta `/dashboard/reportes/vehiculos-frecuentes`, menú
+"Reportes → Vehículos Frecuentes", carpeta
+`src/app/features/reports/vehicle-frequency-report/`
+(`VehicleFrequencyReportDashboard`).
+
 **Definición:** reporte estadístico que agrupa `vehicles` (vía `service_orders.vehicle_id`)
-por `brand`, `model` y/o `year`, contando frecuencia de órdenes de servicio en un rango de
-fechas.
+por `brand`, `model` **o** `year` — un selector "Agrupar por" (Marca/Modelo/Año, toggle
+group) cambia la dimensión activa **instantáneamente sin volver a consultar** la base de
+datos (es un recálculo puro sobre las filas ya cargadas) — contando frecuencia de órdenes de
+servicio en un rango de fechas opcional (`started_date`, mismo filtro que A.1/A.2). Muestra
+cantidad de órdenes y % del total por cada valor, ordenado descendente (ranking).
 
 **Finalidad:** entender qué marcas/modelos/años de vehículo son más comunes en el taller —
 insumo para decisiones de stock de repuestos compatibles (`batches.compatible_brands`/
 `compatible_models`) y para especializar mecánicos en las marcas más frecuentes.
 
-**Riesgo de datos:** `vehicles.brand`, `.model` y `.year` son campos de texto libre (no
-catálogo) — agrupar por estos campos puede fragmentar resultados por inconsistencias de
-escritura (ej. "Toyota" vs "toyota" vs "TOYOTA"). Si se implementa, normalizar
-(`toLowerCase()`/`trim()`) antes de agrupar, o el reporte quedará ruidoso.
+**Riesgo de datos — resuelto:** `vehicles.brand`, `.model` y `.year` son campos de texto libre
+(no catálogo). Se implementó la normalización sugerida: la **clave de agrupación** usa
+`value.trim().toLowerCase()` (`normalizeKey()` en el componente), y el **valor mostrado** se
+recapitaliza con un `toTitleCase()` genérico (primera letra de cada palabra en mayúscula) para
+que la tabla no muestre el texto crudo tal cual fue tecleado. El seed prueba este caso
+explícitamente (ver abajo) — sin la normalización, "Toyota" y "TOYOTA" habrían quedado como 2
+filas separadas en vez de sumar sus órdenes juntas.
+
+**Cambio de esquema:** no se requirió — `brand`/`model`/`year` ya existían en `vehicles` como
+texto libre, tal como anticipaba el riesgo de datos original.
+
+**Seed:** se agregó un 5º vehículo (`vehicle 5`, Toyota Hilux 2018, con `brand = 'TOYOTA'` en
+mayúsculas a propósito — mismo cliente que el vehículo 2) y 4 órdenes de servicio nuevas
+(OS-0004 a OS-0007, cada una con una sola línea de mano de obra para mantener el total interno
+consistente) repartidas así: 2 más para el vehículo 1 (Toyota Corolla), 1 para el vehículo 5
+(TOYOTA Hilux) y 1 más para el vehículo 3 (Nissan Frontier). Resultado esperado agrupando por
+marca (normalizada): Toyota = 4 órdenes (3 del vehículo 1 + 1 del vehículo 5, sumadas gracias a
+la normalización), Nissan = 2, Suzuki = 1, Honda = 0 (sin órdenes, no aparece). Sin esto, las 3
+órdenes originales del seed apuntaban cada una a un vehículo distinto — un ranking totalmente
+trivial (todo empatado en 1).
+
+**Capa de datos:** `SPServiceOrder.getVehicleFrequency()` — una sola query a `service_orders`
+con `vehicle:vehicles(brand,model,year)` embebido y `.not('vehicle_id','is',null)`, filtrada
+por `started_date`. Sin RPC ni `forkJoin` — mismo criterio de solo-lectura que el resto de
+reportes de este módulo.
 
 ### C.2 — [Reporte] ¿Cuánto estoy ganando por productos?
 

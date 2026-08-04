@@ -198,11 +198,16 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- 12. vehicles
 -- ============================================================
+-- Vehiculo 5: brand = 'TOYOTA' (mayusculas) a proposito, distinto de la
+-- capitalizacion 'Toyota' del vehiculo 1 — ejercita el riesgo de datos
+-- que reports.md ya advertia para el Reporte C.1 (vehicles.brand es
+-- texto libre, sin normalizar se fragmentaria en 2 grupos distintos).
 INSERT INTO vehicles (id, customer_id, license_plate, brand, model, displacement, year, chassis_number, description, state) VALUES
   ('00000000-0000-0000-0011-000000000001', '00000000-0000-0000-0010-000000000001', '1234-ABC', 'Toyota',  'Corolla',   '1.8L', '2016', 'JTX1234567890001', 'Sedan color blanco.', 'ACTIVE'),
   ('00000000-0000-0000-0011-000000000002', '00000000-0000-0000-0010-000000000002', 'MOT-567',  'Honda',   'CBR 250R',  '250cc','2019', 'HND1234567890002', 'Motocicleta deportiva roja.', 'ACTIVE'),
   ('00000000-0000-0000-0011-000000000003', '00000000-0000-0000-0010-000000000003', '5678-XYZ', 'Nissan',  'Frontier',  '2.5L', '2014', 'NIS1234567890003', 'Camioneta doble cabina.', 'ACTIVE'),
-  ('00000000-0000-0000-0011-000000000004', '00000000-0000-0000-0010-000000000004', '9012-DEF', 'Suzuki',  'Alto',      '1.0L', '2020', 'SUZ1234567890004', 'Hatchback color gris.', 'ACTIVE')
+  ('00000000-0000-0000-0011-000000000004', '00000000-0000-0000-0010-000000000004', '9012-DEF', 'Suzuki',  'Alto',      '1.0L', '2020', 'SUZ1234567890004', 'Hatchback color gris.', 'ACTIVE'),
+  ('00000000-0000-0000-0011-000000000005', '00000000-0000-0000-0010-000000000002', '3456-GHI', 'TOYOTA',  'Hilux',     '2.4L', '2018', 'TOY1234567890005', 'Camioneta doble cabina blanca.', 'ACTIVE')
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -284,7 +289,43 @@ INSERT INTO service_orders (
    'OS-0003', 'Cambio de aceite con filtros y pastillas de freno.',
    585.00, 0.00, 585.00, NULL, NULL, false, '86500',
    (CURRENT_DATE - INTERVAL '10 days')::date, (CURRENT_DATE - INTERVAL '9 days')::date, NULL,
-   'COMPLETED', 'CASH')
+   'COMPLETED', 'CASH'),
+  -- OS-0004 a OS-0007: ordenes adicionales solo para dar variedad al
+  -- Reporte "Que tipo de vehiculo/marca/año entra mas" (C.1, reports.md)
+  -- — repiten vehiculo 1 (Toyota Corolla, 2 ordenes mas) y vehiculo 3
+  -- (Nissan Frontier, 1 orden mas) para que el ranking no quede trivial
+  -- (todo empatado en 1), y OS-0006 usa el vehiculo 5 ('TOYOTA' en
+  -- mayusculas) para probar que el reporte normaliza brand antes de
+  -- agrupar — sin normalizar, "Toyota" y "TOYOTA" quedarian como 2 grupos
+  -- separados en vez de sumar sus 4 ordenes juntas.
+  ('00000000-0000-0000-0021-000000000004',
+   '00000000-0000-0000-0010-000000000001', '00000000-0000-0000-0011-000000000001',
+   '00000000-0000-0000-0012-000000000002', (SELECT id FROM users WHERE email = 'ventas@mecha.test'),
+   'OS-0004', 'Alineacion y balanceo.',
+   120.00, 120.00, 0.00, NULL, NULL, false, '84000',
+   (CURRENT_DATE - INTERVAL '15 days')::date, (CURRENT_DATE - INTERVAL '15 days')::date, NULL,
+   'COMPLETED', 'CASH'),
+  ('00000000-0000-0000-0021-000000000005',
+   '00000000-0000-0000-0010-000000000001', '00000000-0000-0000-0011-000000000001',
+   '00000000-0000-0000-0012-000000000001', (SELECT id FROM users WHERE email = 'admin@mecha.test'),
+   'OS-0005', 'Diagnostico electrico.',
+   100.00, 0.00, 100.00, NULL, NULL, false, '86800',
+   (CURRENT_DATE - INTERVAL '2 days')::date, NULL, NULL,
+   'IN_PROGRESS', 'CREDIT'),
+  ('00000000-0000-0000-0021-000000000006',
+   '00000000-0000-0000-0010-000000000002', '00000000-0000-0000-0011-000000000005',
+   '00000000-0000-0000-0012-000000000003', (SELECT id FROM users WHERE email = 'ventas@mecha.test'),
+   'OS-0006', 'Revision de frenos.',
+   60.00, 60.00, 0.00, NULL, NULL, false, '31000',
+   (CURRENT_DATE - INTERVAL '20 days')::date, (CURRENT_DATE - INTERVAL '19 days')::date, NULL,
+   'COMPLETED', 'CASH'),
+  ('00000000-0000-0000-0021-000000000007',
+   '00000000-0000-0000-0010-000000000003', '00000000-0000-0000-0011-000000000003',
+   '00000000-0000-0000-0012-000000000001', (SELECT id FROM users WHERE email = 'admin@mecha.test'),
+   'OS-0007', 'Cambio de aceite.',
+   80.00, 0.00, 80.00, NULL, NULL, false, '85400',
+   (CURRENT_DATE - INTERVAL '1 day')::date, NULL, NULL,
+   'IN_PROGRESS', 'CASH')
 ON CONFLICT (id) DO NOTHING;
 
 
@@ -356,7 +397,11 @@ INSERT INTO service_order_services (id, service_id, service_order_id, quote_id, 
   ('00000000-0000-0000-0022-000000000001', '00000000-0000-0000-0013-000000000003', '00000000-0000-0000-0021-000000000001', '00000000-0000-0000-0016-000000000003', 0, 60.00, 1, 60.00),
   ('00000000-0000-0000-0022-000000000002', '00000000-0000-0000-0013-000000000001', '00000000-0000-0000-0021-000000000002', NULL, 0, 80.00, 1, 80.00),
   ('00000000-0000-0000-0022-000000000003', '00000000-0000-0000-0013-000000000005', '00000000-0000-0000-0021-000000000002', NULL, 0, 50.00, 1, 50.00),
-  ('00000000-0000-0000-0022-000000000004', '00000000-0000-0000-0013-000000000001', '00000000-0000-0000-0021-000000000003', NULL, 0, 80.00, 1, 80.00)
+  ('00000000-0000-0000-0022-000000000004', '00000000-0000-0000-0013-000000000001', '00000000-0000-0000-0021-000000000003', NULL, 0, 80.00, 1, 80.00),
+  ('00000000-0000-0000-0022-000000000005', '00000000-0000-0000-0013-000000000002', '00000000-0000-0000-0021-000000000004', NULL, 0, 120.00, 1, 120.00),
+  ('00000000-0000-0000-0022-000000000006', '00000000-0000-0000-0013-000000000004', '00000000-0000-0000-0021-000000000005', NULL, 0, 100.00, 1, 100.00),
+  ('00000000-0000-0000-0022-000000000007', '00000000-0000-0000-0013-000000000003', '00000000-0000-0000-0021-000000000006', NULL, 0, 60.00, 1, 60.00),
+  ('00000000-0000-0000-0022-000000000008', '00000000-0000-0000-0013-000000000001', '00000000-0000-0000-0021-000000000007', NULL, 0, 80.00, 1, 80.00)
 ON CONFLICT (id) DO NOTHING;
 
 

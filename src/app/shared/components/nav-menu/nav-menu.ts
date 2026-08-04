@@ -108,6 +108,7 @@ export class NavMenu {
         { label: 'Productos (Lotes)', icon: 'inventory_2', route: '/dashboard/reportes/productos-lotes' },
         { label: 'Cumpleañeros', icon: 'cake', route: '/dashboard/reportes/cumpleaneros' },
         { label: 'Lotes - Stock', icon: 'warehouse', route: '/dashboard/reportes/lotes-stock' },
+        { label: 'Vehículos Frecuentes', icon: 'directions_car', route: '/dashboard/reportes/vehiculos-frecuentes' },
       ],
     },
   ];

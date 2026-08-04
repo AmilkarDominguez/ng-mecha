@@ -145,6 +145,10 @@ export const routes: Routes = [
         path: 'reportes/lotes-stock',
         loadComponent: () => import('./features/reports/stock-report/stock-report-dashboard').then(m => m.StockReportDashboard),
       },
+      {
+        path: 'reportes/vehiculos-frecuentes',
+        loadComponent: () => import('./features/reports/vehicle-frequency-report/vehicle-frequency-report-dashboard').then(m => m.VehicleFrequencyReportDashboard),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }
