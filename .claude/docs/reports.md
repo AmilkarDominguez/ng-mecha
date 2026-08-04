@@ -221,19 +221,36 @@ datos), no una implementación desde cero.
 
 ### B.2 — [Reporte] Home view: Lotes en bajo stock
 
-**Estado:** no implementado.
+**Estado:** implementado (2026-08-04). `LowStockCard`
+(`src/app/features/dashboard/components/low-stock-card/low-stock-card.ts/html/scss`), montado
+en `dashboard.html` **junto a** `<app-birthday-card />` (no la reemplaza) — mismo grid
+responsive de `dashboard.scss` (`repeat(auto-fill, minmax(22rem, 1fr))`), así que ambas
+tarjetas se acomodan una al lado de la otra automáticamente.
 
-**Definición:** tarjeta en el Dashboard (junto a `BirthdayCard`) que lista, sin filtros, los
-lotes cuyo stock disponible está por debajo del umbral de "bajo stock" (ver A.4 para la
-decisión pendiente de cómo se define ese umbral).
+**Definición:** tarjeta en el Dashboard que lista, sin filtros, los lotes `ACTIVE` cuyo stock
+**disponible** (`SPBatch.getAvailableStock()` / `batch_available_stock`, no `batches.stock` a
+secas) está por debajo de su umbral — ordenados por disponible ascendente (más urgente
+primero). Click en un lote abre `BatchDetailModal` (mismo modal que usa `batch-dashboard`).
 
 **Finalidad:** misma lógica que B.1 pero para inventario — evitar enterarse de un quiebre de
 stock solo cuando un cliente ya lo pidió.
 
-**Datos/entidades:** mismos que A.4 (`batch_available_stock`). Depende de la misma decisión de
-esquema (columna `min_stock` vs. umbral global) antes de poder implementarse — no implementar
-este widget con un número mágico hardcodeado sin antes resolver esa decisión en A.4, o
-quedarán desincronizados cuando se implemente el reporte completo.
+**Datos/entidades:** mismos que A.4. **Sin cambio de esquema** — la decisión de umbral
+(`batches.min_stock` por lote, nullable, fallback a 10 unidades cuando no está definido) ya se
+tomó y quedó implementada al construir A.4 (ver esa sección); B.2 la reutiliza directamente
+sin volver a decidirla, tal como este documento pedía. `LowStockCard` usa exactamente el mismo
+criterio `(stock ?? 0) < (min_stock ?? 10)` que `batch-table.html`, `batch-detail-modal.html`
+y el reporte A.4 — los cuatro lugares del sistema que muestran "stock bajo" están ahora
+sincronizados en un solo criterio, sin números mágicos duplicados.
+
+**Seed:** no se agregó nada nuevo — el seed de `min_stock` hecho en A.4 (2 lotes bajos por
+umbral explícito, 1 por el fallback de 10, 3 saludables) ya le da a esta tarjeta datos no
+triviales para mostrar de entrada.
+
+**Capa de datos:** no se creó ningún método nuevo — reutiliza `SPBatch.listen()` y
+`SPBatch.getAvailableStock()` ya existentes (mismos que usa A.4 y `tab-parts` de cotización),
+filtrando y ordenando client-side en el propio componente, igual que `BirthdayCard` hace con
+`SPCustomer.listen()`.
 
 ---
 

@@ -1,0 +1,47 @@
+<mat-card class="low-stock-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar class="low-stock-card-icon">inventory_2</mat-icon>
+    <mat-card-title>Lotes en bajo stock</mat-card-title>
+    <mat-card-subtitle class="low-stock-card-subtitle">
+      Disponible por debajo del mínimo
+      <span class="low-stock-badge">{{ lowStockBatches().length }}</span>
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="low-stock-card-content">
+    @if (lowStockBatches().length === 0) {
+      <div class="low-stock-empty">
+        <mat-icon class="low-stock-empty-icon">check_circle</mat-icon>
+        <span>No hay lotes con stock bajo</span>
+      </div>
+    } @else {
+      <div class="low-stock-list">
+        @for (row of lowStockBatches(); track row.batch.id) {
+          <button
+            class="low-stock-item"
+            (click)="openDetail(row)"
+            [matTooltip]="'Ver detalle de ' + row.productName"
+            matTooltipPosition="right"
+          >
+            <div class="low-stock-item-qty">
+              <span class="low-stock-qty-number">{{ row.availableStock | number:'1.0-2' }}</span>
+            </div>
+            <mat-divider vertical />
+            <div class="low-stock-item-info">
+              <span class="low-stock-item-name">
+                @if (row.batch.code) {
+                  <span class="low-stock-code">{{ row.batch.code }}</span>
+                }
+                {{ row.productName }}
+              </span>
+              <span class="low-stock-item-meta">
+                Disponible {{ row.availableStock | number:'1.0-2' }} · Mínimo {{ row.minStock | number:'1.0-2' }}
+              </span>
+            </div>
+            <mat-icon class="low-stock-item-arrow">chevron_right</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  </mat-card-content>
+</mat-card>
