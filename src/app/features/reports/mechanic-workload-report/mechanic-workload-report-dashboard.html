@@ -1,0 +1,93 @@
+<div class="mechanic-workload-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <h1 class="page-title">
+        Servicios por Técnico
+        <mat-icon
+          class="title-info-icon"
+          matTooltip="El mecánico se asigna una vez por orden completa (no por línea de servicio). Si una orden tuvo varios servicios, todos se atribuyen al único mecánico de esa orden."
+        >info</mat-icon>
+      </h1>
+      <span class="page-subtitle">Carga de trabajo por mecánico: órdenes atendidas, servicios realizados e ingreso generado</span>
+    </div>
+  </div>
+
+  <form [formGroup]="filterForm" class="filters-row">
+    <mat-form-field appearance="outline" class="filter-date">
+      <mat-label>Desde</mat-label>
+      <input matInput [matDatepicker]="fromPicker" formControlName="from" />
+      <mat-datepicker-toggle matIconSuffix [for]="fromPicker" />
+      <mat-datepicker #fromPicker />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-date">
+      <mat-label>Hasta</mat-label>
+      <input matInput [matDatepicker]="toPicker" formControlName="to" />
+      <mat-datepicker-toggle matIconSuffix [for]="toPicker" />
+      <mat-datepicker #toPicker />
+    </mat-form-field>
+
+    <div class="filter-actions">
+      <button mat-flat-button color="primary" type="button" (click)="search()">
+        <mat-icon>search</mat-icon>
+        Buscar
+      </button>
+      <button mat-stroked-button type="button" (click)="onClearFilters()">
+        Limpiar filtros
+      </button>
+    </div>
+  </form>
+
+  <div class="summary-row">
+    <div class="summary-item">
+      <span class="summary-label">Órdenes Atendidas</span>
+      <span class="summary-value">{{ totalOrders() }}</span>
+    </div>
+    <div class="summary-item">
+      <span class="summary-label">Servicios Realizados</span>
+      <span class="summary-value">{{ totalServices() | number:'1.0-2' }}</span>
+    </div>
+    <span class="result-count">{{ rows().length }} técnico(s)</span>
+  </div>
+
+  <div class="table-scroll">
+    <table mat-table [dataSource]="rows()" class="mechanic-workload-table">
+
+      <ng-container matColumnDef="rank">
+        <th mat-header-cell *matHeaderCellDef>#</th>
+        <td mat-cell *matCellDef="let row; let i = index">{{ i + 1 }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="mechanic_name">
+        <th mat-header-cell *matHeaderCellDef>Mecánico</th>
+        <td mat-cell *matCellDef="let row">{{ row.mechanic_name }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="orders_count">
+        <th mat-header-cell *matHeaderCellDef>Órdenes</th>
+        <td mat-cell *matCellDef="let row" class="cell-amount">{{ row.orders_count | number }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="services_count">
+        <th mat-header-cell *matHeaderCellDef>Servicios</th>
+        <td mat-cell *matCellDef="let row" class="cell-amount">{{ row.services_count | number:'1.0-2' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="income">
+        <th mat-header-cell *matHeaderCellDef>Ingreso Generado</th>
+        <td mat-cell *matCellDef="let row" class="cell-amount">Bs. {{ row.income | number:'1.2-2' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell empty-row" [attr.colspan]="columns.length">
+          Sin servicios registrados en el rango seleccionado.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+</div>

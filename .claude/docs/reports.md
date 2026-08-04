@@ -338,35 +338,110 @@ trivial).
 
 ### C.3 — [Reporte] Productos, servicios de mano de obra y extras
 
-**Definición:** reporte comparativo de las 3 fuentes de ingreso de una orden — repuestos
+**Estado:** implementado (2026-08-04). Ruta `/dashboard/reportes/composicion-ingresos`, menú
+"Reportes → Composición de Ingresos", carpeta
+`src/app/features/reports/income-composition-report/`
+(`IncomeCompositionReportDashboard`). A diferencia de C.2, este documento **no** traía una nota
+de solapamiento con A.1 ni con ningún otro reporte, así que se implementó como página propia
+(ruta + menú), siguiendo la convención por defecto — no se fusionó con Utilidades.
+
+**Definición:** reporte comparativo de las 3 fuentes de ingreso — repuestos
 (`service_order_batches`), mano de obra (`service_order_services`) y servicios externos
-(`service_order_external_services`) — mostrando qué proporción del ingreso total aporta cada
-categoría en un periodo.
+(`service_order_external_services`) — sumadas a través de **todas** las órdenes en un rango de
+fechas opcional (`started_date`), mostrando el ingreso y el % que cada categoría aporta al
+total, con una barra de proporción visual. Es un agregado a nivel de sistema (no por orden ni
+por producto) — las otras 2 dimensiones ya las cubren A.1 (por orden) y A.2/C.2 (por producto).
 
 **Finalidad:** entender la composición del negocio (¿se gana más por repuestos o por mano de
 obra?) para decisiones estratégicas de precios (ej. subir tarifa de mano de obra vs. ajustar
 margen de repuestos).
 
+**Cambio de esquema:** no se requirió — `subtotal` ya existía en las 3 tablas pivote.
+
+**Seed:** no se agregó nada nuevo — los datos ya sembrados (para A.1/A.2/C.1) ya cubren las 3
+categorías con pesos bien distintos (mano de obra Bs. 630, repuestos Bs. 1080, externos
+Bs. 150 — repuestos ~58%, mano de obra ~34%, externos ~8% del total de Bs. 1860), suficiente
+para verificar que el reporte calcula proporciones reales y no un empate trivial.
+
+**Capa de datos:** `SPServiceOrder.getIncomeComposition()` — un método nuevo (no había uno
+hermano con esta forma de agregación de 3 fuentes a nivel de sistema). Una sola query a
+`service_orders` con las 3 tablas pivote embebidas (`order_services`, `order_batches`,
+`order_externals`, cada una trayendo solo `subtotal`), sumadas client-side. Sin RPC ni
+`forkJoin`.
+
 ### C.4 — [Reporte] Servicios en Órdenes de Servicio Completadas o Pendientes por rango de fechas
 
-**Definición:** listado de líneas de mano de obra (`service_order_services`) filtrado por el
-estado de su orden (`service_orders.state`: `COMPLETED` = completadas, `IN_PROGRESS` =
-pendientes — no existe un estado "PENDING" separado, ver `[[service-order-flow]]`) y por rango
-de fechas (`started_date`/`ended_date`).
+**Estado:** implementado (2026-08-04). Ruta `/dashboard/reportes/servicios-por-estado`, menú
+"Reportes → Servicios por Estado", carpeta
+`src/app/features/reports/service-lines-report/` (`ServiceLinesReportDashboard`). Sin
+solapamiento con otro reporte del documento — es el único que lista **líneas** de mano de obra
+sin agregar, filtradas por estado de orden.
+
+**Definición:** listado plano (una fila por línea, sin agregar) de mano de obra
+(`service_order_services`) filtrado por el estado de su orden (`service_orders.state`:
+`COMPLETED` = completadas, `IN_PROGRESS` = pendientes — toggle de 3 opciones: Completadas /
+Pendientes / Ambas, default Ambas) y por rango de fechas opcional sobre `started_date`. **Nunca
+incluye órdenes `CANCELED`** — ese tercer estado está fuera del alcance de la definición
+original ("no existe un estado PENDING separado"), ni siquiera con el toggle en "Ambas".
+Columnas: fecha, orden, estado (chip), servicio, cantidad, cliente, vehículo, mecánico — sin
+precio/subtotal, es seguimiento operativo, no financiero.
 
 **Finalidad:** seguimiento operativo (no financiero) de qué servicios se prestaron o siguen
 pendientes en un periodo — útil para planificación de carga de trabajo, no solo para
 contabilidad.
 
+**Cambio de esquema:** no se requirió.
+
+**Seed:** se agregó **OS-0008**, una orden `CANCELED` con una línea de mano de obra, para
+probar explícitamente que el reporte la excluye en las 3 posiciones del toggle (incluida
+"Ambas" — que solo significa COMPLETED+IN_PROGRESS, no "todos los estados"). Las 7 órdenes ya
+sembradas para A.1/C.1/C.3 ya cubrían ambos estados en scope (4 `COMPLETED`, 3
+`IN_PROGRESS`) con mecánicos y servicios variados, así que no hizo falta agregar más allá de
+OS-0008.
+
+**Capa de datos:** `SPServiceOrder.getServiceLinesReport()` — método nuevo, anclado en
+`service_order_services` con join `!inner` a `service_orders` (para filtrar por `state` y
+`started_date`) y a `services`/`customers`/`vehicles`/`mechanics` para los datos a mostrar. Sin
+agregación — cada fila del resultado es una línea real de la tabla, ordenada por fecha
+descendente en el cliente.
+
 ### C.5 — [Reporte] Por servicio, qué servicios son los más requeridos
 
+**Estado:** implementado (2026-08-04). Ruta `/dashboard/reportes/servicios-mas-requeridos`,
+menú "Reportes → Servicios Más Requeridos", carpeta
+`src/app/features/reports/service-frequency-report/`
+(`ServiceFrequencyReportDashboard`). Sin solapamiento con otro reporte de este documento.
+
 **Definición:** ranking de `services` (catálogo) por frecuencia de uso en
-`service_order_services`, en un rango de fechas.
+`service_order_services` (cantidad total realizada) e ingreso generado, en un rango de fechas
+opcional, ordenado por cantidad descendente. Sin filtro de estado de orden — mismo criterio ya
+usado en A.2/C.1/C.3 (ninguno excluye órdenes `CANCELED`, solo filtran por fecha); se mantuvo
+por consistencia entre reportes hermanos, no por descuido.
 
 **Finalidad:** identificar los servicios más demandados — insumo para pricing, promociones, o
 priorizar capacitación de mecánicos en esos servicios específicos.
 
+**Cambio de esquema:** no se requirió.
+
+**Seed:** no se agregó nada nuevo — las 9 líneas de mano de obra ya sembradas (para A.1/C.1/
+C.3/C.4) ya dan un ranking no trivial: "Cambio de aceite" = 3, "Revisión de frenos" = 2,
+"Diagnóstico eléctrico" = 2 (incluye la línea de la orden `CANCELED` OS-0008, ver nota de
+criterio arriba), "Cambio de batería" = 1, "Alineación y balanceo" = 1.
+
+**Capa de datos:** `SPServiceOrder.getServiceFrequencyReport()` — método nuevo (mismo patrón
+que `getProductSalesReport`/A.2, pero sobre `service_order_services` en vez de
+`service_order_batches`; no se reusó el mismo método porque son tablas distintas, pero sigue
+la misma forma de query/agrupación). Una sola query con join `!inner` a `service_orders` para
+el filtro de fecha, agrupada por servicio en el cliente.
+
 ### C.6 — [Reporte] Reporte por productos/lote: qué lotes se venden más por producto
+
+**Estado:** resuelto — **implementado indirectamente por A.2**, no como reporte separado. Esta
+resolución ya se tomó y documentó al implementar A.2 (ver esa sección, "Resolución de la nota
+de solapamiento (C.6)"): `SPServiceOrder.getProductSalesReport()` ordena sus filas por
+cantidad vendida **descendente** por defecto, así que la misma tabla de A.2
+(`/dashboard/reportes/productos-lotes`) ya sirve como el ranking/top que pedía C.6. No se creó
+ruta, menú, ni método nuevo para C.6 — sería una fuente de datos idéntica a A.2.
 
 **Definición:** ranking (top N) de `batches`/`products` por cantidad vendida, sumando
 `service_order_batches.quantity` agrupado por producto, en un rango de fechas.
@@ -377,21 +452,46 @@ es su vista de "ranking/top", no una fuente de datos distinta.
 
 ### C.7 — [Reporte] Servicios hechos por técnico
 
-**Definición:** reporte que agrupa el trabajo realizado por mecánico en un rango de fechas.
+**Estado:** implementado (2026-08-04). Ruta `/dashboard/reportes/servicios-por-tecnico`, menú
+"Reportes → Servicios por Técnico", carpeta
+`src/app/features/reports/mechanic-workload-report/`
+(`MechanicWorkloadReportDashboard`). La limitación de modelo de abajo **no bloqueó la
+implementación** — el documento ya aclaraba que no era un bug, solo una característica
+aceptada del modelo actual; se implementó tal cual con atribución a nivel de orden completa,
+y se avisa al usuario con un ícono de info junto al título (mismo texto que esta nota).
+
+**Definición:** reporte que agrupa el trabajo realizado por mecánico en un rango de fechas
+opcional, mostrando por mecánico: órdenes atendidas (distintas), servicios realizados (suma de
+`quantity`) e ingreso generado (suma de `subtotal`). Ordenado por servicios realizados
+descendente. Sin filtro de estado de orden — mismo criterio que A.2/C.1/C.3/C.5.
 
 **Finalidad:** medir productividad/carga de trabajo por mecánico — insumo para evaluación de
 desempeño o reparto de comisiones.
 
-**⚠️ Limitación de modelo de datos a tener en cuenta antes de implementar:** desde la
-migración v15 (`service-order-single-mechanic`), `mechanic_id` vive en `service_orders`
-(un mecánico por **orden completa**), no en `service_order_services` (un mecánico por
-**línea**). Esto significa que este reporte solo puede atribuir trabajo a nivel de orden
-completa: si una orden tiene 3 líneas de mano de obra distintas, las 3 se atribuyen al único
-mecánico de esa orden, aunque en la realidad pudieran haberlas hecho personas distintas. No es
-un bug del reporte — es una limitación del modelo actual (`[[service-order-flow]]`, regla de
-negocio #3). Si se necesita atribución por línea, habría que reintroducir `mechanic_id` en
-`service_order_services` (cambio de esquema mayor, ya descartado una vez — coordinar con
-`[[service-order-flow]]` antes de revivirlo).
+**⚠️ Limitación de modelo de datos (ya existía, se implementó respetándola, no se resolvió):**
+desde la migración v15 (`service-order-single-mechanic`), `mechanic_id` vive en
+`service_orders` (un mecánico por **orden completa**), no en `service_order_services` (un
+mecánico por **línea**). Esto significa que este reporte solo puede atribuir trabajo a nivel
+de orden completa: si una orden tiene 3 líneas de mano de obra distintas, las 3 se atribuyen al
+único mecánico de esa orden, aunque en la realidad pudieran haberlas hecho personas distintas.
+No es un bug del reporte — es una limitación del modelo actual (`[[service-order-flow]]`,
+regla de negocio #3). Si se necesita atribución por línea, habría que reintroducir
+`mechanic_id` en `service_order_services` (cambio de esquema mayor, ya descartado una vez —
+coordinar con `[[service-order-flow]]` antes de revivirlo).
+
+**Cambio de esquema:** no se requirió — se implementó respetando la limitación de arriba, no
+resolviéndola (habría sido el cambio de esquema mayor ya descartado).
+
+**Seed:** no se agregó nada nuevo — las 7 órdenes con mano de obra ya sembradas reparten sus
+líneas entre los 3 mecánicos (Roberto: OS-0001, OS-0005, OS-0007 → 3 órdenes/3 servicios; Luis:
+OS-0002 [2 líneas], OS-0004 [1 línea, y también la orden `CANCELED` OS-0008] → 3 órdenes/4
+servicios; Fernando: OS-0003, OS-0006 → 2 órdenes/2 servicios), suficiente para un ranking no
+trivial.
+
+**Capa de datos:** `SPServiceOrder.getMechanicWorkloadReport()` — método nuevo, mismo patrón
+que `getServiceFrequencyReport`/C.5 pero agrupando por `service_order.mechanic_id` (join
+anidado a 2 niveles: `service_order_services → service_orders → mechanics`) en vez de por
+`service_id`. Cuenta órdenes distintas con un `Set` de ids además de sumar `quantity`.
 
 ### C.8 — [Reporte] Órdenes de servicio y fecha de retorno
 

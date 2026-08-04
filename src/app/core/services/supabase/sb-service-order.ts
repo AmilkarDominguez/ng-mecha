@@ -11,6 +11,11 @@ import {
   ServiceOrderWithLines,
   ServiceOrderUtilityRow,
   ProductSalesReportRow,
+  IncomeCompositionTotals,
+  ServiceLineReportRow,
+  ServiceFrequencyRow,
+  MechanicWorkloadRow,
+  OrderState,
 } from '../../models/service-order.model';
 import { Vehicle } from '../../models/vehicle.model';
 
@@ -25,6 +30,29 @@ export interface ProductSalesReportFilters {
 }
 
 export interface VehicleFrequencyFilters {
+  from?: string;
+  to?: string;
+}
+
+export interface IncomeCompositionFilters {
+  from?: string;
+  to?: string;
+}
+
+export interface ServiceLineReportFilters {
+  from?: string;
+  to?: string;
+  // Estados a incluir — el reporte C.4 solo tiene sentido para
+  // COMPLETED/IN_PROGRESS, nunca CANCELED (fuera de su definicion).
+  states: Extract<OrderState, 'COMPLETED' | 'IN_PROGRESS'>[];
+}
+
+export interface ServiceFrequencyFilters {
+  from?: string;
+  to?: string;
+}
+
+export interface MechanicWorkloadFilters {
   from?: string;
   to?: string;
 }
@@ -273,6 +301,107 @@ export class SPServiceOrder {
   }
 
   /**
+   * Reporte "Servicios mas requeridos" (reports.md C.5): agrupa
+   * service_order_services por servicio en un rango de fechas (mismo
+   * patron que getProductSalesReport/A.2, pero sobre la tabla de mano de
+   * obra — no se reusa el mismo metodo porque son tablas distintas).
+   * Ordenado por cantidad descendente (ranking). Sin filtro de estado de
+   * orden, mismo criterio que A.2/C.1/C.3 (no excluyen CANCELED).
+   */
+  public getServiceFrequencyReport(filters: ServiceFrequencyFilters): Observable<ServiceFrequencyRow[]> {
+    let query = this.supabase
+      .from(this.TABLE_SERVICES)
+      .select('quantity, subtotal, service:services(id,name), service_order:service_orders!inner(started_date)');
+
+    if (filters.from) query = query.gte('service_order.started_date', filters.from);
+    if (filters.to) query = query.lte('service_order.started_date', filters.to);
+
+    return from(query).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return this.groupByService((data ?? []) as any[]);
+      }),
+    );
+  }
+
+  private groupByService(rows: any[]): ServiceFrequencyRow[] {
+    const byService = new Map<string, ServiceFrequencyRow>();
+    for (const row of rows) {
+      const serviceId = row.service?.id;
+      if (!serviceId) continue;
+      const existing = byService.get(serviceId);
+      if (existing) {
+        existing.quantity += row.quantity ?? 0;
+        existing.income += row.subtotal ?? 0;
+      } else {
+        byService.set(serviceId, {
+          service_id: serviceId,
+          service_name: row.service?.name ?? 'Sin servicio',
+          quantity: row.quantity ?? 0,
+          income: row.subtotal ?? 0,
+        });
+      }
+    }
+    return Array.from(byService.values()).sort((a, b) => b.quantity - a.quantity);
+  }
+
+  /**
+   * Reporte "Servicios hechos por tecnico" (reports.md C.7): agrupa
+   * lineas de mano de obra por el mecanico de SU ORDEN
+   * (service_orders.mechanic_id) — no hay mechanic_id por linea desde la
+   * migracion v15, ver nota en MechanicWorkloadRow. orders_count cuenta
+   * ordenes distintas (carga de trabajo real), services_count suma
+   * quantity de todas las lineas. Sin filtro de estado de orden, mismo
+   * criterio que A.2/C.1/C.3/C.5.
+   */
+  public getMechanicWorkloadReport(filters: MechanicWorkloadFilters): Observable<MechanicWorkloadRow[]> {
+    let query = this.supabase
+      .from(this.TABLE_SERVICES)
+      .select(
+        'quantity, subtotal, ' +
+        'service_order:service_orders!inner(id, started_date, mechanic:mechanics(id,name,lastname))',
+      );
+
+    if (filters.from) query = query.gte('service_order.started_date', filters.from);
+    if (filters.to) query = query.lte('service_order.started_date', filters.to);
+
+    return from(query).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return this.groupByMechanic((data ?? []) as any[]);
+      }),
+    );
+  }
+
+  private groupByMechanic(rows: any[]): MechanicWorkloadRow[] {
+    const byMechanic = new Map<string, MechanicWorkloadRow & { orderIds: Set<string> }>();
+    for (const row of rows) {
+      const order = row.service_order;
+      if (!order) continue;
+      const mechanic = order.mechanic;
+      const key = mechanic?.id ?? 'unassigned';
+      let entry = byMechanic.get(key);
+      if (!entry) {
+        entry = {
+          mechanic_id: mechanic?.id ?? null,
+          mechanic_name: mechanic ? [mechanic.name, mechanic.lastname].filter(Boolean).join(' ') : 'Sin asignar',
+          orders_count: 0,
+          services_count: 0,
+          income: 0,
+          orderIds: new Set<string>(),
+        };
+        byMechanic.set(key, entry);
+      }
+      entry.orderIds.add(order.id);
+      entry.services_count += row.quantity ?? 0;
+      entry.income += row.subtotal ?? 0;
+    }
+    return Array.from(byMechanic.values())
+      .map(({ orderIds, ...rest }) => ({ ...rest, orders_count: orderIds.size }))
+      .sort((a, b) => b.services_count - a.services_count);
+  }
+
+  /**
    * Reporte "Que tipo de vehiculo/marca/año entra mas" (reports.md C.1):
    * una fila por cada orden con vehiculo asignado en el rango de fechas
    * (started_date), con brand/model/year del vehiculo. La agrupacion por
@@ -295,6 +424,93 @@ export class SPServiceOrder {
         return (data ?? [])
           .map((row: any) => row.vehicle as Pick<Vehicle, 'brand' | 'model' | 'year'> | null)
           .filter((v): v is Pick<Vehicle, 'brand' | 'model' | 'year'> => v !== null);
+      }),
+    );
+  }
+
+  /**
+   * Reporte de Composicion de Ingresos (reports.md C.3): suma el
+   * subtotal de las 3 fuentes de ingreso de una orden (mano de obra,
+   * repuestos, servicios externos) a traves de TODAS las ordenes en el
+   * rango de fechas (started_date) — un solo agregado del sistema, no
+   * por orden ni por producto. No hay un metodo hermano con esta forma
+   * (ni A.1 ni A.2 suman las 3 fuentes por separado a este nivel), asi
+   * que se creo uno nuevo en vez de reusar/generalizar otro.
+   */
+  public getIncomeComposition(filters: IncomeCompositionFilters): Observable<IncomeCompositionTotals> {
+    let query = this.supabase
+      .from(this.TABLE)
+      .select(
+        'order_services:service_order_services(subtotal), ' +
+        'order_batches:service_order_batches(subtotal), ' +
+        'order_externals:service_order_external_services(subtotal)',
+      );
+
+    if (filters.from) query = query.gte('started_date', filters.from);
+    if (filters.to) query = query.lte('started_date', filters.to);
+
+    return from(query).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        const totals: IncomeCompositionTotals = { labor: 0, parts: 0, external: 0 };
+        for (const row of (data ?? []) as any[]) {
+          totals.labor += (row.order_services ?? []).reduce((acc: number, s: any) => acc + (s.subtotal ?? 0), 0);
+          totals.parts += (row.order_batches ?? []).reduce((acc: number, b: any) => acc + (b.subtotal ?? 0), 0);
+          totals.external += (row.order_externals ?? []).reduce((acc: number, e: any) => acc + (e.subtotal ?? 0), 0);
+        }
+        return totals;
+      }),
+    );
+  }
+
+  /**
+   * Reporte de Servicios por Estado (reports.md C.4): listado plano (sin
+   * agregar) de lineas de mano de obra cuya orden esta en alguno de los
+   * estados seleccionados (solo COMPLETED/IN_PROGRESS tienen sentido
+   * aqui — nunca CANCELED, fuera del alcance de este reporte) y cuyo
+   * started_date cae en el rango de fechas. Seguimiento operativo (carga
+   * de trabajo), no financiero — por eso no trae price/subtotal.
+   */
+  public getServiceLinesReport(filters: ServiceLineReportFilters): Observable<ServiceLineReportRow[]> {
+    let query = this.supabase
+      .from(this.TABLE_SERVICES)
+      .select(
+        'id, quantity, service:services(name), ' +
+        'service_order:service_orders!inner(id,number,state,started_date,ended_date,' +
+        'customer:customers(name,lastname), vehicle:vehicles(license_plate,brand,model), ' +
+        'mechanic:mechanics(name,lastname))',
+      )
+      .in('service_order.state', filters.states);
+
+    if (filters.from) query = query.gte('service_order.started_date', filters.from);
+    if (filters.to) query = query.lte('service_order.started_date', filters.to);
+
+    return from(query).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return ((data ?? []) as any[])
+          .map((row): ServiceLineReportRow => {
+            const order = row.service_order ?? {};
+            const customer = order.customer;
+            const vehicle = order.vehicle;
+            const mechanic = order.mechanic;
+            return {
+              id: row.id,
+              service_name: row.service?.name ?? 'Sin servicio',
+              quantity: row.quantity ?? 0,
+              order_id: order.id,
+              order_number: order.number ?? null,
+              order_state: order.state,
+              started_date: order.started_date ?? null,
+              ended_date: order.ended_date ?? null,
+              customer_name: customer ? [customer.name, customer.lastname].filter(Boolean).join(' ') : '—',
+              vehicle_label: vehicle
+                ? [vehicle.brand, vehicle.model, vehicle.license_plate].filter(Boolean).join(' ')
+                : '—',
+              mechanic_name: mechanic ? [mechanic.name, mechanic.lastname].filter(Boolean).join(' ') : '—',
+            };
+          })
+          .sort((a, b) => (b.started_date ?? '').localeCompare(a.started_date ?? ''));
       }),
     );
   }

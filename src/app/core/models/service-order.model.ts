@@ -180,3 +180,69 @@ export interface ProductSalesReportRow {
   cost: number;
   utility: number;
 }
+
+// Totales para el Reporte de Composicion de Ingresos (reports.md C.3):
+// suma de subtotal de las 3 fuentes de ingreso de una orden (mano de
+// obra, repuestos, servicios externos) a traves de TODAS las ordenes en
+// el rango de fechas — no es por orden ni por producto, es un solo
+// agregado del sistema. El componente calcula el % de cada categoria
+// sobre el total (labor + parts + external).
+export interface IncomeCompositionTotals {
+  labor: number;
+  parts: number;
+  external: number;
+}
+
+// Fila plana (una por linea de mano de obra, sin agregar) para el
+// Reporte de Servicios por Estado (reports.md C.4): seguimiento
+// operativo de que servicios se prestaron (COMPLETED) o siguen
+// pendientes (IN_PROGRESS) en un rango de fechas — nunca incluye
+// ordenes CANCELED, ese tercer estado esta fuera del alcance de este
+// reporte segun su propia definicion.
+export interface ServiceLineReportRow {
+  id: string;
+  service_name: string;
+  quantity: number;
+  order_id: string;
+  order_number: string | null;
+  order_state: OrderState;
+  started_date: string | null;
+  ended_date: string | null;
+  customer_name: string;
+  vehicle_label: string;
+  mechanic_name: string;
+}
+
+// Fila agregada para el Reporte "Servicios mas requeridos" (reports.md
+// C.5): mismo patron que ProductSalesReportRow (A.2) pero agrupando
+// service_order_services por servicio en vez de service_order_batches
+// por producto — no se reusa el mismo metodo porque son tablas
+// distintas, pero sigue la misma forma (quantity = frecuencia de uso,
+// income = subtotal sumado). Sin filtro de estado de orden, igual
+// criterio que A.2/C.1/C.3 (ninguno excluye CANCELED, solo filtran por
+// fecha) — mantenido por consistencia, no por descuido.
+export interface ServiceFrequencyRow {
+  service_id: string;
+  service_name: string;
+  quantity: number;
+  income: number;
+}
+
+// Fila agregada para el Reporte "Servicios hechos por tecnico"
+// (reports.md C.7): agrupa lineas de mano de obra por el mecanico de SU
+// ORDEN (service_orders.mechanic_id), no por linea — desde la migracion
+// v15 (service-order-single-mechanic) el mecanico es 1 por orden
+// completa, no por servicio individual, asi que si una orden tuvo 3
+// lineas de mano de obra distintas, las 3 se atribuyen al unico
+// mecanico de esa orden aunque en la realidad las hubiera hecho gente
+// distinta. No es un bug de este reporte, es una limitacion aceptada
+// del modelo (ver [[service-order-flow]] regla de negocio #3).
+// orders_count = ordenes distintas atribuidas (carga de trabajo real),
+// services_count = suma de quantity de todas sus lineas de mano de obra.
+export interface MechanicWorkloadRow {
+  mechanic_id: string | null;
+  mechanic_name: string;
+  orders_count: number;
+  services_count: number;
+  income: number;
+}

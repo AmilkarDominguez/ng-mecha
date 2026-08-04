@@ -109,6 +109,10 @@ export class NavMenu {
         { label: 'Cumpleañeros', icon: 'cake', route: '/dashboard/reportes/cumpleaneros' },
         { label: 'Lotes - Stock', icon: 'warehouse', route: '/dashboard/reportes/lotes-stock' },
         { label: 'Vehículos Frecuentes', icon: 'directions_car', route: '/dashboard/reportes/vehiculos-frecuentes' },
+        { label: 'Composición de Ingresos', icon: 'pie_chart', route: '/dashboard/reportes/composicion-ingresos' },
+        { label: 'Servicios por Estado', icon: 'assignment_turned_in', route: '/dashboard/reportes/servicios-por-estado' },
+        { label: 'Servicios Más Requeridos', icon: 'star', route: '/dashboard/reportes/servicios-mas-requeridos' },
+        { label: 'Servicios por Técnico', icon: 'engineering', route: '/dashboard/reportes/servicios-por-tecnico' },
       ],
     },
   ];

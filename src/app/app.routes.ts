@@ -149,6 +149,22 @@ export const routes: Routes = [
         path: 'reportes/vehiculos-frecuentes',
         loadComponent: () => import('./features/reports/vehicle-frequency-report/vehicle-frequency-report-dashboard').then(m => m.VehicleFrequencyReportDashboard),
       },
+      {
+        path: 'reportes/composicion-ingresos',
+        loadComponent: () => import('./features/reports/income-composition-report/income-composition-report-dashboard').then(m => m.IncomeCompositionReportDashboard),
+      },
+      {
+        path: 'reportes/servicios-por-estado',
+        loadComponent: () => import('./features/reports/service-lines-report/service-lines-report-dashboard').then(m => m.ServiceLinesReportDashboard),
+      },
+      {
+        path: 'reportes/servicios-mas-requeridos',
+        loadComponent: () => import('./features/reports/service-frequency-report/service-frequency-report-dashboard').then(m => m.ServiceFrequencyReportDashboard),
+      },
+      {
+        path: 'reportes/servicios-por-tecnico',
+        loadComponent: () => import('./features/reports/mechanic-workload-report/mechanic-workload-report-dashboard').then(m => m.MechanicWorkloadReportDashboard),
+      },
     ]
   },
   { path: '**', redirectTo: 'auth/login' }
