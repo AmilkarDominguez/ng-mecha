@@ -164,9 +164,19 @@ export interface ServiceOrderUtilityRow {
 // descendente por defecto, lo que tambien sirve como el ranking "que
 // lotes se venden mas por producto" (C.6) — ver nota de solapamiento en
 // reports.md, no se implemento un reporte C.6 separado.
+//
+// cost/utility (agregados en la misma fila, no un tipo aparte) reutilizan
+// cost_at_sale — reports.md C.2 ("¿Cuanto estoy ganando por productos?")
+// es un recorte de A.1 acotado a repuestos, con la MISMA agrupacion por
+// producto que A.2 ya calculaba; en vez de duplicar la query se extendio
+// esta fila y SPServiceOrder.getProductSalesReport() con estos 2 campos.
+// A.2 (product-sales-report-dashboard) no los muestra — solo los usa la
+// pestaña "Por Producto" del Reporte de Utilidades (C.2).
 export interface ProductSalesReportRow {
   product_id: string;
   product_name: string;
   quantity: number;
   income: number;
+  cost: number;
+  utility: number;
 }

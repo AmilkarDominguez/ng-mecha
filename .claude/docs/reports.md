@@ -306,15 +306,35 @@ reportes de este módulo.
 
 ### C.2 — [Reporte] ¿Cuánto estoy ganando por productos?
 
+**Estado:** implementado (2026-08-04), **sin ruta ni menú propios a propósito** — ver
+resolución del solapamiento abajo. Vive como la pestaña **"Por Producto"** dentro de
+`UtilityReportDashboard` (`/dashboard/reportes/utilidades`, misma ruta que A.1), junto a la
+pestaña original ahora renombrada "Por Orden".
+
 **Definición:** desglose de utilidad limitado a repuestos vendidos (`service_order_batches`):
-ingreso (`price × quantity` menos descuento) menos costo (`batches.cost × quantity`),
-agrupado por producto y/o periodo.
+ingreso (suma de `subtotal`) menos costo (`cost_at_sale`, con fallback a `batches.cost` para
+líneas anteriores a esa columna — mismo criterio que A.1), agrupado por producto, con el mismo
+filtro de fecha (`started_date`) que la pestaña "Por Orden".
 
-**Finalidad:** aislar la rentabilidad de la venta de repuestos, separada de mano de obra y
-servicios externos — es un recorte/drill-down de A.1 (Utilidades), no un reporte
-independiente desde cero si A.1 ya existe.
+**Resolución del solapamiento (era la nota explícita del documento original: "es un
+recorte/drill-down de A.1, no un reporte independiente desde cero"):** se implementó
+literalmente como eso — **no se creó una carpeta/ruta/menú nueva**. Además, en la capa de
+datos C.2 resultó ser el mismo cálculo que ya hacía A.2 (`getProductSalesReport()`, agrupar
+`service_order_batches` por producto) más costo/utilidad, así que en vez de escribir una
+tercera query se **generalizó `SPServiceOrder.getProductSalesReport()`** (agregando
+`cost_at_sale`/`batch.cost` al `select` y `cost`/`utility` a `ProductSalesReportRow`) y C.2
+simplemente la reutiliza con los mismos filtros de fecha que ya tenía la pestaña "Por Orden".
+`product-sales-report-dashboard` (A.2) no muestra las columnas nuevas — sigue enfocado en
+movimiento (cantidad/ingreso), no rentabilidad.
 
-**Riesgo de datos:** mismo problema de costo no histórico que A.1 — ver esa sección.
+**Riesgo de datos:** mismo problema de costo no histórico que A.1 — ya resuelto ahí
+(`cost_at_sale`), reutilizado aquí sin volver a decidirlo.
+
+**Cambio de esquema:** no se requirió — `cost_at_sale` ya existía desde A.1.
+
+**Seed:** no se agregó nada nuevo — reutiliza exactamente los mismos datos sembrados para
+A.1/A.2 (los mismos lotes con `cost_at_sale` variado ya dan un desglose por producto no
+trivial).
 
 ### C.3 — [Reporte] Productos, servicios de mano de obra y extras
 

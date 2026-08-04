@@ -49,6 +49,25 @@
   height: 3.5rem;
 }
 
+.utility-tabs {
+  // ::ng-deep necesario: Angular Material proyecta el contenido de cada
+  // mat-tab dentro de un CDK portal (.mat-mdc-tab-body-content), fuera
+  // del arbol donde la encapsulacion emulada de este componente aplica
+  // sus propios estilos de layout (no de tema).
+  ::ng-deep .mat-mdc-tab-body-content {
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+.tab-hint {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
 .summary-row {
   display: flex;
   align-items: baseline;

@@ -33,69 +33,134 @@
     </div>
   </form>
 
-  <div class="summary-row">
-    <div class="summary-item">
-      <span class="summary-label">Ingreso</span>
-      <span class="summary-value">Bs. {{ totalIncome() | number:'1.2-2' }}</span>
-    </div>
-    <div class="summary-item">
-      <span class="summary-label">Costo</span>
-      <span class="summary-value summary-cost">Bs. {{ totalCost() | number:'1.2-2' }}</span>
-    </div>
-    <div class="summary-item">
-      <span class="summary-label">Utilidad</span>
-      <span class="summary-value summary-utility">Bs. {{ totalUtility() | number:'1.2-2' }}</span>
-    </div>
-    <span class="result-count">{{ rows().length }} resultado(s)</span>
-  </div>
+  <mat-tab-group animationDuration="0ms" class="utility-tabs">
 
-  <div class="table-scroll">
-    <table mat-table [dataSource]="rows()" class="utility-table">
+    <mat-tab label="Por Orden">
+      <div class="summary-row">
+        <div class="summary-item">
+          <span class="summary-label">Ingreso</span>
+          <span class="summary-value">Bs. {{ totalIncome() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Costo</span>
+          <span class="summary-value summary-cost">Bs. {{ totalCost() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Utilidad</span>
+          <span class="summary-value summary-utility">Bs. {{ totalUtility() | number:'1.2-2' }}</span>
+        </div>
+        <span class="result-count">{{ rows().length }} resultado(s)</span>
+      </div>
 
-      <ng-container matColumnDef="started_date">
-        <th mat-header-cell *matHeaderCellDef>Fecha</th>
-        <td mat-cell *matCellDef="let row">{{ row.started_date | date:'dd/MM/yyyy' }}</td>
-      </ng-container>
+      <div class="table-scroll">
+        <table mat-table [dataSource]="rows()" class="utility-table">
 
-      <ng-container matColumnDef="number">
-        <th mat-header-cell *matHeaderCellDef>Orden</th>
-        <td mat-cell *matCellDef="let row">{{ row.number ?? '—' }}</td>
-      </ng-container>
+          <ng-container matColumnDef="started_date">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let row">{{ row.started_date | date:'dd/MM/yyyy' }}</td>
+          </ng-container>
 
-      <ng-container matColumnDef="customer">
-        <th mat-header-cell *matHeaderCellDef>Cliente</th>
-        <td mat-cell *matCellDef="let row">{{ customerLabel(row) }}</td>
-      </ng-container>
+          <ng-container matColumnDef="number">
+            <th mat-header-cell *matHeaderCellDef>Orden</th>
+            <td mat-cell *matCellDef="let row">{{ row.number ?? '—' }}</td>
+          </ng-container>
 
-      <ng-container matColumnDef="vehicle">
-        <th mat-header-cell *matHeaderCellDef>Vehículo</th>
-        <td mat-cell *matCellDef="let row">{{ vehicleLabel(row) }}</td>
-      </ng-container>
+          <ng-container matColumnDef="customer">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let row">{{ customerLabel(row) }}</td>
+          </ng-container>
 
-      <ng-container matColumnDef="income">
-        <th mat-header-cell *matHeaderCellDef>Ingreso</th>
-        <td mat-cell *matCellDef="let row" class="cell-amount">Bs. {{ row.income | number:'1.2-2' }}</td>
-      </ng-container>
+          <ng-container matColumnDef="vehicle">
+            <th mat-header-cell *matHeaderCellDef>Vehículo</th>
+            <td mat-cell *matCellDef="let row">{{ vehicleLabel(row) }}</td>
+          </ng-container>
 
-      <ng-container matColumnDef="cost">
-        <th mat-header-cell *matHeaderCellDef>Costo</th>
-        <td mat-cell *matCellDef="let row" class="cell-amount cell-cost">Bs. {{ row.cost | number:'1.2-2' }}</td>
-      </ng-container>
+          <ng-container matColumnDef="income">
+            <th mat-header-cell *matHeaderCellDef>Ingreso</th>
+            <td mat-cell *matCellDef="let row" class="cell-amount">Bs. {{ row.income | number:'1.2-2' }}</td>
+          </ng-container>
 
-      <ng-container matColumnDef="utility">
-        <th mat-header-cell *matHeaderCellDef>Utilidad</th>
-        <td mat-cell *matCellDef="let row" class="cell-amount cell-utility">Bs. {{ row.utility | number:'1.2-2' }}</td>
-      </ng-container>
+          <ng-container matColumnDef="cost">
+            <th mat-header-cell *matHeaderCellDef>Costo</th>
+            <td mat-cell *matCellDef="let row" class="cell-amount cell-cost">Bs. {{ row.cost | number:'1.2-2' }}</td>
+          </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="columns"></tr>
-      <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+          <ng-container matColumnDef="utility">
+            <th mat-header-cell *matHeaderCellDef>Utilidad</th>
+            <td mat-cell *matCellDef="let row" class="cell-amount cell-utility">Bs. {{ row.utility | number:'1.2-2' }}</td>
+          </ng-container>
 
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell empty-row" [attr.colspan]="columns.length">
-          Sin órdenes registradas en el rango seleccionado.
-        </td>
-      </tr>
-    </table>
-  </div>
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell empty-row" [attr.colspan]="columns.length">
+              Sin órdenes registradas en el rango seleccionado.
+            </td>
+          </tr>
+        </table>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Por Producto">
+      <span class="tab-hint">Desglose limitado a repuestos vendidos (mano de obra y servicios externos no aplican aquí).</span>
+
+      <div class="summary-row">
+        <div class="summary-item">
+          <span class="summary-label">Ingreso</span>
+          <span class="summary-value">Bs. {{ productTotalIncome() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Costo</span>
+          <span class="summary-value summary-cost">Bs. {{ productTotalCost() | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">Utilidad</span>
+          <span class="summary-value summary-utility">Bs. {{ productTotalUtility() | number:'1.2-2' }}</span>
+        </div>
+        <span class="result-count">{{ productRows().length }} producto(s)</span>
+      </div>
+
+      <div class="table-scroll">
+        <table mat-table [dataSource]="productRows()" class="utility-table">
+
+          <ng-container matColumnDef="product_name">
+            <th mat-header-cell *matHeaderCellDef>Producto</th>
+            <td mat-cell *matCellDef="let row">{{ row.product_name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+            <td mat-cell *matCellDef="let row" class="cell-amount">{{ row.quantity | number:'1.0-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="income">
+            <th mat-header-cell *matHeaderCellDef>Ingreso</th>
+            <td mat-cell *matCellDef="let row" class="cell-amount">Bs. {{ row.income | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="cost">
+            <th mat-header-cell *matHeaderCellDef>Costo</th>
+            <td mat-cell *matCellDef="let row" class="cell-amount cell-cost">Bs. {{ row.cost | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="utility">
+            <th mat-header-cell *matHeaderCellDef>Utilidad</th>
+            <td mat-cell *matCellDef="let row" class="cell-amount cell-utility">Bs. {{ row.utility | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="productColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: productColumns;"></tr>
+
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell empty-row" [attr.colspan]="productColumns.length">
+              Sin repuestos vendidos en el rango seleccionado.
+            </td>
+          </tr>
+        </table>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
 
 </div>

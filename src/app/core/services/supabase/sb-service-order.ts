@@ -216,11 +216,23 @@ export class SPServiceOrder {
    * e ingreso (subtotal). Ordenado por cantidad descendente — sirve a la
    * vez como el ranking "que lotes se venden mas" (ver nota de
    * solapamiento con C.6 en reports.md).
+   *
+   * Tambien trae cost_at_sale (+ fallback batches.cost, igual criterio
+   * que getUtilityReport/A.1) para que la misma fila sirva al Reporte de
+   * Utilidades por Producto (reports.md C.2) — es un recorte de A.1
+   * acotado a repuestos con la MISMA agrupacion por producto que ya
+   * calculaba A.2, asi que se generalizo esta query en vez de duplicarla
+   * (ver nota en ProductSalesReportRow, service-order.model.ts). A.2 no
+   * muestra cost/utility en su tabla, solo los consume la pestaña "Por
+   * Producto" de utility-report-dashboard.
    */
   public getProductSalesReport(filters: ProductSalesReportFilters): Observable<ProductSalesReportRow[]> {
     let query = this.supabase
       .from(this.TABLE_BATCHES)
-      .select('quantity, subtotal, batch:batches(product_id, product:products(id,name)), service_order:service_orders!inner(started_date)');
+      .select(
+        'quantity, subtotal, cost_at_sale, batch:batches(product_id, product:products(id,name), cost), ' +
+        'service_order:service_orders!inner(started_date)',
+      );
 
     if (filters.from) query = query.gte('service_order.started_date', filters.from);
     if (filters.to) query = query.lte('service_order.started_date', filters.to);
@@ -238,20 +250,26 @@ export class SPServiceOrder {
     for (const row of rows) {
       const productId = row.batch?.product_id;
       if (!productId) continue;
+      const lineCost = (row.cost_at_sale ?? row.batch?.cost ?? 0) * (row.quantity ?? 0);
       const existing = byProduct.get(productId);
       if (existing) {
         existing.quantity += row.quantity ?? 0;
         existing.income += row.subtotal ?? 0;
+        existing.cost += lineCost;
       } else {
         byProduct.set(productId, {
           product_id: productId,
           product_name: row.batch?.product?.name ?? 'Sin producto',
           quantity: row.quantity ?? 0,
           income: row.subtotal ?? 0,
+          cost: lineCost,
+          utility: 0,
         });
       }
     }
-    return Array.from(byProduct.values()).sort((a, b) => b.quantity - a.quantity);
+    const result = Array.from(byProduct.values());
+    for (const r of result) r.utility = r.income - r.cost;
+    return result.sort((a, b) => b.quantity - a.quantity);
   }
 
   /**
