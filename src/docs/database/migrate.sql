@@ -1923,3 +1923,18 @@ $$;
 
 REVOKE ALL ON FUNCTION convert_quote_to_order(UUID, UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION convert_quote_to_order(UUID, UUID) TO anon, authenticated;
+
+
+-- ============================================================
+-- v27 — Inventory Module: umbral de stock bajo por lote
+-- (Reporte de Lotes - Stock, reports.md A.4)
+-- ============================================================
+-- min_stock: umbral de "stock bajo" configurable POR LOTE (nullable). Se
+-- eligio una columna por lote en vez de un umbral global en
+-- workshop_settings porque distintos productos tienen niveles de
+-- reposicion muy distintos (esta misma decision aplica al widget B.2
+-- cuando se implemente). batch-table.html y batch-detail-modal.html ya
+-- tenian un indicador visual de "stock bajo" hardcodeado en < 10
+-- unidades; ese magic number ahora es el fallback cuando un lote no
+-- tiene min_stock definido, no se elimino.
+ALTER TABLE batches ADD COLUMN IF NOT EXISTS min_stock NUMERIC;

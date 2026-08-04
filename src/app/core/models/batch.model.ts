@@ -12,6 +12,7 @@ export interface Batch {
   price: number | null;
   code: string | null;
   stock: number | null;
+  min_stock: number | null;
   description: string | null;
   compatible_brands: string | null;
   compatible_models: string | null;
@@ -19,4 +20,9 @@ export interface Batch {
   state: EntityState;
   created_at?: string | Date;
   updated_at?: string | Date;
+  // Joins opcionales — presentes cuando vienen de SPBatch.get() (select con embeds)
+  product?: { name: string | null; category?: { id: string; name: string | null } | null } | null;
+  industry?: { name: string | null } | null;
+  warehouse?: { name: string | null } | null;
+  brand?: { name: string | null } | null;
 }

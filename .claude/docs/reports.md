@@ -154,27 +154,45 @@ excluye correctamente.
 
 ### A.4 — [Reporte] Lotes - Stock
 
-**Estado:** no implementado como reporte completo (existe una versión reducida planificada
-como widget de Dashboard — ver B.2).
+**Estado:** implementado (2026-08-04). Ruta `/dashboard/reportes/lotes-stock`, menú
+"Reportes → Lotes - Stock", carpeta `src/app/features/reports/stock-report/`
+(`StockReportDashboard`). El widget B.2 (Home view: Lotes en bajo stock) sigue **no
+implementado** — esta corrida solo cubrió A.4 — pero la decisión de esquema de abajo ya queda
+resuelta para cuando se implemente B.2 (reutilizar `batches.min_stock`, mismo fallback de 10).
 
-**Definición:** reporte de inventario que lista lotes con su stock actual, filtrable por
-almacén/categoría/marca/industria, con foco en identificar lotes con stock bajo o próximos a
-agotarse.
+**Definición:** reporte de inventario que lista lotes ACTIVOS con su stock **disponible**
+(`batch_available_stock`, no `batches.stock` crudo), filtrable por almacén/categoría/marca/
+industria, con un toggle "Solo stock bajo" y ordenado por stock disponible ascendente (los más
+urgentes primero) para poner el foco en identificar lotes bajos o próximos a agotarse.
 
 **Finalidad:** control de inventario — decidir qué reponer y cuándo.
 
-**Datos/entidades:** `batches.stock` — pero para reflejar el disponible **real** (descontando
-reservas activas de cotizaciones y líneas de órdenes `IN_PROGRESS`), debe usar la vista
-`batch_available_stock` / `SPBatch.getAvailableStock()`, el mismo criterio que ya usa
-`[[quotes-service-orders]]` §1/§6 (`tab-parts` de cotización) — **nunca** `batches.stock` a
-secas, o el reporte mostrará stock "disponible" que en realidad ya está comprometido.
+**Datos/entidades:** `batches` (join a `products.name` + `product_categories.name` vía
+`products.category_id`, `brands.name`, `industries.name`, `warehouses.name`) + vista
+`batch_available_stock` (`SPBatch.getAvailableStock()`) para el stock real. El join a
+categoría no existía en `SPBatch.get()` — se agregó (`product:products(name,
+category:product_categories(id,name))`), junto con `brand:brands(name)` que tampoco estaba.
+Ambos joins son adiciones no rompientes (campos opcionales nuevos en el modelo `Batch`), el
+resto de consumidores de `SPBatch.get()` (`batch-dashboard`, `tab-parts` de orden/cotización)
+sigue funcionando igual.
 
-**Riesgo de datos a decidir antes de implementar:** `batches` no tiene ninguna columna de
-"stock mínimo"/"punto de reorden" hoy. Para marcar qué lotes están en "bajo stock" hace falta
-decidir entre (a) agregar una columna `min_stock`/`reorder_point` a `batches` (cambio de
-esquema) o (b) usar un umbral fijo global configurable en `workshop_settings`
-(`[[admin-settings]]`). Esta decisión también afecta al widget B.2, que depende del mismo
-criterio.
+**Decisión de esquema tomada (resuelve el "Riesgo de datos" original):** se agregó
+`batches.min_stock NUMERIC` (nullable, **por lote**, no un umbral global en
+`workshop_settings`) — distintos productos tienen niveles de reposición muy distintos (una
+batería no se repone igual que un filtro de aceite), así que un umbral único por sistema no
+serviría. `batch-table.html` y `batch-detail-modal.html` ya tenían un indicador visual de
+"stock bajo" hardcodeado en `< 10` unidades (no documentado hasta ahora); se actualizaron para
+usar `(stock ?? 0) < (min_stock ?? 10)` — el `10` queda como **fallback** cuando el lote no
+tiene `min_stock` configurado, no se inventó un número nuevo. El campo se expuso en
+`batch-form-modal` ("Stock Mínimo", opcional) para que sea editable — sin esto el reporte
+nunca tendría datos reales que mostrar. Migración `migrate.sql` v27.
+
+**Seed:** se agregó `min_stock` a los 6 lotes ya sembrados con una mezcla deliberada de casos
+— 2 quedan en "stock bajo" por umbral explícito, 1 vía el fallback de 10 (sin `min_stock`), 3
+saludables. El lote `AC-003` (Aceite sintético) es el caso más importante: su `stock` crudo
+(30) luce saludable, pero su `available_stock` real (26, tras descontar la reserva `ACTIVE` de
+la cotización `CT-0002`) cae bajo su umbral (30) — el escenario exacto que obliga a usar
+`batch_available_stock` en vez de `batches.stock` a secas.
 
 ---
 

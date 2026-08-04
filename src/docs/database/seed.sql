@@ -116,40 +116,48 @@ ON CONFLICT (id) DO NOTHING;
 -- ============================================================
 -- 9. batches
 -- ============================================================
+-- min_stock (reports.md A.4): mezcla deliberada de casos para el Reporte
+-- de Lotes - Stock — lote 3 y 4 quedan "bajo stock" via umbral explicito,
+-- lote 6 vía el fallback de 10 unidades (min_stock NULL), lotes 1/2/5
+-- quedan saludables. El lote 3 es el caso mas importante: su `stock`
+-- crudo (30) luce saludable, pero su `available_stock` real (26, tras
+-- descontar la reserva ACTIVE de CT-0002 en la seccion 22) cae bajo su
+-- umbral de 30 — exactamente el escenario que exige usar
+-- batch_available_stock y no batches.stock a secas.
 INSERT INTO batches (
   id, product_id, warehouse_id, supplier_id, industry_id, brand_id, bank_account_id,
-  cost, price, code, stock, compatible_brands, compatible_models, expiration_date, state
+  cost, price, code, stock, min_stock, compatible_brands, compatible_models, expiration_date, state
 ) VALUES
   ('00000000-0000-0000-0008-000000000001',
    '00000000-0000-0000-0003-000000000001', '00000000-0000-0000-0007-000000000001',
    '00000000-0000-0000-0004-000000000001', '00000000-0000-0000-0005-000000000001',
    '00000000-0000-0000-0006-000000000001', '00000000-0000-0000-0009-000000000001',
-   25.00, 45.00, 'FA-001', 50, 'Toyota, Nissan', 'Corolla, Sentra', (CURRENT_DATE + INTERVAL '2 years')::date, 'ACTIVE'),
+   25.00, 45.00, 'FA-001', 50, 20, 'Toyota, Nissan', 'Corolla, Sentra', (CURRENT_DATE + INTERVAL '2 years')::date, 'ACTIVE'),
   ('00000000-0000-0000-0008-000000000002',
    '00000000-0000-0000-0003-000000000002', '00000000-0000-0000-0007-000000000001',
    '00000000-0000-0000-0004-000000000001', '00000000-0000-0000-0005-000000000001',
    '00000000-0000-0000-0006-000000000001', NULL,
-   20.00, 35.00, 'FR-002', 40, 'Toyota, Nissan', 'Corolla, Frontier', (CURRENT_DATE + INTERVAL '2 years')::date, 'ACTIVE'),
+   20.00, 35.00, 'FR-002', 40, 15, 'Toyota, Nissan', 'Corolla, Frontier', (CURRENT_DATE + INTERVAL '2 years')::date, 'ACTIVE'),
   ('00000000-0000-0000-0008-000000000003',
    '00000000-0000-0000-0003-000000000003', '00000000-0000-0000-0007-000000000001',
    '00000000-0000-0000-0004-000000000002', '00000000-0000-0000-0005-000000000001',
    '00000000-0000-0000-0006-000000000002', '00000000-0000-0000-0009-000000000001',
-   60.00, 95.00, 'AC-003', 30, 'Universal', 'Universal', (CURRENT_DATE + INTERVAL '1 year')::date, 'ACTIVE'),
+   60.00, 95.00, 'AC-003', 30, 30, 'Universal', 'Universal', (CURRENT_DATE + INTERVAL '1 year')::date, 'ACTIVE'),
   ('00000000-0000-0000-0008-000000000004',
    '00000000-0000-0000-0003-000000000004', '00000000-0000-0000-0007-000000000002',
    '00000000-0000-0000-0004-000000000003', '00000000-0000-0000-0005-000000000001',
    '00000000-0000-0000-0006-000000000003', '00000000-0000-0000-0009-000000000002',
-   90.00, 150.00, 'PF-004', 20, 'Nissan', 'Frontier', (CURRENT_DATE + INTERVAL '3 years')::date, 'ACTIVE'),
+   90.00, 150.00, 'PF-004', 20, 25, 'Nissan', 'Frontier', (CURRENT_DATE + INTERVAL '3 years')::date, 'ACTIVE'),
   ('00000000-0000-0000-0008-000000000005',
    '00000000-0000-0000-0003-000000000005', '00000000-0000-0000-0007-000000000002',
    '00000000-0000-0000-0004-000000000003', '00000000-0000-0000-0005-000000000001',
    '00000000-0000-0000-0006-000000000003', NULL,
-   110.00, 180.00, 'DF-005', 15, 'Nissan', 'Frontier', (CURRENT_DATE + INTERVAL '3 years')::date, 'ACTIVE'),
+   110.00, 180.00, 'DF-005', 15, NULL, 'Nissan', 'Frontier', (CURRENT_DATE + INTERVAL '3 years')::date, 'ACTIVE'),
   ('00000000-0000-0000-0008-000000000006',
    '00000000-0000-0000-0003-000000000006', '00000000-0000-0000-0007-000000000001',
    '00000000-0000-0000-0004-000000000001', '00000000-0000-0000-0005-000000000002',
    '00000000-0000-0000-0006-000000000004', '00000000-0000-0000-0009-000000000001',
-   250.00, 380.00, 'BAT-006', 10, 'Suzuki', 'Alto', (CURRENT_DATE + INTERVAL '18 months')::date, 'ACTIVE')
+   250.00, 380.00, 'BAT-006', 10, NULL, 'Suzuki', 'Alto', (CURRENT_DATE + INTERVAL '18 months')::date, 'ACTIVE')
 ON CONFLICT (id) DO NOTHING;
 
 

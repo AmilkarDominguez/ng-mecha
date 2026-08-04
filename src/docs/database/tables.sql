@@ -297,6 +297,16 @@ CREATE TABLE IF NOT EXISTS batches (
   updated_at      TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
 
+-- min_stock: umbral de "stock bajo" configurable POR LOTE (nullable). Se
+-- eligio una columna por lote en vez de un umbral global en
+-- workshop_settings porque distintos productos tienen niveles de
+-- reposicion muy distintos (ver reports.md A.4 — esta misma decision
+-- aplica al widget B.2 cuando se implemente). batch-table.html y
+-- batch-detail-modal.html ya tenian un indicador visual de "stock bajo"
+-- hardcodeado en < 10 unidades; ese magic number ahora es el fallback
+-- cuando un lote no tiene min_stock definido, no se elimino.
+ALTER TABLE batches ADD COLUMN IF NOT EXISTS min_stock NUMERIC;
+
 
 -- ============================================================
 -- Workshop Module

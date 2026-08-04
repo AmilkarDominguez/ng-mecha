@@ -107,6 +107,7 @@ export class NavMenu {
         { label: 'Utilidades', icon: 'trending_up', route: '/dashboard/reportes/utilidades' },
         { label: 'Productos (Lotes)', icon: 'inventory_2', route: '/dashboard/reportes/productos-lotes' },
         { label: 'Cumpleañeros', icon: 'cake', route: '/dashboard/reportes/cumpleaneros' },
+        { label: 'Lotes - Stock', icon: 'warehouse', route: '/dashboard/reportes/lotes-stock' },
       ],
     },
   ];

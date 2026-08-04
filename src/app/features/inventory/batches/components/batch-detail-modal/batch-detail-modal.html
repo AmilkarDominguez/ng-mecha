@@ -58,8 +58,14 @@
     <div class="detail-section-group">
       <div class="detail-section">
         <span class="detail-label">Stock</span>
-        <span class="detail-value" [class.stock-low]="(batch.stock ?? 0) < 10">
+        <span class="detail-value" [class.stock-low]="(batch.stock ?? 0) < (batch.min_stock ?? 10)">
           {{ batch.stock !== null ? (batch.stock | number) : '—' }}
+        </span>
+      </div>
+      <div class="detail-section">
+        <span class="detail-label">Stock Mínimo</span>
+        <span class="detail-value">
+          {{ batch.min_stock !== null ? (batch.min_stock | number) : 'Por defecto (10)' }}
         </span>
       </div>
       <div class="detail-section">

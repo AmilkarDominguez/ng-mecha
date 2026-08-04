@@ -103,6 +103,15 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-half">
+      <mat-label>Stock Mínimo (opcional)</mat-label>
+      <input matInput type="number" formControlName="min_stock" placeholder="Ej. 10" min="0" />
+      <mat-hint>Umbral para marcar el lote como "stock bajo" en reportes e inventario.</mat-hint>
+      @if (getFieldError('min_stock')) {
+        <mat-error>{{ getFieldError('min_stock') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="field-half">
       <mat-label>Vencimiento (opcional)</mat-label>
       <input matInput type="date" formControlName="expiration_date" />
     </mat-form-field>

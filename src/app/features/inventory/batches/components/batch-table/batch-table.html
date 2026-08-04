@@ -30,7 +30,7 @@
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Stock</th>
       <td mat-cell *matCellDef="let row" class="cell-number">
         @if (row.stock !== null) {
-          <span [class.stock-low]="row.stock < 10">{{ row.stock | number }}</span>
+          <span [class.stock-low]="row.stock < (row.min_stock ?? 10)">{{ row.stock | number }}</span>
         } @else {
           <span class="cell-empty">—</span>
         }
