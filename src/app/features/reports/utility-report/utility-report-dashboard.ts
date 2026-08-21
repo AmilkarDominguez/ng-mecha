@@ -10,8 +10,13 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
+import type { ChartConfiguration } from 'chart.js';
 import { ProductSalesReportRow, ServiceOrderUtilityRow } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
+import { getChartPalette } from '../../../shared/utils/chart-colors';
+
+const TOP_N = 10;
 
 @Component({
   selector: 'app-utility-report-dashboard',
@@ -27,6 +32,7 @@ import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order
     MatTabsModule,
     DecimalPipe,
     DatePipe,
+    ReportChart,
   ],
   templateUrl: './utility-report-dashboard.html',
   styleUrl: './utility-report-dashboard.scss',
@@ -58,6 +64,53 @@ export class UtilityReportDashboard implements OnInit {
   readonly productTotalIncome = computed(() => this.productRows().reduce((acc, r) => acc + r.income, 0));
   readonly productTotalCost = computed(() => this.productRows().reduce((acc, r) => acc + r.cost, 0));
   readonly productTotalUtility = computed(() => this.productRows().reduce((acc, r) => acc + r.utility, 0));
+
+  readonly summaryChartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const palette = getChartPalette();
+    return {
+      labels: ['Ingreso', 'Costo', 'Utilidad'],
+      datasets: [
+        {
+          data: [this.totalIncome(), this.totalCost(), this.totalUtility()],
+          backgroundColor: [palette.primary, palette.red, palette.green],
+        },
+      ],
+    };
+  });
+
+  readonly summaryChartOptions: ChartConfiguration<'bar'>['options'] = {
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` Bs. ${(ctx.parsed as { y: number }).y.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+      },
+    },
+  };
+
+  readonly productChartTopCount = computed(() => Math.min(TOP_N, this.productRows().length));
+
+  readonly productChartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const palette = getChartPalette();
+    const top = [...this.productRows()].sort((a, b) => b.utility - a.utility).slice(0, TOP_N);
+    return {
+      labels: top.map((r) => r.product_name),
+      datasets: [{ label: 'Utilidad (Bs.)', data: top.map((r) => r.utility), backgroundColor: palette.green }],
+    };
+  });
+
+  readonly productChartOptions: ChartConfiguration<'bar'>['options'] = {
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` Bs. ${(ctx.parsed as { x: number }).x.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+      },
+    },
+  };
 
   ngOnInit(): void {
     this.search();

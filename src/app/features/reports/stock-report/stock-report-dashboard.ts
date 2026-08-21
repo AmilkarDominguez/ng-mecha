@@ -8,12 +8,17 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTableModule } from '@angular/material/table';
+import type { ChartConfiguration } from 'chart.js';
 import { Batch } from '../../../core/models/batch.model';
 import { SPBatch } from '../../../core/services/supabase/sb-batch';
 import { SPWarehouse } from '../../../core/services/supabase/sb-warehouse';
 import { SPBrand } from '../../../core/services/supabase/sb-brand';
 import { SPIndustry } from '../../../core/services/supabase/sb-industry';
 import { SPProductCategory } from '../../../core/services/supabase/sb-product-cateogory';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
+import { getChartPalette } from '../../../shared/utils/chart-colors';
+
+const TOP_N = 10;
 
 // Umbral de "stock bajo" cuando el lote no definio min_stock — mismo
 // fallback usado en batch-table.html/batch-detail-modal.html.
@@ -60,6 +65,7 @@ const EMPTY_FILTERS: StockFilters = {
     MatIconModule,
     MatTableModule,
     DecimalPipe,
+    ReportChart,
   ],
   templateUrl: './stock-report-dashboard.html',
   styleUrl: './stock-report-dashboard.scss',
@@ -126,6 +132,32 @@ export class StockReportDashboard {
   });
 
   readonly lowStockCount = computed(() => this.rows().filter((r) => r.isLow).length);
+
+  readonly statusChartData = computed<ChartConfiguration<'doughnut'>['data']>(() => {
+    const palette = getChartPalette();
+    const low = this.lowStockCount();
+    const ok = this.rows().length - low;
+    return {
+      labels: ['Stock bajo', 'OK'],
+      datasets: [{ data: [low, ok], backgroundColor: [palette.red, palette.green] }],
+    };
+  });
+
+  readonly lowestStockChartTopCount = computed(() => Math.min(TOP_N, this.rows().length));
+
+  readonly lowestStockChartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const palette = getChartPalette();
+    const top = this.rows().slice(0, TOP_N);
+    return {
+      labels: top.map((r) => r.productName),
+      datasets: [{ label: 'Disponible', data: top.map((r) => r.availableStock), backgroundColor: palette.red }],
+    };
+  });
+
+  readonly lowestStockChartOptions: ChartConfiguration<'bar'>['options'] = {
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+  };
 
   search(): void {
     const raw = this.filterForm.getRawValue();

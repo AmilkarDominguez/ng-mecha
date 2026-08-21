@@ -1,0 +1,11 @@
+<mat-card class="trend-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar class="trend-card-icon">show_chart</mat-icon>
+    <mat-card-title>Ingresos vs. Egresos</mat-card-title>
+    <mat-card-subtitle>Últimos 30 días</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="trend-card-content">
+    <app-report-chart type="line" [data]="chartData()" [options]="chartOptions" height="16rem" />
+  </mat-card-content>
+</mat-card>

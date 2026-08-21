@@ -1,0 +1,7 @@
+@if (isEmpty()) {
+  <div class="chart-empty">Sin datos para graficar en el rango seleccionado.</div>
+} @else {
+  <div class="chart-container" [style.height]="height()">
+    <canvas baseChart [type]="type()" [data]="data()" [options]="mergedOptions()"></canvas>
+  </div>
+}

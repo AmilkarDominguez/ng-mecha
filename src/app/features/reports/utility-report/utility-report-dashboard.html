@@ -52,6 +52,11 @@
         <span class="result-count">{{ rows().length }} resultado(s)</span>
       </div>
 
+      <div class="chart-card">
+        <h2 class="chart-card-title">Ingreso vs. Costo vs. Utilidad</h2>
+        <app-report-chart type="bar" [data]="summaryChartData()" [options]="summaryChartOptions" height="16rem" />
+      </div>
+
       <div class="table-scroll">
         <table mat-table [dataSource]="rows()" class="utility-table">
 
@@ -119,6 +124,11 @@
           <span class="summary-value summary-utility">Bs. {{ productTotalUtility() | number:'1.2-2' }}</span>
         </div>
         <span class="result-count">{{ productRows().length }} producto(s)</span>
+      </div>
+
+      <div class="chart-card">
+        <h2 class="chart-card-title">Top {{ productChartTopCount() }} Productos por Utilidad</h2>
+        <app-report-chart type="bar" [data]="productChartData()" [options]="productChartOptions" height="20rem" />
       </div>
 
       <div class="table-scroll">

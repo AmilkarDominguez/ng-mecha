@@ -9,8 +9,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import type { ChartConfiguration } from 'chart.js';
 import { IncomeCompositionTotals } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
+import { getChartPalette } from '../../../shared/utils/chart-colors';
 
 interface CompositionRow {
   category: 'LABOR' | 'PARTS' | 'EXTERNAL';
@@ -33,6 +36,7 @@ const EMPTY_TOTALS: IncomeCompositionTotals = { labor: 0, parts: 0, external: 0 
     MatIconModule,
     MatTableModule,
     DecimalPipe,
+    ReportChart,
   ],
   templateUrl: './income-composition-report-dashboard.html',
   styleUrl: './income-composition-report-dashboard.scss',
@@ -67,6 +71,35 @@ export class IncomeCompositionReportDashboard implements OnInit {
       { category: 'EXTERNAL' as const, label: 'Servicios Externos', income: t.external, percentage: pct(t.external) },
     ].sort((a, b) => b.income - a.income);
   });
+
+  readonly chartData = computed<ChartConfiguration<'doughnut'>['data']>(() => {
+    const palette = getChartPalette();
+    const colorByCategory: Record<CompositionRow['category'], string> = {
+      LABOR: palette.primary,
+      PARTS: palette.purple,
+      EXTERNAL: palette.tertiary,
+    };
+    const rows = this.rows();
+    return {
+      labels: rows.map((r) => r.label),
+      datasets: [
+        {
+          data: rows.map((r) => r.income),
+          backgroundColor: rows.map((r) => colorByCategory[r.category]),
+        },
+      ],
+    };
+  });
+
+  readonly chartOptions: ChartConfiguration<'doughnut'>['options'] = {
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` Bs. ${(ctx.parsed as number).toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+      },
+    },
+  };
 
   ngOnInit(): void {
     this.search();

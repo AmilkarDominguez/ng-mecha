@@ -1,0 +1,44 @@
+<mat-card class="receivables-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar class="receivables-card-icon">payments</mat-icon>
+    <mat-card-title>Cuentas por Cobrar</mat-card-title>
+    <mat-card-subtitle class="receivables-card-subtitle">
+      Órdenes con saldo pendiente
+      <span class="receivables-badge">{{ pendingOrders().length }}</span>
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="receivables-card-content">
+    @if (pendingOrders().length === 0) {
+      <div class="receivables-empty">
+        <mat-icon class="receivables-empty-icon">check_circle</mat-icon>
+        <span>No hay saldos pendientes de cobro</span>
+      </div>
+    } @else {
+      <div class="receivables-list">
+        @for (order of pendingOrders(); track order.id) {
+          <button
+            class="receivables-item"
+            (click)="openPayments(order)"
+            [matTooltip]="'Registrar pago de la orden ' + (order.number ?? '')"
+            matTooltipPosition="right"
+          >
+            <div class="receivables-item-amount">
+              <span class="receivables-amount-number">Bs. {{ order.must! | number:'1.0-2' }}</span>
+            </div>
+            <mat-divider vertical />
+            <div class="receivables-item-info">
+              <span class="receivables-item-name">
+                {{ order.number ?? 'Sin número' }} · {{ customerLabel(order) }}
+              </span>
+              <span class="receivables-item-meta">
+                Total Bs. {{ (order.total_iva ?? order.total ?? 0) | number:'1.0-2' }} · Pagado Bs. {{ (order.have ?? 0) | number:'1.0-2' }}
+              </span>
+            </div>
+            <mat-icon class="receivables-item-arrow">chevron_right</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

@@ -10,8 +10,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import type { ChartConfiguration } from 'chart.js';
 import { Vehicle } from '../../../core/models/vehicle.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
+import { getChartPalette } from '../../../shared/utils/chart-colors';
+
+const TOP_N = 10;
 
 type VehicleDimension = 'brand' | 'model' | 'year';
 type VehicleFrequencyRow = Pick<Vehicle, 'brand' | 'model' | 'year'>;
@@ -53,6 +58,7 @@ function toTitleCase(key: string): string {
     MatIconModule,
     MatTableModule,
     DecimalPipe,
+    ReportChart,
   ],
   templateUrl: './vehicle-frequency-report-dashboard.html',
   styleUrl: './vehicle-frequency-report-dashboard.scss',
@@ -96,6 +102,22 @@ export class VehicleFrequencyReportDashboard implements OnInit {
   });
 
   readonly totalOrders = computed(() => this.rawRows().length);
+
+  readonly chartTopCount = computed(() => Math.min(TOP_N, this.rows().length));
+
+  readonly chartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const palette = getChartPalette();
+    const top = this.rows().slice(0, TOP_N);
+    return {
+      labels: top.map((r) => r.label),
+      datasets: [{ label: 'Órdenes', data: top.map((r) => r.count), backgroundColor: palette.tertiary }],
+    };
+  });
+
+  readonly chartOptions: ChartConfiguration<'bar'>['options'] = {
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+  };
 
   ngOnInit(): void {
     this.search();

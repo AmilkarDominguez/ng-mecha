@@ -9,8 +9,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import type { ChartConfiguration } from 'chart.js';
 import { ProductSalesReportRow } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
+import { getChartPalette } from '../../../shared/utils/chart-colors';
+
+const TOP_N = 10;
 
 @Component({
   selector: 'app-product-sales-report-dashboard',
@@ -24,6 +29,7 @@ import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order
     MatIconModule,
     MatTableModule,
     DecimalPipe,
+    ReportChart,
   ],
   templateUrl: './product-sales-report-dashboard.html',
   styleUrl: './product-sales-report-dashboard.scss',
@@ -44,6 +50,29 @@ export class ProductSalesReportDashboard implements OnInit {
 
   readonly totalQuantity = computed(() => this.rows().reduce((acc, r) => acc + r.quantity, 0));
   readonly totalIncome = computed(() => this.rows().reduce((acc, r) => acc + r.income, 0));
+
+  readonly chartTopCount = computed(() => Math.min(TOP_N, this.rows().length));
+
+  readonly chartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const palette = getChartPalette();
+    const top = this.rows().slice(0, TOP_N);
+    return {
+      labels: top.map((r) => r.product_name),
+      datasets: [{ label: 'Ingreso (Bs.)', data: top.map((r) => r.income), backgroundColor: palette.primary }],
+    };
+  });
+
+  readonly chartOptions: ChartConfiguration<'bar'>['options'] = {
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` Bs. ${(ctx.parsed as { x: number }).x.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+      },
+    },
+  };
 
   ngOnInit(): void {
     this.search();

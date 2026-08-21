@@ -50,6 +50,11 @@
     </div>
   </div>
 
+  <div class="chart-card chart-card-narrow">
+    <h2 class="chart-card-title">Órdenes por Estado</h2>
+    <app-report-chart type="doughnut" [data]="chartData()" height="16rem" />
+  </div>
+
   <div class="table-scroll">
     <table mat-table [dataSource]="rows()" class="service-lines-table">
 

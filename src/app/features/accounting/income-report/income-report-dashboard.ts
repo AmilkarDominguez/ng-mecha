@@ -11,9 +11,12 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { toSignal } from '@angular/core/rxjs-interop';
+import type { ChartConfiguration } from 'chart.js';
 import { BankAccountHistory } from '../../../core/models/bank-account-history.model';
 import { SPBankAccount } from '../../../core/services/supabase/sb-bank-account';
 import { SPBankAccountHistory } from '../../../core/services/supabase/sb-bank-account-history';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
+import { getChartPalette } from '../../../shared/utils/chart-colors';
 
 @Component({
   selector: 'app-income-report-dashboard',
@@ -29,6 +32,7 @@ import { SPBankAccountHistory } from '../../../core/services/supabase/sb-bank-ac
     MatTableModule,
     DecimalPipe,
     DatePipe,
+    ReportChart,
   ],
   templateUrl: './income-report-dashboard.html',
   styleUrl: './income-report-dashboard.scss',
@@ -53,6 +57,41 @@ export class IncomeReportDashboard implements OnInit {
   });
 
   readonly totalIncome = computed(() => this.rows().reduce((acc, r) => acc + (r.amount ?? 0), 0));
+
+  readonly chartData = computed<ChartConfiguration<'line'>['data']>(() => {
+    const palette = getChartPalette();
+    const totalsByDate = new Map<string, number>();
+    for (const r of this.rows()) {
+      if (!r.created_at) continue;
+      const date = new Date(r.created_at).toISOString().split('T')[0];
+      totalsByDate.set(date, (totalsByDate.get(date) ?? 0) + (r.amount ?? 0));
+    }
+    const dates = Array.from(totalsByDate.keys()).sort();
+    return {
+      labels: dates,
+      datasets: [
+        {
+          label: 'Ingreso diario (Bs.)',
+          data: dates.map((d) => totalsByDate.get(d)!),
+          borderColor: palette.primary,
+          backgroundColor: palette.primary,
+          tension: 0.3,
+          fill: false,
+        },
+      ],
+    };
+  });
+
+  readonly chartOptions: ChartConfiguration<'line'>['options'] = {
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` Bs. ${(ctx.parsed as { y: number }).y.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        },
+      },
+    },
+  };
 
   ngOnInit(): void {
     this.search();

@@ -1,0 +1,39 @@
+<mat-card class="recent-orders-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar class="recent-orders-card-icon">history</mat-icon>
+    <mat-card-title>Órdenes Recientes</mat-card-title>
+    <mat-card-subtitle>Últimos movimientos registrados</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="recent-orders-card-content">
+    @if (recentOrders().length === 0) {
+      <div class="recent-orders-empty">
+        <mat-icon class="recent-orders-empty-icon">inbox</mat-icon>
+        <span>Aún no hay órdenes de servicio registradas</span>
+      </div>
+    } @else {
+      <div class="recent-orders-list">
+        @for (order of recentOrders(); track order.id) {
+          <button
+            class="recent-orders-item"
+            (click)="openDetail(order)"
+            [matTooltip]="'Ver detalle de la orden ' + (order.number ?? '')"
+            matTooltipPosition="above"
+          >
+            <span class="recent-orders-state" [attr.data-state]="order.state">{{ stateLabel(order) }}</span>
+
+            <div class="recent-orders-item-info">
+              <span class="recent-orders-item-name">
+                {{ order.number ?? 'Sin número' }} · {{ customerLabel(order) }}
+              </span>
+              <span class="recent-orders-item-meta">{{ vehicleLabel(order) }}</span>
+            </div>
+
+            <span class="recent-orders-item-total">Bs. {{ (order.total_iva ?? order.total ?? 0) | number:'1.2-2' }}</span>
+            <mat-icon class="recent-orders-item-arrow">chevron_right</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

@@ -76,6 +76,17 @@
     </div>
   </div>
 
+  <div class="chart-row">
+    <div class="chart-card chart-card-narrow">
+      <h2 class="chart-card-title">Stock Bajo vs. OK</h2>
+      <app-report-chart type="doughnut" [data]="statusChartData()" height="16rem" />
+    </div>
+    <div class="chart-card">
+      <h2 class="chart-card-title">Top {{ lowestStockChartTopCount() }} con Menor Stock</h2>
+      <app-report-chart type="bar" [data]="lowestStockChartData()" [options]="lowestStockChartOptions" height="16rem" />
+    </div>
+  </div>
+
   <div class="table-scroll">
     <table mat-table [dataSource]="rows()" class="stock-table">
 

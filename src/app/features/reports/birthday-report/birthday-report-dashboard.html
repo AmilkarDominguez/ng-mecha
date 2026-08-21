@@ -33,6 +33,11 @@
     <span class="result-count">{{ rows().length }} resultado(s)</span>
   </div>
 
+  <div class="chart-card">
+    <h2 class="chart-card-title">Cumpleañeros por Día del Mes</h2>
+    <app-report-chart type="bar" [data]="chartData()" [options]="chartOptions" height="16rem" />
+  </div>
+
   <div class="table-scroll">
     <table mat-table [dataSource]="rows()" class="birthday-table">
 

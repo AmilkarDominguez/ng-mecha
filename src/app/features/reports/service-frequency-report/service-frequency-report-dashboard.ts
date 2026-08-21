@@ -9,8 +9,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import type { ChartConfiguration } from 'chart.js';
 import { ServiceFrequencyRow } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
+import { getChartPalette } from '../../../shared/utils/chart-colors';
+
+const TOP_N = 10;
 
 @Component({
   selector: 'app-service-frequency-report-dashboard',
@@ -24,6 +29,7 @@ import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order
     MatIconModule,
     MatTableModule,
     DecimalPipe,
+    ReportChart,
   ],
   templateUrl: './service-frequency-report-dashboard.html',
   styleUrl: './service-frequency-report-dashboard.scss',
@@ -44,6 +50,22 @@ export class ServiceFrequencyReportDashboard implements OnInit {
 
   readonly totalQuantity = computed(() => this.rows().reduce((acc, r) => acc + r.quantity, 0));
   readonly totalIncome = computed(() => this.rows().reduce((acc, r) => acc + r.income, 0));
+
+  readonly chartTopCount = computed(() => Math.min(TOP_N, this.rows().length));
+
+  readonly chartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const palette = getChartPalette();
+    const top = this.rows().slice(0, TOP_N);
+    return {
+      labels: top.map((r) => r.service_name),
+      datasets: [{ label: 'Veces Realizado', data: top.map((r) => r.quantity), backgroundColor: palette.tertiary }],
+    };
+  });
+
+  readonly chartOptions: ChartConfiguration<'bar'>['options'] = {
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+  };
 
   ngOnInit(): void {
     this.search();

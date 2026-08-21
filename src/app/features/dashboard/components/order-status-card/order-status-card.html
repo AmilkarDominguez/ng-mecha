@@ -1,0 +1,11 @@
+<mat-card class="order-status-card">
+  <mat-card-header>
+    <mat-icon mat-card-avatar class="order-status-card-icon">assignment</mat-icon>
+    <mat-card-title>Órdenes por Estado</mat-card-title>
+    <mat-card-subtitle>{{ total() }} orden(es) en total</mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content class="order-status-card-content">
+    <app-report-chart type="doughnut" [data]="chartData()" height="16rem" />
+  </mat-card-content>
+</mat-card>

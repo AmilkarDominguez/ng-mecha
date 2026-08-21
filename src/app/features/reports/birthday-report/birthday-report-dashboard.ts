@@ -8,8 +8,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import type { ChartConfiguration } from 'chart.js';
 import { SPCustomer } from '../../../core/services/supabase/sb-customer';
 import { SPMechanic } from '../../../core/services/supabase/sb-mechanic';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
+import { getChartPalette } from '../../../shared/utils/chart-colors';
 
 type BirthdayEntityType = 'CUSTOMER' | 'MECHANIC';
 
@@ -39,6 +42,7 @@ const MONTH_NAMES = [
     MatIconModule,
     MatTableModule,
     MatTooltipModule,
+    ReportChart,
   ],
   templateUrl: './birthday-report-dashboard.html',
   styleUrl: './birthday-report-dashboard.scss',
@@ -92,6 +96,24 @@ export class BirthdayReportDashboard {
   });
 
   readonly appliedMonthLabel = computed(() => MONTH_NAMES[this.appliedMonth() - 1]);
+
+  readonly chartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const palette = getChartPalette();
+    const counts = new Map<number, number>();
+    for (const r of this.rows()) {
+      counts.set(r.day, (counts.get(r.day) ?? 0) + 1);
+    }
+    const days = Array.from(counts.keys()).sort((a, b) => a - b);
+    return {
+      labels: days.map((d) => `Día ${d}`),
+      datasets: [{ label: 'Cumpleañeros', data: days.map((d) => counts.get(d)!), backgroundColor: palette.primary }],
+    };
+  });
+
+  readonly chartOptions: ChartConfiguration<'bar'>['options'] = {
+    plugins: { legend: { display: false } },
+    scales: { y: { ticks: { stepSize: 1, precision: 0 } } },
+  };
 
   search(): void {
     this.appliedMonth.set(this.filterForm.value.month ?? this.currentMonth);

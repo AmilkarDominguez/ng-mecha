@@ -10,8 +10,13 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import type { ChartConfiguration } from 'chart.js';
 import { MechanicWorkloadRow } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
+import { getChartPalette } from '../../../shared/utils/chart-colors';
+
+const TOP_N = 10;
 
 @Component({
   selector: 'app-mechanic-workload-report-dashboard',
@@ -26,6 +31,7 @@ import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order
     MatTableModule,
     MatTooltipModule,
     DecimalPipe,
+    ReportChart,
   ],
   templateUrl: './mechanic-workload-report-dashboard.html',
   styleUrl: './mechanic-workload-report-dashboard.scss',
@@ -46,6 +52,22 @@ export class MechanicWorkloadReportDashboard implements OnInit {
 
   readonly totalOrders = computed(() => this.rows().reduce((acc, r) => acc + r.orders_count, 0));
   readonly totalServices = computed(() => this.rows().reduce((acc, r) => acc + r.services_count, 0));
+
+  readonly chartTopCount = computed(() => Math.min(TOP_N, this.rows().length));
+
+  readonly chartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const palette = getChartPalette();
+    const top = this.rows().slice(0, TOP_N);
+    return {
+      labels: top.map((r) => r.mechanic_name),
+      datasets: [{ label: 'Órdenes Atendidas', data: top.map((r) => r.orders_count), backgroundColor: palette.primary }],
+    };
+  });
+
+  readonly chartOptions: ChartConfiguration<'bar'>['options'] = {
+    indexAxis: 'y',
+    plugins: { legend: { display: false } },
+  };
 
   ngOnInit(): void {
     this.search();

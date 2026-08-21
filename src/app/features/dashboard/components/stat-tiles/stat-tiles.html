@@ -1,0 +1,39 @@
+<div class="stat-tiles">
+
+  <mat-card class="stat-tile">
+    <mat-icon class="stat-tile-icon stat-tile-icon-progress">build</mat-icon>
+    <div class="stat-tile-body">
+      <span class="stat-tile-label">Órdenes en Curso</span>
+      <span class="stat-tile-value">{{ inProgressCount() }}</span>
+    </div>
+  </mat-card>
+
+  <mat-card class="stat-tile">
+    <mat-icon class="stat-tile-icon stat-tile-icon-income">trending_up</mat-icon>
+    <div class="stat-tile-body">
+      <span class="stat-tile-label">Ingreso del Mes</span>
+      <span class="stat-tile-value">Bs. {{ totalIncome() | number:'1.2-2' }}</span>
+    </div>
+  </mat-card>
+
+  <mat-card class="stat-tile">
+    <mat-icon class="stat-tile-icon stat-tile-icon-expense">trending_down</mat-icon>
+    <div class="stat-tile-body">
+      <span class="stat-tile-label">Egreso del Mes</span>
+      <span class="stat-tile-value">Bs. {{ totalExpense() | number:'1.2-2' }}</span>
+    </div>
+  </mat-card>
+
+  <mat-card class="stat-tile">
+    <mat-icon
+      class="stat-tile-icon"
+      [class.stat-tile-icon-income]="netUtility() >= 0"
+      [class.stat-tile-icon-expense]="netUtility() < 0"
+    >account_balance_wallet</mat-icon>
+    <div class="stat-tile-body">
+      <span class="stat-tile-label">Utilidad del Mes</span>
+      <span class="stat-tile-value">Bs. {{ netUtility() | number:'1.2-2' }}</span>
+    </div>
+  </mat-card>
+
+</div>

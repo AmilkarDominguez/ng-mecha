@@ -38,6 +38,11 @@
     <span class="summary-value">Bs. {{ totalIncome() | number:'1.2-2' }}</span>
   </div>
 
+  <div class="chart-card">
+    <h2 class="chart-card-title">Composición del Ingreso</h2>
+    <app-report-chart type="doughnut" [data]="chartData()" [options]="chartOptions" height="16rem" />
+  </div>
+
   <div class="table-scroll">
     <table mat-table [dataSource]="rows()" class="composition-table">
 

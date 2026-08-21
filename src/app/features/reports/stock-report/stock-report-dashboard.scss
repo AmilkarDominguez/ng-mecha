@@ -84,6 +84,35 @@
   color: var(--color-stock-low);
 }
 
+.chart-row {
+  display: flex;
+  align-items: stretch;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.chart-card {
+  display: flex;
+  flex: 1 1 24rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.chart-card-narrow {
+  flex: 1 1 16rem;
+  max-width: 20rem;
+}
+
+.chart-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
 .table-scroll {
   overflow-x: auto;
 }

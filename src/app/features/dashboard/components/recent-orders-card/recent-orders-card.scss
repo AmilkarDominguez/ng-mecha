@@ -1,0 +1,129 @@
+.recent-orders-card {
+  border-radius: 0.75rem;
+  overflow: hidden;
+
+  .recent-orders-card-icon {
+    color: var(--mat-sys-primary);
+    font-size: 1.75rem;
+    height: 1.75rem;
+    width: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.recent-orders-card-content {
+  padding: 0 0 0.5rem;
+}
+
+.recent-orders-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+
+  .recent-orders-empty-icon {
+    font-size: 2.5rem;
+    height: 2.5rem;
+    width: 2.5rem;
+    opacity: 0.4;
+  }
+}
+
+.recent-orders-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.recent-orders-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+  width: 100%;
+
+  &:hover {
+    background: var(--color-row-hover-bg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: -2px;
+  }
+}
+
+.recent-orders-state {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 0.125rem 0.625rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  // Mismos colores que .state-chip en service-order-dashboard.scss
+  &[data-state='IN_PROGRESS'] {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+
+  &[data-state='COMPLETED'] {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  &[data-state='CANCELED'] {
+    background: #ffebee;
+    color: #c62828;
+  }
+}
+
+.recent-orders-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.recent-orders-item-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-orders-item-meta {
+  font-size: 0.775rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-orders-item-total {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.recent-orders-item-arrow {
+  flex-shrink: 0;
+  color: var(--color-text-faint);
+  font-size: 1.25rem;
+  height: 1.25rem;
+  width: 1.25rem;
+}

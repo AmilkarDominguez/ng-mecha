@@ -48,6 +48,11 @@
     <span class="result-count">{{ rows().length }} {{ dimensionLabel().toLowerCase() }}(s) distinta(s)</span>
   </div>
 
+  <div class="chart-card">
+    <h2 class="chart-card-title">Top {{ chartTopCount() }} {{ dimensionLabel() }} con Más Órdenes</h2>
+    <app-report-chart type="bar" [data]="chartData()" [options]="chartOptions" height="20rem" />
+  </div>
+
   <div class="table-scroll">
     <table mat-table [dataSource]="rows()" class="vehicle-frequency-table">
 

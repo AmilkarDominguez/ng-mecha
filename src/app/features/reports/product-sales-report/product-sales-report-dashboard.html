@@ -45,6 +45,11 @@
     <span class="result-count">{{ rows().length }} producto(s)</span>
   </div>
 
+  <div class="chart-card">
+    <h2 class="chart-card-title">Top {{ chartTopCount() }} Productos por Ingreso</h2>
+    <app-report-chart type="bar" [data]="chartData()" [options]="chartOptions" height="20rem" />
+  </div>
+
   <div class="table-scroll">
     <table mat-table [dataSource]="rows()" class="product-sales-table">
 

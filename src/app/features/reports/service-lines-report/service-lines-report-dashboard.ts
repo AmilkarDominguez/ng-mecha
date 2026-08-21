@@ -10,8 +10,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import type { ChartConfiguration } from 'chart.js';
 import { ServiceLineReportRow } from '../../../core/models/service-order.model';
 import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order';
+import { ReportChart } from '../../../shared/components/report-chart/report-chart';
 
 type StateFilter = 'ALL' | 'COMPLETED' | 'IN_PROGRESS';
 
@@ -29,6 +31,7 @@ type StateFilter = 'ALL' | 'COMPLETED' | 'IN_PROGRESS';
     MatTableModule,
     DecimalPipe,
     DatePipe,
+    ReportChart,
   ],
   templateUrl: './service-lines-report-dashboard.html',
   styleUrl: './service-lines-report-dashboard.scss',
@@ -55,6 +58,24 @@ export class ServiceLinesReportDashboard implements OnInit {
   });
 
   readonly totalOrders = computed(() => new Set(this.rows().map((r) => r.order_id)).size);
+
+  readonly chartData = computed<ChartConfiguration<'doughnut'>['data']>(() => {
+    const ordersByState = new Map<string, Set<string>>();
+    for (const row of this.rows()) {
+      const set = ordersByState.get(row.order_state) ?? new Set<string>();
+      set.add(row.order_id);
+      ordersByState.set(row.order_state, set);
+    }
+    return {
+      labels: ['Completadas', 'Pendientes'],
+      datasets: [
+        {
+          data: [ordersByState.get('COMPLETED')?.size ?? 0, ordersByState.get('IN_PROGRESS')?.size ?? 0],
+          backgroundColor: ['#2e7d32', '#1565c0'],
+        },
+      ],
+    };
+  });
 
   ngOnInit(): void {
     this.search();

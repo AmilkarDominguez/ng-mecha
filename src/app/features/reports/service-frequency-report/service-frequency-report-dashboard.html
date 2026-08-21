@@ -45,6 +45,11 @@
     <span class="result-count">{{ rows().length }} servicio(s) distinto(s)</span>
   </div>
 
+  <div class="chart-card">
+    <h2 class="chart-card-title">Top {{ chartTopCount() }} Servicios Más Requeridos</h2>
+    <app-report-chart type="bar" [data]="chartData()" [options]="chartOptions" height="20rem" />
+  </div>
+
   <div class="table-scroll">
     <table mat-table [dataSource]="rows()" class="service-frequency-table">
 

@@ -77,6 +77,26 @@
   color: var(--mat-sys-primary);
 }
 
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+}
+
+.chart-card-narrow {
+  max-width: 20rem;
+}
+
+.chart-card-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
 .table-scroll {
   overflow-x: auto;
 }
