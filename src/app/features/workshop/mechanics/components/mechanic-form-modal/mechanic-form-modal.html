@@ -30,10 +30,10 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-half">
-      <mat-label>NIT</mat-label>
-      <input matInput formControlName="nit" placeholder="Ej. 7654321001" />
-      @if (getFieldError('nit')) {
-        <mat-error>{{ getFieldError('nit') }}</mat-error>
+      <mat-label>Cargo</mat-label>
+      <input matInput formControlName="cargo" placeholder="Ej. Mecánico de motor" />
+      @if (getFieldError('cargo')) {
+        <mat-error>{{ getFieldError('cargo') }}</mat-error>
       }
     </mat-form-field>
 

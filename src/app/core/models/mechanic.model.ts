@@ -6,7 +6,7 @@ export interface Mechanic {
   name: string | null;
   lastname: string | null;
   ci: string | null;
-  nit: string | null;
+  cargo: string | null;
   address: string | null;
   email: string | null;
   birthdate: string | null;

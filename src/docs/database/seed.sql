@@ -218,11 +218,11 @@ ON CONFLICT (id) DO NOTHING;
 -- (agosto) — mismo motivo que Patricia en customers: el Reporte de
 -- Cumpleanos (A.3) combina clientes Y mecanicos, algo que el widget de
 -- Dashboard (B.1) nunca hizo (solo customers).
-INSERT INTO mechanics (id, name, lastname, ci, nit, address, email, birthdate, phone, incorporated_at, retired_at, state) VALUES
-  ('00000000-0000-0000-0012-000000000001', 'Roberto', 'Choque Flores', '4123890', '4123890011', 'Zona Sarco, Cochabamba',    'roberto.choque@mecha.test', '1982-05-10', '70055566', (CURRENT_DATE - INTERVAL '3 years'), NULL, 'ACTIVE'),
-  ('00000000-0000-0000-0012-000000000002', 'Luis',    'Vargas Rios',   '5219034', '5219034011', 'Zona Queru Queru, Cochabamba', 'luis.vargas@mecha.test',  '1988-09-18', '70066677', (CURRENT_DATE - INTERVAL '2 years'), NULL, 'ACTIVE'),
-  ('00000000-0000-0000-0012-000000000003', 'Fernando','Rojas Guzman',  '6023481', '6023481011', 'Zona Tupuraya, Cochabamba', 'fernando.rojas@mecha.test',  '1991-12-04', '70077788', (CURRENT_DATE - INTERVAL '1 years'), NULL, 'ACTIVE'),
-  ('00000000-0000-0000-0012-000000000004', 'Diego',   'Salvatierra Rojas', '5432198', '5432198011', 'Zona Cala Cala, Cochabamba', 'diego.salvatierra@mecha.test', '1993-08-22', '70099910', (CURRENT_DATE - INTERVAL '6 months'), NULL, 'ACTIVE')
+INSERT INTO mechanics (id, name, lastname, ci, cargo, address, email, birthdate, phone, incorporated_at, retired_at, state) VALUES
+  ('00000000-0000-0000-0012-000000000001', 'Roberto', 'Choque Flores', '4123890', 'Mecánico de motor',             'Zona Sarco, Cochabamba',    'roberto.choque@mecha.test', '1982-05-10', '70055566', (CURRENT_DATE - INTERVAL '3 years'), NULL, 'ACTIVE'),
+  ('00000000-0000-0000-0012-000000000002', 'Luis',    'Vargas Rios',   '5219034', 'Electricista automotriz',        'Zona Queru Queru, Cochabamba', 'luis.vargas@mecha.test',  '1988-09-18', '70066677', (CURRENT_DATE - INTERVAL '2 years'), NULL, 'ACTIVE'),
+  ('00000000-0000-0000-0012-000000000003', 'Fernando','Rojas Guzman',  '6023481', 'Mecánico de suspensión y frenos','Zona Tupuraya, Cochabamba', 'fernando.rojas@mecha.test',  '1991-12-04', '70077788', (CURRENT_DATE - INTERVAL '1 years'), NULL, 'ACTIVE'),
+  ('00000000-0000-0000-0012-000000000004', 'Diego',   'Salvatierra Rojas', '5432198', 'Ayudante de taller',         'Zona Cala Cala, Cochabamba', 'diego.salvatierra@mecha.test', '1993-08-22', '70099910', (CURRENT_DATE - INTERVAL '6 months'), NULL, 'ACTIVE')
 ON CONFLICT (id) DO NOTHING;
 
 

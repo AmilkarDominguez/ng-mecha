@@ -1938,3 +1938,24 @@ GRANT EXECUTE ON FUNCTION convert_quote_to_order(UUID, UUID) TO anon, authentica
 -- unidades; ese magic number ahora es el fallback cuando un lote no
 -- tiene min_stock definido, no se elimino.
 ALTER TABLE batches ADD COLUMN IF NOT EXISTS min_stock NUMERIC;
+
+
+-- ============================================================
+-- v28 — Workshop Module: mechanics.nit -> mechanics.cargo
+-- ============================================================
+-- El NIT (numero tributario) no aplica a un empleado del taller. Se
+-- reemplaza por "cargo": texto libre con el rol/puesto del mecanico
+-- (ej. "Mecanico de motor", "Electricista automotriz"), editable desde
+-- el formulario de Mecanicos. Se RENOMBRA la columna (no se elimina y
+-- recrea) para conservar cualquier dato ya cargado.
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'mechanics' AND column_name = 'nit'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'mechanics' AND column_name = 'cargo'
+  ) THEN
+    ALTER TABLE mechanics RENAME COLUMN nit TO cargo;
+  END IF;
+END $$;

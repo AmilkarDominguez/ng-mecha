@@ -346,7 +346,7 @@ CREATE TABLE IF NOT EXISTS mechanics (
   name           TEXT,
   lastname       TEXT,
   ci             TEXT,
-  nit            TEXT,
+  cargo          TEXT,
   address        TEXT,
   email          TEXT,
   birthdate      DATE,
