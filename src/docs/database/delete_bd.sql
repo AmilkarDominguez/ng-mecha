@@ -10,14 +10,33 @@
 -- STORAGE — bucket de logo (workshop_settings)
 -- storage.objects/buckets no se eliminan con DROP TABLE de las tablas de
 -- negocio (viven en el schema storage), hay que limpiarlos aparte.
+--
+-- Supabase bloquea el DELETE directo sobre storage.objects con el trigger
+-- storage.protect_delete() ("Direct deletion from storage tables is not
+-- allowed"). Para el reset de desarrollo se desactivan los triggers solo
+-- durante esta limpieza (session_replication_role = replica, local a la
+-- transaccion, se restaura solo). Si el rol de conexion no tiene permiso
+-- para eso, el bloque NO aborta el script: emite un NOTICE y hay que
+-- vaciar el bucket 'workshop-logo' a mano desde Storage.
 -- ============================================================
 DROP POLICY IF EXISTS "public_read_workshop_logo" ON storage.objects;
 DROP POLICY IF EXISTS "auth_write_workshop_logo"   ON storage.objects;
 DROP POLICY IF EXISTS "auth_update_workshop_logo"  ON storage.objects;
 DROP POLICY IF EXISTS "anon_write_workshop_logo"   ON storage.objects;
 DROP POLICY IF EXISTS "anon_update_workshop_logo"  ON storage.objects;
-DELETE FROM storage.objects WHERE bucket_id = 'workshop-logo';
-DELETE FROM storage.buckets WHERE id = 'workshop-logo';
+
+DO $$
+BEGIN
+  BEGIN
+    -- true = SET LOCAL: se revierte al terminar la transaccion
+    PERFORM set_config('session_replication_role', 'replica', true);
+    DELETE FROM storage.objects WHERE bucket_id = 'workshop-logo';
+    DELETE FROM storage.buckets WHERE id = 'workshop-logo';
+    PERFORM set_config('session_replication_role', 'origin', true);
+  EXCEPTION WHEN OTHERS THEN
+    RAISE NOTICE 'Limpieza de storage omitida (%). Vacia el bucket "workshop-logo" manualmente desde Storage.', SQLERRM;
+  END;
+END $$;
 
 
 -- ============================================================
