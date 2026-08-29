@@ -37,10 +37,10 @@
         </div>
       }
 
-      @if (mechanic.email) {
+      @if (mechanic.salary !== null && mechanic.salary !== undefined) {
         <div class="detail-section">
-          <span class="detail-label">Correo electrónico</span>
-          <span class="detail-value">{{ mechanic.email }}</span>
+          <span class="detail-label">Salario</span>
+          <span class="detail-value">{{ mechanic.salary | currency:'BOB':'symbol-narrow':'1.2-2' }}</span>
         </div>
       }
 

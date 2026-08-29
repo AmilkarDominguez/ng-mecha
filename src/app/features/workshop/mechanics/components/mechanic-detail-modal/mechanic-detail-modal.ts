@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +11,7 @@ import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialo
 @Component({
   selector: 'app-mechanic-detail-modal',
   imports: [
+    CurrencyPipe,
     DatePipe,
     DialogFrame,
     MatButtonModule,

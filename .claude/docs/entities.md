@@ -331,7 +331,7 @@
 | ci               | String        | nullable             |
 | position         | String        | nullable — cargo / rol dentro del taller (texto libre) |
 | address          | LocalDate     | nullable             |
-| email            | LocalDate     | nullable             |
+| salary           | BigDecimal(10,2) | nullable — salario del mecánico |
 | birthdate        | LocalDate     | nullable             |
 | phone            | String        | nullable             |
 | incorporated_at  | LocalDateTime | nullable             |

@@ -8,7 +8,7 @@ export interface Mechanic {
   ci: string | null;
   position: string | null;
   address: string | null;
-  email: string | null;
+  salary: number | null;
   birthdate: string | null;
   phone: string | null;
   incorporated_at: string | null;

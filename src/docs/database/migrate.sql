@@ -1959,3 +1959,16 @@ DO $$ BEGIN
     ALTER TABLE mechanics RENAME COLUMN nit TO position;
   END IF;
 END $$;
+
+
+-- ============================================================
+-- v29 — Workshop Module: mechanics.email -> mechanics.salary
+-- ============================================================
+-- El correo del mecanico no se usaba en ningun flujo (no habia envio de
+-- notificaciones ni login por mecanico). Se reemplaza por "salary":
+-- salario mensual del mecanico, NUMERIC(10,2), nullable, editable desde
+-- el formulario de Mecanicos. No es una conversion de tipo compatible
+-- (TEXT de emails -> NUMERIC), asi que se elimina la columna y se crea
+-- la nueva; cualquier dato de correo previo se pierde a proposito.
+ALTER TABLE mechanics DROP COLUMN IF EXISTS email;
+ALTER TABLE mechanics ADD COLUMN IF NOT EXISTS salary NUMERIC(10,2);

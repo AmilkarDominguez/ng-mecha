@@ -28,10 +28,10 @@
       <td mat-cell *matCellDef="let row">{{ row.phone ?? '—' }}</td>
     </ng-container>
 
-    <!-- Column: email -->
-    <ng-container matColumnDef="email">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Correo</th>
-      <td mat-cell *matCellDef="let row" class="cell-email">{{ row.email ?? '—' }}</td>
+    <!-- Column: position -->
+    <ng-container matColumnDef="position">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Cargo</th>
+      <td mat-cell *matCellDef="let row" class="cell-position">{{ row.position ?? '—' }}</td>
     </ng-container>
 
     <!-- Column: incorporated_at -->

@@ -348,7 +348,7 @@ CREATE TABLE IF NOT EXISTS mechanics (
   ci             TEXT,
   position       TEXT,
   address        TEXT,
-  email          TEXT,
+  salary         NUMERIC(10,2),
   birthdate      DATE,
   phone          TEXT,
   incorporated_at TIMESTAMPTZ,

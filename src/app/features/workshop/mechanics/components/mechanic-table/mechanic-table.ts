@@ -31,7 +31,7 @@ export class MechanicTable implements AfterViewInit {
   view = output<Mechanic>();
   delete = output<Mechanic>();
 
-  readonly displayedColumns = ['fullName', 'ci', 'phone', 'email', 'incorporated_at', 'state', 'actions'];
+  readonly displayedColumns = ['fullName', 'ci', 'phone', 'position', 'incorporated_at', 'state', 'actions'];
 
   dataSource = new MatTableDataSource<Mechanic>([]);
 
@@ -53,7 +53,7 @@ export class MechanicTable implements AfterViewInit {
         case 'fullName': return `${item.name ?? ''} ${item.lastname ?? ''}`.toLowerCase();
         case 'ci': return (item.ci ?? '').toLowerCase();
         case 'phone': return (item.phone ?? '').toLowerCase();
-        case 'email': return (item.email ?? '').toLowerCase();
+        case 'position': return (item.position ?? '').toLowerCase();
         case 'incorporated_at': return item.incorporated_at ?? '';
         case 'state': return item.state;
         default: return '';

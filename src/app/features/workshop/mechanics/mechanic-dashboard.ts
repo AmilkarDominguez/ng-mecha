@@ -44,7 +44,7 @@ export class MechanicDashboard {
         (m.name ?? '').toLowerCase().includes(term) ||
         (m.lastname ?? '').toLowerCase().includes(term) ||
         (m.ci ?? '').toLowerCase().includes(term) ||
-        (m.email ?? '').toLowerCase().includes(term) ||
+        (m.position ?? '').toLowerCase().includes(term) ||
         (m.phone ?? '').toLowerCase().includes(term),
     );
   });

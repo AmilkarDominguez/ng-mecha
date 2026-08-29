@@ -47,7 +47,7 @@ export class MechanicFormModal implements OnInit {
     ci: ['', [Validators.maxLength(20)]],
     position: ['', [Validators.maxLength(100)]],
     phone: ['', [Validators.maxLength(20)]],
-    email: ['', [Validators.email, Validators.maxLength(150)]],
+    salary: [null as number | null, [Validators.min(0)]],
     birthdate: [null as Date | null],
     incorporated_at: [null as Date | null],
     retired_at: [null as Date | null],
@@ -77,7 +77,7 @@ export class MechanicFormModal implements OnInit {
         ci: m.ci ?? '',
         position: m.position ?? '',
         phone: m.phone ?? '',
-        email: m.email ?? '',
+        salary: m.salary ?? null,
         birthdate: m.birthdate ? new Date(m.birthdate) : null,
         incorporated_at: m.incorporated_at ? new Date(m.incorporated_at) : null,
         retired_at: m.retired_at ? new Date(m.retired_at) : null,
@@ -116,7 +116,7 @@ export class MechanicFormModal implements OnInit {
       ci: raw.ci || null,
       position: raw.position || null,
       phone: raw.phone || null,
-      email: raw.email || null,
+      salary: raw.salary !== null && raw.salary !== undefined ? Number(raw.salary) : null,
       birthdate: raw.birthdate ? this.toIsoDate(raw.birthdate) : null,
       incorporated_at: raw.incorporated_at ? this.toIsoDate(raw.incorporated_at) : null,
       retired_at: raw.retired_at ? this.toIsoDate(raw.retired_at) : null,
@@ -138,7 +138,7 @@ export class MechanicFormModal implements OnInit {
     const control = this.form.get(field);
     if (!control?.errors || !control.touched) return '';
     if (control.errors['required']) return 'Este campo es obligatorio';
-    if (control.errors['email']) return 'Correo electrónico inválido';
+    if (control.errors['min']) return `El valor mínimo es ${control.errors['min'].min}`;
     if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
     return 'Campo inválido';
   }
