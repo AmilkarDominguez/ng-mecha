@@ -8,7 +8,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -50,7 +49,6 @@ function addDays(date: Date, days: number): Date {
     MatInputModule,
     MatRadioModule,
     MatDatepickerModule,
-    MatNativeDateModule,
     MatDividerModule,
     MatProgressSpinnerModule,
     DecimalPipe,

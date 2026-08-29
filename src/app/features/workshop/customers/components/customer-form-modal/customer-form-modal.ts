@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -23,6 +24,7 @@ export interface CustomerFormData {
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
     MatSelectModule,
     MatButtonModule,
     MatSlideToggleModule,
@@ -53,7 +55,7 @@ export class CustomerFormModal implements OnInit {
     ci: ['', [Validators.maxLength(20)]],
     nit: ['', [Validators.maxLength(20)]],
     phone: ['', [Validators.maxLength(20)]],
-    birthdate: [''],
+    birthdate: [null as Date | null],
     address: ['', [Validators.maxLength(300)]],
     rating: [null as CustomerRating | null],
     active: [true],
@@ -81,7 +83,7 @@ export class CustomerFormModal implements OnInit {
         ci: c.ci ?? '',
         nit: c.nit ?? '',
         phone: c.phone ?? '',
-        birthdate: c.birthdate ?? '',
+        birthdate: c.birthdate ? new Date(c.birthdate) : null,
         address: c.address ?? '',
         rating: c.rating ?? null,
         active: c.state === 'ACTIVE',
@@ -118,7 +120,7 @@ export class CustomerFormModal implements OnInit {
       ci: raw.ci || null,
       nit: raw.nit || null,
       phone: raw.phone || null,
-      birthdate: raw.birthdate || null,
+      birthdate: raw.birthdate ? this.toIsoDate(raw.birthdate) : null,
       address: raw.address || null,
       rating: raw.rating || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
@@ -128,6 +130,10 @@ export class CustomerFormModal implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close(null);
+  }
+
+  private toIsoDate(d: Date): string {
+    return d.toISOString().split('T')[0];
   }
 
   getFieldError(field: string): string {

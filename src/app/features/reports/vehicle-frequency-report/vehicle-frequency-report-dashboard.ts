@@ -7,7 +7,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import type { ChartConfiguration } from 'chart.js';
@@ -51,7 +50,6 @@ function toTitleCase(key: string): string {
     ReactiveFormsModule,
     MatFormFieldModule,
     MatDatepickerModule,
-    MatNativeDateModule,
     MatInputModule,
     MatButtonModule,
     MatButtonToggleModule,

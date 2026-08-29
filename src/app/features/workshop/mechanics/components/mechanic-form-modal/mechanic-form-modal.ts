@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -22,6 +23,7 @@ export interface MechanicFormData {
     DialogFrame,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
     MatButtonModule,
     MatSlideToggleModule,
     MatIconModule,
@@ -46,9 +48,9 @@ export class MechanicFormModal implements OnInit {
     nit: ['', [Validators.maxLength(20)]],
     phone: ['', [Validators.maxLength(20)]],
     email: ['', [Validators.email, Validators.maxLength(150)]],
-    birthdate: [''],
-    incorporated_at: [''],
-    retired_at: [''],
+    birthdate: [null as Date | null],
+    incorporated_at: [null as Date | null],
+    retired_at: [null as Date | null],
     address: ['', [Validators.maxLength(300)]],
     active: [true],
     contacts: this.fb.group({
@@ -76,9 +78,9 @@ export class MechanicFormModal implements OnInit {
         nit: m.nit ?? '',
         phone: m.phone ?? '',
         email: m.email ?? '',
-        birthdate: m.birthdate ?? '',
-        incorporated_at: m.incorporated_at ?? '',
-        retired_at: m.retired_at ?? '',
+        birthdate: m.birthdate ? new Date(m.birthdate) : null,
+        incorporated_at: m.incorporated_at ? new Date(m.incorporated_at) : null,
+        retired_at: m.retired_at ? new Date(m.retired_at) : null,
         address: m.address ?? '',
         active: m.state === 'ACTIVE',
         contacts: {
@@ -115,9 +117,9 @@ export class MechanicFormModal implements OnInit {
       nit: raw.nit || null,
       phone: raw.phone || null,
       email: raw.email || null,
-      birthdate: raw.birthdate || null,
-      incorporated_at: raw.incorporated_at || null,
-      retired_at: raw.retired_at || null,
+      birthdate: raw.birthdate ? this.toIsoDate(raw.birthdate) : null,
+      incorporated_at: raw.incorporated_at ? this.toIsoDate(raw.incorporated_at) : null,
+      retired_at: raw.retired_at ? this.toIsoDate(raw.retired_at) : null,
       address: raw.address || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
       contacts,
@@ -126,6 +128,10 @@ export class MechanicFormModal implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close(null);
+  }
+
+  private toIsoDate(d: Date): string {
+    return d.toISOString().split('T')[0];
   }
 
   getFieldError(field: string): string {

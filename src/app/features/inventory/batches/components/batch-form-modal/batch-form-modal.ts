@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -34,6 +35,7 @@ export interface BatchFormData {
     DialogFrame,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
     MatButtonModule,
     MatSelectModule,
     MatSlideToggleModule,
@@ -71,7 +73,7 @@ export class BatchFormModal implements OnInit {
     description: [null as string | null, [Validators.maxLength(500)]],
     compatible_brands: [null as string | null, [Validators.maxLength(100)]],
     compatible_models: [null as string | null, [Validators.maxLength(100)]],
-    expiration_date: [null as string | Date | null],
+    expiration_date: [null as Date | null],
     active: [true],
   });
 
@@ -93,7 +95,7 @@ export class BatchFormModal implements OnInit {
         description: batch.description,
         compatible_brands: batch.compatible_brands,
         compatible_models: batch.compatible_models,
-        expiration_date: batch.expiration_date ?? null,
+        expiration_date: batch.expiration_date ? new Date(batch.expiration_date) : null,
         active: batch.state === 'ACTIVE',
       });
     }
@@ -134,13 +136,17 @@ export class BatchFormModal implements OnInit {
       description: raw.description || null,
       compatible_brands: raw.compatible_brands || null,
       compatible_models: raw.compatible_models || null,
-      expiration_date: raw.expiration_date || null,
+      expiration_date: raw.expiration_date ? this.toIsoDate(raw.expiration_date) : null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }
 
   onCancel(): void {
     this.dialogRef.close(null);
+  }
+
+  private toIsoDate(d: Date): string {
+    return d.toISOString().split('T')[0];
   }
 
   getFieldError(field: string): string {

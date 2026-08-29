@@ -6,7 +6,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -24,7 +23,6 @@ const TOP_N = 10;
     ReactiveFormsModule,
     MatFormFieldModule,
     MatDatepickerModule,
-    MatNativeDateModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,

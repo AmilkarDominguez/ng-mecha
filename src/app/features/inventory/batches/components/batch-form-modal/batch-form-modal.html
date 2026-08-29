@@ -113,7 +113,9 @@
 
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Vencimiento (opcional)</mat-label>
-      <input matInput type="date" formControlName="expiration_date" />
+      <input matInput [matDatepicker]="expirationPicker" formControlName="expiration_date" />
+      <mat-datepicker-toggle matSuffix [for]="expirationPicker" />
+      <mat-datepicker #expirationPicker />
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-full">

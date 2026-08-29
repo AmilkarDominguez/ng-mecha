@@ -6,7 +6,6 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import type { ChartConfiguration } from 'chart.js';
@@ -30,7 +29,6 @@ const EMPTY_TOTALS: IncomeCompositionTotals = { labor: 0, parts: 0, external: 0 
     ReactiveFormsModule,
     MatFormFieldModule,
     MatDatepickerModule,
-    MatNativeDateModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,

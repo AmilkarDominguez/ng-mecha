@@ -44,7 +44,7 @@
           <td class="header-label">Placa:</td>
           <td class="header-value">{{ d.vehicle?.license_plate ?? '—' }}</td>
           <td class="header-label">Fecha Ing:</td>
-          <td class="header-value">{{ d.started_date | date:'d/M/yyyy' }}</td>
+          <td class="header-value">{{ d.started_date | date:'dd/MM/yyyy' }}</td>
           <td class="logo-cell" rowspan="2">
             @if ((!settings() || settings()?.show_in_print) && settings()?.logo_url) {
               <div class="company-logo">
@@ -59,7 +59,7 @@
           <td class="header-label">Kilometraje:</td>
           <td class="header-value">{{ d.mileage ?? '—' }}</td>
           <td class="header-label">Fecha Entrega:</td>
-          <td class="header-value">{{ d.return_date | date:'d/M/yyyy' }}</td>
+          <td class="header-value">{{ d.return_date | date:'dd/MM/yyyy' }}</td>
         </tr>
       </tbody>
     </table>

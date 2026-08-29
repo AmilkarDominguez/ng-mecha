@@ -55,7 +55,9 @@
 
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Fecha de nacimiento</mat-label>
-      <input matInput formControlName="birthdate" type="date" />
+      <input matInput [matDatepicker]="birthdatePicker" formControlName="birthdate" />
+      <mat-datepicker-toggle matSuffix [for]="birthdatePicker" />
+      <mat-datepicker #birthdatePicker />
       @if (getFieldError('birthdate')) {
         <mat-error>{{ getFieldError('birthdate') }}</mat-error>
       }
@@ -63,7 +65,9 @@
 
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Fecha de incorporación</mat-label>
-      <input matInput formControlName="incorporated_at" type="date" />
+      <input matInput [matDatepicker]="incorporatedAtPicker" formControlName="incorporated_at" />
+      <mat-datepicker-toggle matSuffix [for]="incorporatedAtPicker" />
+      <mat-datepicker #incorporatedAtPicker />
       @if (getFieldError('incorporated_at')) {
         <mat-error>{{ getFieldError('incorporated_at') }}</mat-error>
       }
@@ -71,7 +75,9 @@
 
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Fecha de retiro</mat-label>
-      <input matInput formControlName="retired_at" type="date" />
+      <input matInput [matDatepicker]="retiredAtPicker" formControlName="retired_at" />
+      <mat-datepicker-toggle matSuffix [for]="retiredAtPicker" />
+      <mat-datepicker #retiredAtPicker />
       @if (getFieldError('retired_at')) {
         <mat-error>{{ getFieldError('retired_at') }}</mat-error>
       }
