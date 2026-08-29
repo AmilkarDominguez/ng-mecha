@@ -480,7 +480,6 @@ export class ServiceOrderForm implements OnInit {
       subtotal:         l.subtotal,
       cost_at_sale:     l.cost_at_sale,
       product_name:     l.batch?.product?.name ?? '',
-      industry_name:    l.batch?.industry?.name ?? '',
     };
   }
 

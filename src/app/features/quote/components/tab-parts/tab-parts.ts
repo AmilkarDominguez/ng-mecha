@@ -16,13 +16,11 @@ import { SPBatch } from '../../../../core/services/supabase/sb-batch';
 import { SPProduct } from '../../../../core/services/supabase/sb-product';
 import { SPWarehouse } from '../../../../core/services/supabase/sb-warehouse';
 import { SPSupplier } from '../../../../core/services/supabase/sb-supplier';
-import { SPIndustry } from '../../../../core/services/supabase/sb-industry';
 import { SPBrand } from '../../../../core/services/supabase/sb-brand';
 import { BatchFormModal } from '../../../inventory/batches/components/batch-form-modal/batch-form-modal';
 
 interface BatchWithRelations extends Batch {
   product?: { name: string } | null;
-  industry?: { name: string } | null;
   warehouse?: { name: string } | null;
 }
 
@@ -46,7 +44,6 @@ export class QuoteTabParts {
   private productService = inject(SPProduct);
   private warehouseService = inject(SPWarehouse);
   private supplierService = inject(SPSupplier);
-  private industryService = inject(SPIndustry);
   private brandService = inject(SPBrand);
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
@@ -58,7 +55,6 @@ export class QuoteTabParts {
   private readonly allProducts = toSignal(this.productService.get(), { initialValue: [] });
   private readonly allWarehouses = toSignal(this.warehouseService.get(), { initialValue: [] });
   private readonly allSuppliers = toSignal(this.supplierService.get(), { initialValue: [] });
-  private readonly allIndustries = toSignal(this.industryService.get(), { initialValue: [] });
   private readonly allBrands = toSignal(this.brandService.get(), { initialValue: [] });
 
   readonly manualMode = signal(false);
@@ -139,7 +135,6 @@ export class QuoteTabParts {
         products: this.allProducts(),
         warehouses: this.allWarehouses(),
         suppliers: this.allSuppliers(),
-        industries: this.allIndustries(),
         brands: this.allBrands(),
       },
     });
@@ -150,12 +145,10 @@ export class QuoteTabParts {
           const newBatch = saved?.[0];
           if (!newBatch) return;
           const product = this.allProducts().find((p) => p.id === newBatch.product_id);
-          const industry = this.allIndustries().find((i) => i.id === newBatch.industry_id);
           const warehouse = this.allWarehouses().find((w) => w.id === newBatch.warehouse_id);
           this.selectBatch({
             ...newBatch,
             product: product ? { name: product.name ?? '' } : null,
-            industry: industry ? { name: industry.name ?? '' } : null,
             warehouse: warehouse ? { name: warehouse.name ?? '' } : null,
           });
         },
@@ -194,7 +187,6 @@ export class QuoteTabParts {
       discount: 0,
       subtotal: price * quantity,
       product_name: batch.product?.name ?? batch.description ?? batch.id,
-      industry_name: batch.industry?.name ?? '—',
     });
 
     this.clearSelection();
@@ -222,7 +214,6 @@ export class QuoteTabParts {
       discount: 0,
       subtotal: price * quantity,
       product_name: description,
-      industry_name: 'Por pedir',
     });
 
     this.clearSelection();

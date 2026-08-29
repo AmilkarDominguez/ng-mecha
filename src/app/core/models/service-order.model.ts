@@ -81,7 +81,6 @@ export interface ServiceOrderServiceRow extends ServiceOrderService {
 
 export interface ServiceOrderBatchRow extends ServiceOrderBatch {
   product_name: string;
-  industry_name: string;
 }
 
 export interface ServiceOrderExternalServiceRow extends ServiceOrderExternalService {
@@ -113,7 +112,6 @@ export interface OrderBatchLine {
   batch: {
     description: string | null;
     product: { name: string | null } | null;
-    industry: { name: string | null } | null;
   } | null;
   quote: { number: string | null } | null;
 }

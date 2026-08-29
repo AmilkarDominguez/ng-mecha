@@ -13,7 +13,6 @@ import { Batch } from '../../../core/models/batch.model';
 import { SPBatch } from '../../../core/services/supabase/sb-batch';
 import { SPWarehouse } from '../../../core/services/supabase/sb-warehouse';
 import { SPBrand } from '../../../core/services/supabase/sb-brand';
-import { SPIndustry } from '../../../core/services/supabase/sb-industry';
 import { SPProductCategory } from '../../../core/services/supabase/sb-product-cateogory';
 import { ReportChart } from '../../../shared/components/report-chart/report-chart';
 import { getChartPalette } from '../../../shared/utils/chart-colors';
@@ -30,7 +29,6 @@ interface StockReportRow {
   productName: string;
   categoryName: string;
   brandName: string;
-  industryName: string;
   warehouseName: string;
   stock: number;
   availableStock: number;
@@ -42,7 +40,6 @@ interface StockFilters {
   warehouseId: string | null;
   categoryId: string | null;
   brandId: string | null;
-  industryId: string | null;
   lowStockOnly: boolean;
 }
 
@@ -50,7 +47,6 @@ const EMPTY_FILTERS: StockFilters = {
   warehouseId: null,
   categoryId: null,
   brandId: null,
-  industryId: null,
   lowStockOnly: false,
 };
 
@@ -80,21 +76,18 @@ export class StockReportDashboard {
 
   private readonly warehouses = toSignal(inject(SPWarehouse).listen(), { initialValue: [] });
   private readonly brands = toSignal(inject(SPBrand).listen(), { initialValue: [] });
-  private readonly industries = toSignal(inject(SPIndustry).listen(), { initialValue: [] });
   private readonly categories = toSignal(inject(SPProductCategory).listen(), { initialValue: [] });
 
   readonly activeWarehouses = computed(() => this.warehouses().filter((w) => w.state === 'ACTIVE'));
   readonly activeBrands = computed(() => this.brands().filter((b) => b.state === 'ACTIVE'));
-  readonly activeIndustries = computed(() => this.industries().filter((i) => i.state === 'ACTIVE'));
   readonly activeCategories = computed(() => this.categories().filter((c) => c.state === 'ACTIVE'));
 
-  readonly columns = ['product', 'category', 'brand', 'industry', 'warehouse', 'stock', 'min_stock', 'status'];
+  readonly columns = ['product', 'category', 'brand', 'warehouse', 'stock', 'min_stock', 'status'];
 
   readonly filterForm = new FormGroup({
     warehouse_id: new FormControl<string | null>(null),
     category_id: new FormControl<string | null>(null),
     brand_id: new FormControl<string | null>(null),
-    industry_id: new FormControl<string | null>(null),
     low_stock_only: new FormControl<boolean>(false, { nonNullable: true }),
   });
 
@@ -109,7 +102,6 @@ export class StockReportDashboard {
       .filter((b) => !filters.warehouseId || b.warehouse_id === filters.warehouseId)
       .filter((b) => !filters.categoryId || b.product?.category?.id === filters.categoryId)
       .filter((b) => !filters.brandId || b.brand_id === filters.brandId)
-      .filter((b) => !filters.industryId || b.industry_id === filters.industryId)
       .map((b): StockReportRow => {
         const minStock = b.min_stock ?? DEFAULT_MIN_STOCK;
         const available = availableMap[b.id] ?? b.stock ?? 0;
@@ -119,7 +111,6 @@ export class StockReportDashboard {
           productName: b.product?.name ?? '—',
           categoryName: b.product?.category?.name ?? '—',
           brandName: b.brand?.name ?? '—',
-          industryName: b.industry?.name ?? '—',
           warehouseName: b.warehouse?.name ?? '—',
           stock: b.stock ?? 0,
           availableStock: available,
@@ -165,7 +156,6 @@ export class StockReportDashboard {
       warehouseId: raw.warehouse_id,
       categoryId: raw.category_id,
       brandId: raw.brand_id,
-      industryId: raw.industry_id,
       lowStockOnly: raw.low_stock_only,
     });
   }
@@ -175,7 +165,6 @@ export class StockReportDashboard {
       warehouse_id: null,
       category_id: null,
       brand_id: null,
-      industry_id: null,
       low_stock_only: false,
     });
     this.appliedFilters.set(EMPTY_FILTERS);

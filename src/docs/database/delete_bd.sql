@@ -69,7 +69,6 @@ DROP TABLE IF EXISTS products              CASCADE;
 DROP TABLE IF EXISTS customers             CASCADE;
 DROP TABLE IF EXISTS warehouses            CASCADE;
 DROP TABLE IF EXISTS suppliers             CASCADE;
-DROP TABLE IF EXISTS industries            CASCADE;
 DROP TABLE IF EXISTS brands                CASCADE;
 DROP TABLE IF EXISTS product_presentations CASCADE;
 DROP TABLE IF EXISTS product_categories    CASCADE;

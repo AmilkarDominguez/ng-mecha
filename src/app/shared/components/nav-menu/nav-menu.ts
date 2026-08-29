@@ -58,7 +58,6 @@ export class NavMenu {
         { label: 'Productos', icon: 'inventory', route: '/dashboard/inventario/productos' },
         { label: 'Almacenes', icon: 'warehouse', route: '/dashboard/inventario/almacenes' },
         { label: 'Marcas', icon: 'branding_watermark', route: '/dashboard/inventario/marcas' },
-        { label: 'Industrias', icon: 'factory', route: '/dashboard/inventario/industrias' },
         { label: 'Proveedores', icon: 'storefront', route: '/dashboard/compras/proveedores' },
         { label: 'Lotes', icon: 'add_box', route: '/dashboard/inventario/lotes' },
       ],

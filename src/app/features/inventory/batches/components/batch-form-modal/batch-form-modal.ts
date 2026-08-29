@@ -15,7 +15,6 @@ import { Batch } from '../../../../../core/models/batch.model';
 import { Product } from '../../../../../core/models/product.model';
 import { Warehouse } from '../../../../../core/models/warehouse.model';
 import { Supplier } from '../../../../../core/models/supplier.model';
-import { Industry } from '../../../../../core/models/industry.model';
 import { Brand } from '../../../../../core/models/brand.model';
 import { SPBankAccount } from '../../../../../core/services/supabase/sb-bank-account';
 
@@ -24,7 +23,6 @@ export interface BatchFormData {
   products: Product[];
   warehouses: Warehouse[];
   suppliers: Supplier[];
-  industries: Industry[];
   brands: Brand[];
 }
 
@@ -62,8 +60,7 @@ export class BatchFormModal implements OnInit {
     product_id: ['', [Validators.required]],
     warehouse_id: ['', [Validators.required]],
     supplier_id: ['', [Validators.required]],
-    industry_id: ['', [Validators.required]],
-    brand_id: [null as string | null],
+    brand_id: ['', [Validators.required]],
     bank_account_id: [null as string | null],
     code: [null as string | null, [Validators.maxLength(80)]],
     stock: [null as number | null, [Validators.min(0)]],
@@ -84,7 +81,6 @@ export class BatchFormModal implements OnInit {
         product_id: batch.product_id,
         warehouse_id: batch.warehouse_id,
         supplier_id: batch.supplier_id,
-        industry_id: batch.industry_id,
         brand_id: batch.brand_id,
         bank_account_id: batch.bank_account_id ?? null,
         code: batch.code,
@@ -125,8 +121,7 @@ export class BatchFormModal implements OnInit {
       product_id: raw.product_id!,
       warehouse_id: raw.warehouse_id!,
       supplier_id: raw.supplier_id!,
-      industry_id: raw.industry_id!,
-      brand_id: raw.brand_id || null,
+      brand_id: raw.brand_id!,
       bank_account_id: raw.bank_account_id || null,
       code: raw.code || null,
       stock,

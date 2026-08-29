@@ -162,27 +162,13 @@
 
 ---
 
-## 6. Industry
-
-**Tabla:** `industries`
-
-| Columna     | Tipo          | Restricciones    |
-|-------------|---------------|------------------|
-| id          |  String (UUID)| PK, auto-increment |
-| name        | String        | not null         |
-| description | String        | nullable         |
-| state       | State (enum)  | default: ACTIVE  |
-| created_at   | LocalDateTime | auto             |
-| updated_at   | LocalDateTime | auto             |
-
-**Relaciones:**
-- One-to-Many → `Batch`
-
----
-
-## 7. Brand
+## 6. Brand
 
 **Tabla:** `brands`
+
+Entidad única de catálogo para marca **y procedencia/industria** de un lote
+(la entidad `industries` se fusionó aquí — ver `migrate.sql` v30). `batches.brand_id`
+es la única FK; no existe `industry_id`.
 
 | Columna     | Tipo          | Restricciones    |
 |-------------|---------------|------------------|
@@ -199,7 +185,7 @@
 
 ---
 
-## 8. Warehouse
+## 7. Warehouse
 
 **Tabla:** `warehouses`
 
@@ -217,7 +203,7 @@
 
 ---
 
-## 9. Batch
+## 8. Batch
 
 **Tabla:** `batches`
 
@@ -227,8 +213,7 @@
 | product_id      | Long (FK)       | not null → products.id        |
 | warehouse_id    | Long (FK)       | not null → warehouses.id      |
 | supplier_id     | Long (FK)       | not null → suppliers.id       |
-| industry_id     | Long (FK)       | not null → industries.id      |
-| brand_id        | Long (FK)       | nullable → brands.id          |
+| brand_id        | Long (FK)       | not null → brands.id (marca / procedencia) |
 | price           | BigDecimal(8,2) | nullable                      |
 | cost            | BigDecimal(8,2) | nullable                      |
 | code            | String          | nullable                      |
@@ -245,8 +230,7 @@
 - Many-to-One → `Product`
 - Many-to-One → `Warehouse`
 - Many-to-One → `Supplier`
-- Many-to-One → `Industry`
-- Many-to-One → `Brand`
+- Many-to-One → `Brand` (marca / procedencia — antes `Industry`)
 - One-to-Many → `ServiceOrderBatch`
 - One-to-Many → `QuoteBatch`
 ---

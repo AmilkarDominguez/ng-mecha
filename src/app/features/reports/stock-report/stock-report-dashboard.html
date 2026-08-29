@@ -38,16 +38,6 @@
       </mat-select>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="filter-select">
-      <mat-label>Industria</mat-label>
-      <mat-select formControlName="industry_id">
-        <mat-option [value]="null">Todas</mat-option>
-        @for (i of activeIndustries(); track i.id) {
-          <mat-option [value]="i.id">{{ i.name }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-
     <div class="filter-toggle">
       <mat-slide-toggle formControlName="low_stock_only" color="primary">
         Solo stock bajo
@@ -108,11 +98,6 @@
       <ng-container matColumnDef="brand">
         <th mat-header-cell *matHeaderCellDef>Marca</th>
         <td mat-cell *matCellDef="let row">{{ row.brandName }}</td>
-      </ng-container>
-
-      <ng-container matColumnDef="industry">
-        <th mat-header-cell *matHeaderCellDef>Industria</th>
-        <td mat-cell *matCellDef="let row">{{ row.industryName }}</td>
       </ng-container>
 
       <ng-container matColumnDef="warehouse">

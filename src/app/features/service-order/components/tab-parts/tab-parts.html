@@ -33,9 +33,6 @@
                   @if (b.price != null) {
                     <span class="result-tag price">Bs. {{ b.price | number:'1.2-2' }}</span>
                   }
-                  @if (b.industry?.name) {
-                    <span class="result-tag">{{ b.industry?.name }}</span>
-                  }
                   @if (b.warehouse?.name) {
                     <span class="result-tag muted">{{ b.warehouse?.name }}</span>
                   }
@@ -81,12 +78,6 @@
           <div class="batch-field">
             <span class="field-label">Precio venta</span>
             <span class="field-value">Bs. {{ batch.price | number:'1.2-2' }}</span>
-          </div>
-        }
-        @if (batch.industry?.name) {
-          <div class="batch-field">
-            <span class="field-label">Industria</span>
-            <span class="field-value">{{ batch.industry?.name }}</span>
           </div>
         }
         @if (batch.warehouse?.name) {

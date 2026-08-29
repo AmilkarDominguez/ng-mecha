@@ -5,8 +5,7 @@ export interface Batch {
   product_id: string;
   warehouse_id: string;
   supplier_id: string;
-  industry_id: string;
-  brand_id: string | null;
+  brand_id: string;
   bank_account_id?: string | null;
   cost: number | null;
   price: number | null;
@@ -22,7 +21,6 @@ export interface Batch {
   updated_at?: string | Date;
   // Joins opcionales — presentes cuando vienen de SPBatch.get() (select con embeds)
   product?: { name: string | null; category?: { id: string; name: string | null } | null } | null;
-  industry?: { name: string | null } | null;
   warehouse?: { name: string | null } | null;
   brand?: { name: string | null } | null;
 }

@@ -12,7 +12,6 @@ import { SPBatch } from '../../../../core/services/supabase/sb-batch';
 import { SPProduct } from '../../../../core/services/supabase/sb-product';
 import { SPWarehouse } from '../../../../core/services/supabase/sb-warehouse';
 import { SPSupplier } from '../../../../core/services/supabase/sb-supplier';
-import { SPIndustry } from '../../../../core/services/supabase/sb-industry';
 import { SPBrand } from '../../../../core/services/supabase/sb-brand';
 import { BatchDetailModal, BatchDetailData } from '../../../inventory/batches/components/batch-detail-modal/batch-detail-modal';
 
@@ -47,7 +46,6 @@ export class LowStockCard {
   private productService = inject(SPProduct);
   private warehouseService = inject(SPWarehouse);
   private supplierService = inject(SPSupplier);
-  private industryService = inject(SPIndustry);
   private brandService = inject(SPBrand);
 
   private readonly batches = toSignal(this.batchService.listen(), { initialValue: [] as Batch[] });
@@ -58,7 +56,6 @@ export class LowStockCard {
   private readonly products = toSignal(this.productService.listen(), { initialValue: [] });
   private readonly warehouses = toSignal(this.warehouseService.listen(), { initialValue: [] });
   private readonly suppliers = toSignal(this.supplierService.listen(), { initialValue: [] });
-  private readonly industries = toSignal(this.industryService.listen(), { initialValue: [] });
   private readonly brands = toSignal(this.brandService.listen(), { initialValue: [] });
 
   readonly lowStockBatches = computed<LowStockRow[]>(() => {
@@ -88,7 +85,6 @@ export class LowStockCard {
         products: this.products(),
         warehouses: this.warehouses(),
         suppliers: this.suppliers(),
-        industries: this.industries(),
         brands: this.brands(),
       } satisfies BatchDetailData,
     });

@@ -9,7 +9,6 @@ import { Batch } from '../../../../../core/models/batch.model';
 import { Product } from '../../../../../core/models/product.model';
 import { Warehouse } from '../../../../../core/models/warehouse.model';
 import { Supplier } from '../../../../../core/models/supplier.model';
-import { Industry } from '../../../../../core/models/industry.model';
 import { Brand } from '../../../../../core/models/brand.model';
 
 export interface BatchDetailData {
@@ -17,7 +16,6 @@ export interface BatchDetailData {
   products: Product[];
   warehouses: Warehouse[];
   suppliers: Supplier[];
-  industries: Industry[];
   brands: Brand[];
 }
 
@@ -52,10 +50,6 @@ export class BatchDetailModal {
 
   getSupplierName(id: string): string {
     return this.data.suppliers.find(s => s.id === id)?.name ?? '—';
-  }
-
-  getIndustryName(id: string): string {
-    return this.data.industries.find(i => i.id === id)?.name ?? '—';
   }
 
   getBrandName(id: string | null): string {

@@ -245,17 +245,9 @@ CREATE TABLE IF NOT EXISTS suppliers (
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 6. industries
-CREATE TABLE IF NOT EXISTS industries (
-  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  name        TEXT        NOT NULL,
-  description TEXT,
-  state       state_enum  NOT NULL DEFAULT 'ACTIVE',
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- 7. brands
+-- 6. brands
+-- Catálogo único de marca Y procedencia/industria de un lote
+-- (la tabla `industries` se fusionó aquí — ver migrate.sql v30).
 CREATE TABLE IF NOT EXISTS brands (
   id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   name        TEXT,
@@ -282,8 +274,7 @@ CREATE TABLE IF NOT EXISTS batches (
   product_id      UUID           NOT NULL REFERENCES products(id)    ON DELETE RESTRICT,
   warehouse_id    UUID           NOT NULL REFERENCES warehouses(id)  ON DELETE RESTRICT,
   supplier_id     UUID           NOT NULL REFERENCES suppliers(id)   ON DELETE RESTRICT,
-  industry_id     UUID           NOT NULL REFERENCES industries(id)  ON DELETE RESTRICT,
-  brand_id        UUID           REFERENCES brands(id)               ON DELETE SET NULL,
+  brand_id        UUID           NOT NULL REFERENCES brands(id)      ON DELETE RESTRICT,
   cost            NUMERIC(10,2),
   price           NUMERIC(10,2),
   code            TEXT,
@@ -1686,7 +1677,6 @@ CREATE INDEX IF NOT EXISTS idx_multimedia_product_id    ON multimedia(product_id
 CREATE INDEX IF NOT EXISTS idx_batches_product_id       ON batches(product_id);
 CREATE INDEX IF NOT EXISTS idx_batches_warehouse_id     ON batches(warehouse_id);
 CREATE INDEX IF NOT EXISTS idx_batches_supplier_id      ON batches(supplier_id);
-CREATE INDEX IF NOT EXISTS idx_batches_industry_id      ON batches(industry_id);
 CREATE INDEX IF NOT EXISTS idx_batches_brand_id         ON batches(brand_id);
 CREATE INDEX IF NOT EXISTS idx_batches_bank_account_id  ON batches(bank_account_id);
 CREATE INDEX IF NOT EXISTS idx_contacts_reference_id    ON contacts(reference_id);
@@ -1742,7 +1732,6 @@ BEGIN
     'products',
     'multimedia',
     'suppliers',
-    'industries',
     'brands',
     'warehouses',
     'batches',
@@ -1786,7 +1775,6 @@ ALTER TABLE product_presentations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE products              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE multimedia            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE suppliers             ENABLE ROW LEVEL SECURITY;
-ALTER TABLE industries            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE brands                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE warehouses            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE batches               ENABLE ROW LEVEL SECURITY;
@@ -1874,16 +1862,6 @@ CREATE POLICY "auth_update_suppliers"
   ON suppliers FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "auth_delete_suppliers"
   ON suppliers FOR DELETE TO authenticated USING (true);
-
--- industries
-CREATE POLICY "auth_select_industries"
-  ON industries FOR SELECT TO authenticated USING (true);
-CREATE POLICY "auth_insert_industries"
-  ON industries FOR INSERT TO authenticated WITH CHECK (true);
-CREATE POLICY "auth_update_industries"
-  ON industries FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
-CREATE POLICY "auth_delete_industries"
-  ON industries FOR DELETE TO authenticated USING (true);
 
 -- brands
 CREATE POLICY "auth_select_brands"
@@ -2084,16 +2062,6 @@ CREATE POLICY "anon_update_suppliers"
 CREATE POLICY "anon_delete_suppliers"
   ON suppliers FOR DELETE TO anon USING (true);
 
--- industries
-CREATE POLICY "anon_select_industries"
-  ON industries FOR SELECT TO anon USING (true);
-CREATE POLICY "anon_insert_industries"
-  ON industries FOR INSERT TO anon WITH CHECK (true);
-CREATE POLICY "anon_update_industries"
-  ON industries FOR UPDATE TO anon USING (true) WITH CHECK (true);
-CREATE POLICY "anon_delete_industries"
-  ON industries FOR DELETE TO anon USING (true);
-
 -- brands
 CREATE POLICY "anon_select_brands"
   ON brands FOR SELECT TO anon USING (true);
@@ -2241,7 +2209,6 @@ BEGIN
     'products',
     'multimedia',
     'suppliers',
-    'industries',
     'brands',
     'warehouses',
     'batches',

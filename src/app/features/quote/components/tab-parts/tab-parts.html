@@ -50,9 +50,6 @@
                     @if (b.price != null) {
                       <span class="result-tag price">Bs. {{ b.price | number:'1.2-2' }}</span>
                     }
-                    @if (b.industry?.name) {
-                      <span class="result-tag">{{ b.industry?.name }}</span>
-                    }
                   </div>
                 </div>
                 <button mat-stroked-button color="primary" (click)="selectBatch(b)">
@@ -86,12 +83,6 @@
             <span class="field-label">Disponible</span>
             <span class="field-value">{{ selectedAvailableStock() }}</span>
           </div>
-          @if (batch.industry?.name) {
-            <div class="batch-field">
-              <span class="field-label">Industria</span>
-              <span class="field-value">{{ batch.industry?.name }}</span>
-            </div>
-          }
         </div>
       </div>
 

@@ -164,7 +164,7 @@ export class SPServiceOrder {
       batches: from(
         this.supabase
           .from(this.TABLE_BATCHES)
-          .select('*, batch:batches(description, product:products(name), industry:industries(name)), quote:quotes(number)')
+          .select('*, batch:batches(description, product:products(name)), quote:quotes(number)')
           .eq('service_order_id', id),
       ).pipe(map(({ data, error }) => { if (error) throw error; return data ?? []; })),
       externals: from(

@@ -37,8 +37,7 @@ Todas las rutas reales viven bajo `path: 'dashboard'` (`AdminLayout`, `canActiva
 | | Presentaciones | `/dashboard/inventario/presentaciones` | `inventory/product-presentation/` | |
 | | Productos | `/dashboard/inventario/productos` | `inventory/product/` | |
 | | Almacenes | `/dashboard/inventario/almacenes` | `inventory/warehouses/` | |
-| | Marcas | `/dashboard/inventario/marcas` | `inventory/brand/` | |
-| | Industrias | `/dashboard/inventario/industrias` | `inventory/industry/` | |
+| | Marcas | `/dashboard/inventario/marcas` | `inventory/brand/` | Catálogo único de marca **y procedencia/industria** de un lote — la entidad `industries` se fusionó aquí (`migrate.sql` v30); `batches.brand_id` es la única FK. |
 | | Proveedores | `/dashboard/compras/proveedores` ⚠️ | `inventory/supplier/` | Prefijo de ruta `compras/` no `inventario/` — inconsistencia histórica, no la repitas al agregar módulos nuevos (ver §4). |
 | | Lotes | `/dashboard/inventario/lotes` | `inventory/batches/` | |
 | **Cuentas** (features.md lo llama "Contabilidad") | Cuentas Bancarias | `/dashboard/cuentas/cuentas-bancarias` | `accounting/bank-accounts/` | |

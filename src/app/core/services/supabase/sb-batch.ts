@@ -23,7 +23,7 @@ export class SPBatch {
         .from(this.TABLE_NAME)
         .select(
           '*, product:products(name, category:product_categories(id,name)), ' +
-          'industry:industries(name), warehouse:warehouses(name), brand:brands(name)',
+          'warehouse:warehouses(name), brand:brands(name)',
         ),
     ).pipe(
       map(({ data, error }) => {

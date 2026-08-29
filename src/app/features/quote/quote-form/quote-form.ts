@@ -325,7 +325,6 @@ export class QuoteForm implements OnInit {
       discount:      l.discount,
       subtotal:      l.subtotal,
       product_name:  l.batch?.product?.name ?? l.batch?.description ?? l.description ?? '',
-      industry_name: l.batch?.industry?.name ?? (l.batch_id ? '—' : 'Por pedir'),
     };
   }
 

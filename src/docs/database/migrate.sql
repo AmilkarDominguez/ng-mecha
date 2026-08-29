@@ -1972,3 +1972,52 @@ END $$;
 -- la nueva; cualquier dato de correo previo se pierde a proposito.
 ALTER TABLE mechanics DROP COLUMN IF EXISTS email;
 ALTER TABLE mechanics ADD COLUMN IF NOT EXISTS salary NUMERIC(10,2);
+
+
+-- ============================================================
+-- v30 — Inventory Module: fusion de `industries` en `brands`
+-- ============================================================
+-- `industries` y `brands` eran tablas casi identicas (name, description,
+-- state); `industries` no aportaba ninguna columna que `brands` no
+-- tuviera. Se elimina `industries` y `brands` pasa a ser el catalogo
+-- unico de "marca / procedencia" de un lote. `batches` deja de tener dos
+-- FKs (industry_id NOT NULL + brand_id nullable) y queda con una sola:
+-- `brand_id`, ahora NOT NULL (hereda la obligatoriedad que tenia
+-- industry_id).
+--
+-- Backfill: los lotes que no tenian brand_id heredan una marca creada a
+-- partir del nombre/description de su industria, para poder aplicar el
+-- NOT NULL sin perder la referencia.
+DO $$
+DECLARE
+  has_industry_col BOOLEAN;
+  r RECORD;
+  v_brand_id UUID;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'batches' AND column_name = 'industry_id'
+  ) INTO has_industry_col;
+
+  IF has_industry_col THEN
+    FOR r IN
+      SELECT DISTINCT b.industry_id, i.name, i.description
+      FROM batches b
+      JOIN industries i ON i.id = b.industry_id
+      WHERE b.brand_id IS NULL
+    LOOP
+      INSERT INTO brands (name, description) VALUES (r.name, r.description)
+      RETURNING id INTO v_brand_id;
+      UPDATE batches SET brand_id = v_brand_id
+      WHERE industry_id = r.industry_id AND brand_id IS NULL;
+    END LOOP;
+
+    ALTER TABLE batches DROP CONSTRAINT IF EXISTS batches_industry_id_fkey;
+    DROP INDEX IF EXISTS idx_batches_industry_id;
+    ALTER TABLE batches DROP COLUMN IF EXISTS industry_id;
+  END IF;
+
+  ALTER TABLE batches ALTER COLUMN brand_id SET NOT NULL;
+END $$;
+
+DROP TABLE IF EXISTS industries CASCADE;

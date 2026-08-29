@@ -27,7 +27,7 @@ export class ServiceOrderBatchesTable {
   items = input<ServiceOrderBatchRow[]>([]);
   removeItem = output<string>();
 
-  readonly columns = ['item', 'description', 'industry', 'price', 'quantity', 'delivery_time', 'discount', 'subtotal', 'actions'];
+  readonly columns = ['item', 'description', 'price', 'quantity', 'delivery_time', 'discount', 'subtotal', 'actions'];
 
   getSubtotal(row: ServiceOrderBatchRow): number {
     const base = (row.price ?? 0) * (row.quantity ?? 1);

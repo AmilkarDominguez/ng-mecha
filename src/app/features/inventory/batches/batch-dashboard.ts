@@ -12,7 +12,6 @@ import { SPBatchPurchase } from '../../../core/services/supabase/sb-batch-purcha
 import { SPProduct } from '../../../core/services/supabase/sb-product';
 import { SPWarehouse } from '../../../core/services/supabase/sb-warehouse';
 import { SPSupplier } from '../../../core/services/supabase/sb-supplier';
-import { SPIndustry } from '../../../core/services/supabase/sb-industry';
 import { SPBrand } from '../../../core/services/supabase/sb-brand';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { BatchTable } from './components/batch-table/batch-table';
@@ -46,7 +45,6 @@ export class BatchDashboard {
   readonly products = toSignal(inject(SPProduct).listen(), { initialValue: [] });
   readonly warehouses = toSignal(inject(SPWarehouse).listen(), { initialValue: [] });
   readonly suppliers = toSignal(inject(SPSupplier).listen(), { initialValue: [] });
-  readonly industries = toSignal(inject(SPIndustry).listen(), { initialValue: [] });
   readonly brands = toSignal(inject(SPBrand).listen(), { initialValue: [] });
 
   readonly searchTerm = signal('');
@@ -81,7 +79,6 @@ export class BatchDashboard {
         products: this.products(),
         warehouses: this.warehouses(),
         suppliers: this.suppliers(),
-        industries: this.industries(),
         brands: this.brands(),
       } satisfies BatchFormData,
     });
@@ -135,7 +132,6 @@ export class BatchDashboard {
         products: this.products(),
         warehouses: this.warehouses(),
         suppliers: this.suppliers(),
-        industries: this.industries(),
         brands: this.brands(),
       } satisfies BatchFormData,
     });
@@ -181,7 +177,6 @@ export class BatchDashboard {
         products: this.products(),
         warehouses: this.warehouses(),
         suppliers: this.suppliers(),
-        industries: this.industries(),
         brands: this.brands(),
       } satisfies BatchDetailData,
     });

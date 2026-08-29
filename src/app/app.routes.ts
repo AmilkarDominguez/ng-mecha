@@ -42,10 +42,6 @@ export const routes: Routes = [
         loadComponent: () => import('./features/inventory/supplier/supplier-dashboard').then(m => m.SupplierDashboard),
       },
       {
-        path: 'inventario/industrias',
-        loadComponent: () => import('./features/inventory/industry/industry-dashboard').then(m => m.IndustryDashboard),
-      },
-      {
         path: 'inventario/almacenes',
         loadComponent: () => import('./features/inventory/warehouses/warehouse-dashboard').then(m => m.WarehouseDashboard),
       },

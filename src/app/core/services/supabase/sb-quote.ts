@@ -127,7 +127,7 @@ export class SPQuote {
       batches: from(
         this.supabase
           .from(this.TABLE_BATCHES)
-          .select('*, batch:batches(description, product:products(name), industry:industries(name))')
+          .select('*, batch:batches(description, product:products(name))')
           .eq('quote_id', id),
       ).pipe(map(({ data, error }) => { if (error) throw error; return data ?? []; })),
       externals: from(

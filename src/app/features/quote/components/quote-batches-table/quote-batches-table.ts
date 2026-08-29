@@ -28,7 +28,7 @@ export class QuoteBatchesTable {
   items = input<QuoteBatchRow[]>([]);
   removeItem = output<string>();
 
-  readonly columns = ['item', 'description', 'industry', 'price', 'quantity', 'delivery_time', 'discount', 'subtotal', 'actions'];
+  readonly columns = ['item', 'description', 'price', 'quantity', 'delivery_time', 'discount', 'subtotal', 'actions'];
 
   getSubtotal(row: QuoteBatchRow): number {
     const base = (row.price ?? 0) * (row.quantity ?? 1);

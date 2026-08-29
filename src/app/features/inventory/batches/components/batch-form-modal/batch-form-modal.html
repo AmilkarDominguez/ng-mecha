@@ -44,25 +44,15 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Industria / Procedencia *</mat-label>
-      <mat-select formControlName="industry_id">
-        @for (industry of data.industries; track industry.id) {
-          <mat-option [value]="industry.id">{{ industry.name }}</mat-option>
-        }
-      </mat-select>
-      @if (getFieldError('industry_id')) {
-        <mat-error>{{ getFieldError('industry_id') }}</mat-error>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="field-half">
-      <mat-label>Marca (Catálogo)</mat-label>
+      <mat-label>Marca / Procedencia *</mat-label>
       <mat-select formControlName="brand_id">
-        <mat-option [value]="null">Sin marca</mat-option>
         @for (brand of data.brands; track brand.id) {
           <mat-option [value]="brand.id">{{ brand.name }}</mat-option>
         }
       </mat-select>
+      @if (getFieldError('brand_id')) {
+        <mat-error>{{ getFieldError('brand_id') }}</mat-error>
+      }
     </mat-form-field>
 
     <mat-form-field appearance="outline" class="field-half">

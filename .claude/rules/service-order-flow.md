@@ -187,12 +187,12 @@ interface ServiceOrderExternalService { id, external_service_id, service_order_i
 
 // Rows usadas en memoria durante formulario (incluyen nombre para mostrar)
 interface ServiceOrderServiceRow  extends ServiceOrderService  { service_name: string }
-interface ServiceOrderBatchRow    extends ServiceOrderBatch    { product_name: string; industry_name: string }
+interface ServiceOrderBatchRow    extends ServiceOrderBatch    { product_name: string }
 interface ServiceOrderExternalServiceRow extends ServiceOrderExternalService { external_service_name: string }
 
 // Interfaces para vista de detalle (con joins anidados) — también con quote_id + quote.number
 interface OrderServiceLine  { id, service_id, quote_id, price, quantity, discount, subtotal, service: {name, code} | null, quote: {number} | null }
-interface OrderBatchLine    { id, batch_id, quote_id, price, quantity, discount, subtotal, delivery_time, batch: {description, product: {name} | null, industry: {name} | null} | null, quote: {number} | null }
+interface OrderBatchLine    { id, batch_id, quote_id, price, quantity, discount, subtotal, delivery_time, batch: {description, product: {name} | null} | null, quote: {number} | null }
 interface OrderExternalLine { id, external_service_id, bank_account_id, quote_id, cost, price, quantity, subtotal, external_service: {name, company_name} | null, quote: {number} | null }
 
 interface ServiceOrderWithLines extends ServiceOrder {

@@ -80,7 +80,6 @@ export interface QuoteServiceRow extends QuoteService {
 
 export interface QuoteBatchRow extends QuoteBatch {
   product_name: string;
-  industry_name: string;
 }
 
 export interface QuoteExternalServiceRow extends QuoteExternalService {
@@ -109,7 +108,6 @@ export interface QuoteBatchLine {
   batch: {
     description: string | null;
     product: { name: string | null } | null;
-    industry: { name: string | null } | null;
   } | null;
 }
 
