@@ -1941,21 +1941,21 @@ ALTER TABLE batches ADD COLUMN IF NOT EXISTS min_stock NUMERIC;
 
 
 -- ============================================================
--- v28 — Workshop Module: mechanics.nit -> mechanics.cargo
+-- v28 — Workshop Module: mechanics.nit -> mechanics.position
 -- ============================================================
 -- El NIT (numero tributario) no aplica a un empleado del taller. Se
--- reemplaza por "cargo": texto libre con el rol/puesto del mecanico
+-- reemplaza por "position": texto libre con el cargo/rol del mecanico
 -- (ej. "Mecanico de motor", "Electricista automotriz"), editable desde
--- el formulario de Mecanicos. Se RENOMBRA la columna (no se elimina y
--- recrea) para conservar cualquier dato ya cargado.
+-- el formulario de Mecanicos (label UI "Cargo"). Se RENOMBRA la columna
+-- (no se elimina y recrea) para conservar cualquier dato ya cargado.
 DO $$ BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_name = 'mechanics' AND column_name = 'nit'
   ) AND NOT EXISTS (
     SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'mechanics' AND column_name = 'cargo'
+    WHERE table_name = 'mechanics' AND column_name = 'position'
   ) THEN
-    ALTER TABLE mechanics RENAME COLUMN nit TO cargo;
+    ALTER TABLE mechanics RENAME COLUMN nit TO position;
   END IF;
 END $$;

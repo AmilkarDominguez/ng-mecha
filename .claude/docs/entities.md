@@ -329,7 +329,7 @@
 | name             | String        | nullable             |
 | lastname         | String        | nullable             |
 | ci               | String        | nullable             |
-| cargo            | String        | nullable — cargo / rol dentro del taller (texto libre) |
+| position         | String        | nullable — cargo / rol dentro del taller (texto libre) |
 | address          | LocalDate     | nullable             |
 | email            | LocalDate     | nullable             |
 | birthdate        | LocalDate     | nullable             |
