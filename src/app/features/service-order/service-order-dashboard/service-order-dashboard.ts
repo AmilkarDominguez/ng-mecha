@@ -65,6 +65,12 @@ export class ServiceOrderDashboard {
   }
 
   onPrint(order: ServiceOrder): void {
+    // Misma guarda que QuotePrintModal (ver quote-dashboard.ts): sin esto,
+    // un doble clic apila 2 instancias y window.print() imprime la hoja
+    // de servicio (encabezado incluido) dos veces.
+    const alreadyOpen = this.dialog.openDialogs.some((ref) => ref.componentInstance instanceof ServiceOrderPrintModal);
+    if (alreadyOpen) return;
+
     this.dialog.open(ServiceOrderPrintModal, {
       data: order,
       width: '840px',      // ancho A4 (210mm ≈ 794px) + margen lateral

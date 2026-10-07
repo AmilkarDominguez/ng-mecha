@@ -222,10 +222,15 @@ $doc-font:          'Arial', sans-serif;
   min-height: 18mm;
 }
 
+.recomendacion-column {
+  display: flex;
+  flex-direction: column;
+  margin-right: 3mm;
+}
+
 .recomendacion-box {
   border: 2px solid var(--color-print-red);
   padding: 1.5mm 2mm;
-  margin-right: 3mm;
 }
 
 .recomendacion-title {
@@ -241,6 +246,17 @@ $doc-font:          'Arial', sans-serif;
   font-size: 7.5pt;
   white-space: pre-line;
   line-height: 1.5;
+}
+
+.return-date-row {
+  display: flex;
+  gap: 1.5mm;
+  margin-top: 1.5mm;
+  font-size: 7.5pt;
+}
+
+.return-date-label {
+  font-weight: 700;
 }
 
 // ── Bloque Total General (3 filas) ─────────────────────────────────
@@ -297,12 +313,6 @@ $doc-font:          'Arial', sans-serif;
   color: #666;
   letter-spacing: 0.1em;
   margin-bottom: 1mm;
-}
-
-.signature-name {
-  font-weight: 700;
-  font-size: 9pt;
-  text-transform: uppercase;
 }
 
 .signature-role {

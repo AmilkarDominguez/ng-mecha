@@ -155,11 +155,65 @@ $doc-font:          'Arial', sans-serif;
   background: #fff;
 }
 
+.subtotal-row td {
+  background: var(--color-print-blue);
+  color: var(--color-print-blue-text);
+  font-weight: 700;
+  font-size: 7.5pt;
+  text-transform: uppercase;
+}
+
+.subtotal-label { text-align: left; }
+.subtotal-value { text-align: right; white-space: nowrap; }
+
 .empty-row {
   text-align: center;
   color: #888;
   font-style: italic;
   padding: 2mm;
+}
+
+// ── Total general (3 filas: sub total, IVA, total) ─────────────────
+
+.total-general-box {
+  display: flex;
+  flex-direction: column;
+  width: 55mm;
+  margin: 2mm 0 0 auto;
+  border: 1px solid $print-border-dark;
+}
+
+.total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3mm;
+  padding: 1mm 2mm;
+  font-weight: 700;
+  color: var(--color-print-total-text);
+
+  & + & {
+    border-top: 1px solid rgba(0, 0, 0, 0.18);
+  }
+}
+
+.total-row--subtotal {
+  background: var(--color-print-subtotal-bg);
+}
+.total-row--iva {
+  background: var(--color-print-iva-bg);
+}
+.total-row--total {
+  background: var(--color-print-total-bg);
+}
+
+.total-row-label {
+  font-size: 7pt;
+}
+
+.total-row-value {
+  font-size: 9pt;
+  white-space: nowrap;
 }
 
 // ── Nota de advertencia ───────────────────────────────────────────

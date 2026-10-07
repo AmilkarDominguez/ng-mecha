@@ -26,6 +26,7 @@ import { SPCustomer } from '../../../../core/services/supabase/sb-customer';
 import { SPVehicle } from '../../../../core/services/supabase/sb-vehicles';
 import { SPMechanic } from '../../../../core/services/supabase/sb-mechanic';
 import { CustomerFormModal } from '../../../workshop/customers/components/customer-form-modal/customer-form-modal';
+import { parseLocalDate, toLocalIsoDate } from '../../../../core/date/date-utils';
 
 export interface CustomerTabValue {
   customer_id: string | null;
@@ -94,8 +95,8 @@ export class TabCustomer implements OnInit {
       }
       this.form.patchValue({
         mileage:      initial.mileage ?? '',
-        started_date: initial.started_date ? new Date(initial.started_date) : null,
-        ended_date:   initial.ended_date   ? new Date(initial.ended_date)   : null,
+        started_date: parseLocalDate(initial.started_date),
+        ended_date:   parseLocalDate(initial.ended_date),
       }, { emitEvent: false });
     });
   }
@@ -220,8 +221,8 @@ export class TabCustomer implements OnInit {
       vehicle_id: this.selectedVehicle()?.id ?? null,
       mechanic_id: this.selectedMechanic()?.id ?? null,
       mileage: raw.mileage || null,
-      started_date: raw.started_date ? this.toIsoDate(raw.started_date) : null,
-      ended_date: raw.ended_date ? this.toIsoDate(raw.ended_date) : null,
+      started_date: raw.started_date ? toLocalIsoDate(raw.started_date) : null,
+      ended_date: raw.ended_date ? toLocalIsoDate(raw.ended_date) : null,
     });
   }
 
@@ -244,7 +245,4 @@ export class TabCustomer implements OnInit {
     });
   }
 
-  private toIsoDate(d: Date): string {
-    return d.toISOString().split('T')[0];
-  }
 }

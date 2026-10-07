@@ -30,6 +30,7 @@ import {
 } from '../../../core/models/quote.model';
 import { SPQuote } from '../../../core/services/supabase/sb-quote';
 import { AuthService } from '../../../core/auth/services/auth.service';
+import { parseLocalDate, toLocalIsoDate } from '../../../core/date/date-utils';
 
 const IVA_RATE = 0.13;
 
@@ -130,7 +131,7 @@ export class QuoteForm implements OnInit {
             number:          quote.number ?? '',
             with_iva:        quote.with_iva,
             description:     quote.description ?? '',
-            expiration_date: quote.expiration_date ? new Date(quote.expiration_date) : null,
+            expiration_date: parseLocalDate(quote.expiration_date),
           });
           this.customerTabValue.set({
             customer_id: quote.customer_id,
@@ -198,7 +199,7 @@ export class QuoteForm implements OnInit {
       iva:                         withIva ? this.ivaAmount() : null,
       total_iva:                   withIva ? this.totalWithIva() : null,
       with_iva:                    withIva,
-      expiration_date:             raw.expiration_date ? this.toIsoDate(raw.expiration_date) : null,
+      expiration_date:             raw.expiration_date ? toLocalIsoDate(raw.expiration_date) : null,
       state:                       'PENDING' as const,
     };
 
@@ -341,7 +342,4 @@ export class QuoteForm implements OnInit {
     };
   }
 
-  private toIsoDate(d: Date): string {
-    return d.toISOString().split('T')[0];
-  }
 }

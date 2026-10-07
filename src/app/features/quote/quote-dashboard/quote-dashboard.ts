@@ -83,6 +83,14 @@ export class QuoteDashboard {
   }
 
   onPrint(quote: Quote): void {
+    // Sin esta guarda, un doble clic en el icono de imprimir abre DOS
+    // QuotePrintModal apiladas (ninguna cierra a la otra) — el print.css
+    // de ambas sigue visible en el DOM aunque solo la de arriba se vea en
+    // pantalla, asi que window.print() termina imprimiendo la cotizacion
+    // (encabezado incluido) dos veces.
+    const alreadyOpen = this.dialog.openDialogs.some((ref) => ref.componentInstance instanceof QuotePrintModal);
+    if (alreadyOpen) return;
+
     this.dialog.open(QuotePrintModal, {
       data: quote,
       width: '840px',      // ancho A4 (210mm ≈ 794px) + margen lateral

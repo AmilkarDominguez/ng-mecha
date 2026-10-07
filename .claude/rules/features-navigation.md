@@ -33,12 +33,12 @@ Todas las rutas reales viven bajo `path: 'dashboard'` (`AdminLayout`, `canActiva
 |---|---|---|---|---|
 | **Admin** | Usuarios | `/dashboard/admin/usuarios` | `admin/users/` | CRUD estándar (dashboard + tabla + modales). |
 | | Configuración | `/dashboard/admin/configuracion` | `admin/settings/` | Entidad singleton (una sola fila, tabla `workshop_settings`) — sin dashboard/tabla/modal de eliminar, un único formulario (`settings-form.ts`). Alimenta los datos de empresa de `service-order-print-modal` y `quote-print-modal`. Ver `[[admin-settings]]`. |
-| **Inventario** | Categorías | `/dashboard/inventario/categorias` | `inventory/product-category/` | |
+| **Inventario** | Almacenes | `/dashboard/inventario/almacenes` | `inventory/warehouses/` | |
+| | Categorías | `/dashboard/inventario/categorias` | `inventory/product-category/` | |
 | | Presentaciones | `/dashboard/inventario/presentaciones` | `inventory/product-presentation/` | |
-| | Productos | `/dashboard/inventario/productos` | `inventory/product/` | |
-| | Almacenes | `/dashboard/inventario/almacenes` | `inventory/warehouses/` | |
-| | Marcas | `/dashboard/inventario/marcas` | `inventory/brand/` | Catálogo único de marca **y procedencia/industria** de un lote — la entidad `industries` se fusionó aquí (`migrate.sql` v30); `batches.brand_id` es la única FK. |
 | | Proveedores | `/dashboard/compras/proveedores` ⚠️ | `inventory/supplier/` | Prefijo de ruta `compras/` no `inventario/` — inconsistencia histórica, no la repitas al agregar módulos nuevos (ver §4). |
+| | Productos | `/dashboard/inventario/productos` | `inventory/product/` | |
+| | Marcas | `/dashboard/inventario/marcas` | `inventory/brand/` | Catálogo único de marca **y procedencia/industria** de un lote — la entidad `industries` se fusionó aquí (`migrate.sql` v30); `batches.brand_id` es la única FK. |
 | | Lotes | `/dashboard/inventario/lotes` | `inventory/batches/` | |
 | **Cuentas** (features.md lo llama "Contabilidad") | Cuentas Bancarias | `/dashboard/cuentas/cuentas-bancarias` | `accounting/bank-accounts/` | |
 | | Tipos de Transacción | `/dashboard/cuentas/tipos-transaccion` | `accounting/bank-transaction-types/` | |

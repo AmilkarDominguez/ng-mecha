@@ -17,6 +17,7 @@ import { SPWorkshopSettings } from '../../../../core/services/supabase/sb-worksh
 
 const DEFAULT_VALIDEZ_DIAS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+const IVA_RATE = 0.13;
 
 @Component({
   selector: 'app-quote-print-modal',
@@ -45,6 +46,38 @@ export class QuotePrintModal implements OnInit {
     const expiration = new Date(d.expiration_date + 'T00:00:00');
     const days = Math.round((expiration.getTime() - createdDay.getTime()) / MS_PER_DAY);
     return days > 0 ? days : DEFAULT_VALIDEZ_DIAS;
+  });
+
+  // Subtotal de la seccion de repuestos (lines_batches).
+  readonly subtotalBatches = computed(() =>
+    (this.detail()?.lines_batches ?? []).reduce((s, l) => s + (l.subtotal ?? 0), 0),
+  );
+
+  // Subtotal de la seccion "DESCRIPCION DE SERVICIO" (mano de obra + servicios de terceros,
+  // que en este documento comparten una sola tabla — ver quote-print-modal.html).
+  readonly subtotalServices = computed(() => {
+    const d = this.detail();
+    if (!d) return 0;
+    const services  = d.lines_services.reduce((s, l) => s + (l.subtotal ?? 0), 0);
+    const externals = d.lines_externals.reduce((s, l) => s + (l.subtotal ?? 0), 0);
+    return services + externals;
+  });
+
+  // Base sin IVA (= quotes.total, guardado por quote-form.ts al crear/editar).
+  readonly subtotalSinIva = computed(() => this.detail()?.total ?? 0);
+
+  // IVA - IT (13%). Usa el valor guardado; si falta, lo calcula sobre la base.
+  readonly ivaIt = computed(() => {
+    const d = this.detail();
+    if (!d || !d.with_iva) return 0;
+    return d.iva ?? (d.total ?? 0) * IVA_RATE;
+  });
+
+  // Total final: con IVA usa total_iva (o base + ivaIt como respaldo); sin IVA es la base.
+  readonly totalFinal = computed(() => {
+    const d = this.detail();
+    if (!d) return 0;
+    return d.with_iva ? (d.total_iva ?? (d.total ?? 0) + this.ivaIt()) : (d.total ?? 0);
   });
 
   ngOnInit(): void {

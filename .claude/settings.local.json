@@ -14,7 +14,10 @@
       "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); styles=d.get\\('projects',{}\\).get\\('frontend',{}\\).get\\('architect',{}\\).get\\('build',{}\\).get\\('options',{}\\).get\\('styles',[]\\); print\\(styles\\)\")",
       "Bash(xargs -I {} basename {})",
       "Bash(netstat -ano)",
-      "Bash(awk '{print $5}')"
+      "Bash(awk '{print $5}')",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "ClaudeInChromeDomain(localhost:4300)",
+      "mcp__claude-in-chrome__select_browser"
     ]
   }
 }

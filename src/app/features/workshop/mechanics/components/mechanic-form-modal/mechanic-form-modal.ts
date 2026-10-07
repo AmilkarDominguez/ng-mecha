@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Contact } from '../../../../../core/models/contact.model';
 import { Mechanic } from '../../../../../core/models/mechanic.model';
+import { parseLocalDate, toLocalIsoDate } from '../../../../../core/date/date-utils';
 
 export interface MechanicFormData {
   mechanic?: Mechanic;
@@ -78,7 +79,9 @@ export class MechanicFormModal implements OnInit {
         position: m.position ?? '',
         phone: m.phone ?? '',
         salary: m.salary ?? null,
-        birthdate: m.birthdate ? new Date(m.birthdate) : null,
+        // birthdate es DATE puro -> parseLocalDate (ver date-utils.ts). incorporated_at/
+        // retired_at son TIMESTAMPTZ (incluyen offset explicito), new Date() los parsea bien.
+        birthdate: parseLocalDate(m.birthdate),
         incorporated_at: m.incorporated_at ? new Date(m.incorporated_at) : null,
         retired_at: m.retired_at ? new Date(m.retired_at) : null,
         address: m.address ?? '',
@@ -117,7 +120,7 @@ export class MechanicFormModal implements OnInit {
       position: raw.position || null,
       phone: raw.phone || null,
       salary: raw.salary !== null && raw.salary !== undefined ? Number(raw.salary) : null,
-      birthdate: raw.birthdate ? this.toIsoDate(raw.birthdate) : null,
+      birthdate: raw.birthdate ? toLocalIsoDate(raw.birthdate) : null,
       incorporated_at: raw.incorporated_at ? this.toIsoDate(raw.incorporated_at) : null,
       retired_at: raw.retired_at ? this.toIsoDate(raw.retired_at) : null,
       address: raw.address || null,

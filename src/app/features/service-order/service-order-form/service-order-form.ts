@@ -38,6 +38,7 @@ import { SPServiceOrderExternalExpense } from '../../../core/services/supabase/s
 import { SPQuote } from '../../../core/services/supabase/sb-quote';
 import { SPQuoteConversion } from '../../../core/services/supabase/sb-quote-conversion';
 import { AuthService } from '../../../core/auth/services/auth.service';
+import { parseLocalDate, toLocalIsoDate } from '../../../core/date/date-utils';
 
 const IVA_RATE = 0.13;
 
@@ -172,7 +173,7 @@ export class ServiceOrderForm implements OnInit {
             payment_type: order.payment_type,
             with_iva:     order.with_iva,
             description:  order.description ?? '',
-            return_date:  order.return_date ? new Date(order.return_date) : null,
+            return_date:  parseLocalDate(order.return_date),
           });
           this.customerTabValue.set({
             customer_id:  order.customer_id,
@@ -260,7 +261,7 @@ export class ServiceOrderForm implements OnInit {
       draft_expiration_date: null,
       started_date:          tab.started_date,
       ended_date:            tab.ended_date,
-      return_date:           raw.return_date ? raw.return_date.toISOString().split('T')[0] : null,
+      return_date:           raw.return_date ? toLocalIsoDate(raw.return_date) : null,
       state:                 'IN_PROGRESS' as const,
       payment_type:          raw.payment_type ?? 'CASH',
     };

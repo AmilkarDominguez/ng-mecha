@@ -91,12 +91,6 @@ export class ServiceOrderPrintModal implements OnInit {
     return [v.brand, v.model].filter(Boolean).join('/ ');
   }
 
-  mechanicName(): string {
-    const m = this.detail()?.mechanic;
-    if (!m) return '—';
-    return [m.name, m.lastname].filter(Boolean).join(' ').toUpperCase();
-  }
-
   orderNumber(): string {
     const d = this.detail();
     if (!d) return '';

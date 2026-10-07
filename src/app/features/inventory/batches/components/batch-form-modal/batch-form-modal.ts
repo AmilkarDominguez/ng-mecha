@@ -17,6 +17,7 @@ import { Warehouse } from '../../../../../core/models/warehouse.model';
 import { Supplier } from '../../../../../core/models/supplier.model';
 import { Brand } from '../../../../../core/models/brand.model';
 import { SPBankAccount } from '../../../../../core/services/supabase/sb-bank-account';
+import { parseLocalDate, toLocalIsoDate } from '../../../../../core/date/date-utils';
 
 export interface BatchFormData {
   batch?: Batch;
@@ -91,7 +92,7 @@ export class BatchFormModal implements OnInit {
         description: batch.description,
         compatible_brands: batch.compatible_brands,
         compatible_models: batch.compatible_models,
-        expiration_date: batch.expiration_date ? new Date(batch.expiration_date) : null,
+        expiration_date: parseLocalDate(batch.expiration_date),
         active: batch.state === 'ACTIVE',
       });
     }
@@ -131,17 +132,13 @@ export class BatchFormModal implements OnInit {
       description: raw.description || null,
       compatible_brands: raw.compatible_brands || null,
       compatible_models: raw.compatible_models || null,
-      expiration_date: raw.expiration_date ? this.toIsoDate(raw.expiration_date) : null,
+      expiration_date: raw.expiration_date ? toLocalIsoDate(raw.expiration_date) : null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
     });
   }
 
   onCancel(): void {
     this.dialogRef.close(null);
-  }
-
-  private toIsoDate(d: Date): string {
-    return d.toISOString().split('T')[0];
   }
 
   getFieldError(field: string): string {

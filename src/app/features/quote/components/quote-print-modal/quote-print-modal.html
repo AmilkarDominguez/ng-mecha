@@ -74,6 +74,13 @@
             </tr>
           }
 
+          @if (d.lines_batches.length > 0) {
+            <tr class="subtotal-row">
+              <td colspan="4" class="subtotal-label">SUBTOTAL REPUESTOS</td>
+              <td class="subtotal-value">{{ subtotalBatches() | number:'1.2-2' }}</td>
+            </tr>
+          }
+
           @if (d.lines_services.length > 0 || d.lines_externals.length > 0) {
             <tr class="section-row">
               <td colspan="5">DESCRIPCION DE SERVICIO</td>
@@ -100,11 +107,34 @@
             </tr>
           }
 
+          @if (d.lines_services.length > 0 || d.lines_externals.length > 0) {
+            <tr class="subtotal-row">
+              <td colspan="4" class="subtotal-label">SUBTOTAL SERVICIOS</td>
+              <td class="subtotal-value">{{ subtotalServices() | number:'1.2-2' }}</td>
+            </tr>
+          }
+
           @if (d.lines_batches.length === 0 && d.lines_services.length === 0 && d.lines_externals.length === 0) {
             <tr><td colspan="5" class="empty-row">Sin líneas registradas</td></tr>
           }
         </tbody>
       </table>
+
+      <!-- Total general -->
+      <div class="total-general-box">
+        <div class="total-row total-row--subtotal">
+          <span class="total-row-label">Sub Total (Total sin IVA)</span>
+          <span class="total-row-value">{{ subtotalSinIva() | number:'1.2-2' }}</span>
+        </div>
+        <div class="total-row total-row--iva">
+          <span class="total-row-label">IVA - IT (Cálculo del 13%)</span>
+          <span class="total-row-value">{{ ivaIt() | number:'1.2-2' }}</span>
+        </div>
+        <div class="total-row total-row--total">
+          <span class="total-row-label">Total ({{ d.with_iva ? 'Sub Total + IVA - IT' : 'Sin IVA' }})</span>
+          <span class="total-row-value">{{ totalFinal() | number:'1.2-2' }}</span>
+        </div>
+      </div>
 
       <!-- Nota de advertencia -->
       <div class="note-bar">EL PRECIO PUEDE VARIAR UNA VES DESARMADO EL VEHICULO</div>

@@ -59,7 +59,7 @@
           <td class="header-label">Kilometraje:</td>
           <td class="header-value">{{ d.mileage ?? '—' }}</td>
           <td class="header-label">Fecha Entrega:</td>
-          <td class="header-value">{{ d.return_date | date:'dd/MM/yyyy' }}</td>
+          <td class="header-value">{{ d.ended_date | date:'dd/MM/yyyy' }}</td>
         </tr>
       </tbody>
     </table>
@@ -152,9 +152,17 @@
 
     <!-- Pie -->
     <div class="doc-footer">
-      <div class="recomendacion-box">
-        <div class="recomendacion-title">RECOMENDACIÓN</div>
-        <div class="recomendacion-body">{{ d.description ?? '' }}</div>
+      <div class="recomendacion-column">
+        <div class="recomendacion-box">
+          <div class="recomendacion-title">RECOMENDACIÓN</div>
+          <div class="recomendacion-body">{{ d.description ?? '' }}</div>
+        </div>
+        @if (d.return_date) {
+          <div class="return-date-row">
+            <span class="return-date-label">Fecha retorno:</span>
+            <span class="return-date-value">{{ d.return_date | date:'dd/MM/yyyy' }}</span>
+          </div>
+        }
       </div>
       <div class="total-general-box">
         <div class="total-row total-row--subtotal">
@@ -175,7 +183,6 @@
     <!-- Firma -->
     <div class="doc-signature">
       <div class="signature-line">- - - - - - - - - - - - - - - - - - - - - - - - -</div>
-      <div class="signature-name">{{ mechanicName() }}</div>
       <div class="signature-role">ASESOR DE SERVICIOS</div>
     </div>
 

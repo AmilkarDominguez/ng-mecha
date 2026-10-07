@@ -12,6 +12,7 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Contact } from '../../../../../core/models/contact.model';
 import { Customer, CustomerRating } from '../../../../../core/models/customer.model';
 import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
+import { parseLocalDate, toLocalIsoDate } from '../../../../../core/date/date-utils';
 
 export interface CustomerFormData {
   customer?: Customer;
@@ -83,7 +84,7 @@ export class CustomerFormModal implements OnInit {
         ci: c.ci ?? '',
         nit: c.nit ?? '',
         phone: c.phone ?? '',
-        birthdate: c.birthdate ? new Date(c.birthdate) : null,
+        birthdate: parseLocalDate(c.birthdate),
         address: c.address ?? '',
         rating: c.rating ?? null,
         active: c.state === 'ACTIVE',
@@ -120,7 +121,7 @@ export class CustomerFormModal implements OnInit {
       ci: raw.ci || null,
       nit: raw.nit || null,
       phone: raw.phone || null,
-      birthdate: raw.birthdate ? this.toIsoDate(raw.birthdate) : null,
+      birthdate: raw.birthdate ? toLocalIsoDate(raw.birthdate) : null,
       address: raw.address || null,
       rating: raw.rating || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
@@ -130,10 +131,6 @@ export class CustomerFormModal implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close(null);
-  }
-
-  private toIsoDate(d: Date): string {
-    return d.toISOString().split('T')[0];
   }
 
   getFieldError(field: string): string {
