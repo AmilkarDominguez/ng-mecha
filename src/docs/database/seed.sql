@@ -1,9 +1,15 @@
 -- ============================================================
--- Mecha Sys — Seed de datos de prueba
+-- Mecha Sys — Seed de datos de prueba (demostracion)
 -- Database: Supabase (PostgreSQL)
 -- Ejecutar DESPUES de tables.sql (y migrate.sql si aplica).
 -- Idempotente: usa ids fijos + ON CONFLICT (id) DO NOTHING, se
 -- puede correr varias veces sin duplicar filas.
+--
+-- Este archivo siembra datos de NEGOCIO/DEMO (customers, vehicles,
+-- products, batches, etc.). Si solo necesitas datos operativos para que
+-- el sistema arranque (usuarios, tipos de transaccion, configuracion del
+-- taller) sin ningun registro de las demas entidades, usa
+-- seed_initial.sql en su lugar.
 -- ============================================================
 
 -- ------------------------------------------------------------
