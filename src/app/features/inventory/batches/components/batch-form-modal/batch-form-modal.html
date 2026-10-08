@@ -10,7 +10,7 @@
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Producto *</mat-label>
       <mat-select formControlName="product_id">
-        @for (product of data.products; track product.id) {
+        @for (product of products(); track product.id) {
           <mat-option [value]="product.id">{{ product.name }}</mat-option>
         }
       </mat-select>
@@ -46,7 +46,7 @@
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Marca / Procedencia *</mat-label>
       <mat-select formControlName="brand_id">
-        @for (brand of data.brands; track brand.id) {
+        @for (brand of brands(); track brand.id) {
           <mat-option [value]="brand.id">{{ brand.name }}</mat-option>
         }
       </mat-select>
@@ -62,6 +62,85 @@
         <mat-error>{{ getFieldError('code') }}</mat-error>
       }
     </mat-form-field>
+
+    <div class="field-full">
+      <mat-expansion-panel class="quick-panel" #productPanel="matExpansionPanel">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="quick-panel-title">
+            <mat-icon>inventory_2</mat-icon>
+            Registrar producto nuevo
+            <span class="quick-panel-hint">(opcional)</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div [formGroup]="quickProductForm" class="quick-panel-grid">
+          <mat-form-field appearance="outline" class="quick-panel-field">
+            <mat-label>Nombre *</mat-label>
+            <input matInput formControlName="name" placeholder="Ej. Filtro de aceite" />
+            @if (getQuickFieldError(quickProductForm, 'name')) {
+              <mat-error>{{ getQuickFieldError(quickProductForm, 'name') }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="quick-panel-field quick-panel-field-full">
+            <mat-label>Descripción</mat-label>
+            <input matInput formControlName="description" placeholder="Descripción breve (opcional)" />
+          </mat-form-field>
+        </div>
+
+        <div class="quick-panel-actions">
+          <button mat-flat-button color="primary" type="button"
+            [disabled]="creatingProduct()"
+            (click)="createProduct(productPanel)">
+            <mat-icon>add</mat-icon>
+            {{ creatingProduct() ? 'Creando...' : 'Crear y seleccionar' }}
+          </button>
+        </div>
+      </mat-expansion-panel>
+    </div>
+
+    <div class="field-full">
+      <mat-expansion-panel class="quick-panel" #brandPanel="matExpansionPanel">
+        <mat-expansion-panel-header>
+          <mat-panel-title class="quick-panel-title">
+            <mat-icon>branding_watermark</mat-icon>
+            Registrar marca nueva
+            <span class="quick-panel-hint">(opcional)</span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div [formGroup]="quickBrandForm" class="quick-panel-grid">
+          <mat-form-field appearance="outline" class="quick-panel-field">
+            <mat-label>Nombre *</mat-label>
+            <input matInput formControlName="name" placeholder="Ej. Bosch" />
+            @if (getQuickFieldError(quickBrandForm, 'name')) {
+              <mat-error>{{ getQuickFieldError(quickBrandForm, 'name') }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="quick-panel-field">
+            <mat-label>Calificación</mat-label>
+            <mat-select formControlName="score">
+              <mat-option [value]="null">Sin calificación</mat-option>
+              @for (s of scoreOptions; track s) {
+                <mat-option [value]="s">{{ s }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="quick-panel-field quick-panel-field-full">
+            <mat-label>Descripción</mat-label>
+            <input matInput formControlName="description" placeholder="Descripción breve (opcional)" />
+          </mat-form-field>
+        </div>
+
+        <div class="quick-panel-actions">
+          <button mat-flat-button color="primary" type="button"
+            [disabled]="creatingBrand()"
+            (click)="createBrand(brandPanel)">
+            <mat-icon>add</mat-icon>
+            {{ creatingBrand() ? 'Creando...' : 'Crear y seleccionar' }}
+          </button>
+        </div>
+      </mat-expansion-panel>
+    </div>
 
     <div class="form-section-title">Compatibilidad</div>
 

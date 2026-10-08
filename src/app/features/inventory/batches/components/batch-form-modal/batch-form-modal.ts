@@ -1,9 +1,10 @@
-import { Component, computed, inject, OnInit } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DialogFrame } from '../../../../../shared/components/dialog-frame/dialog-frame';
+import { MatExpansionModule, MatExpansionPanel } from '@angular/material/expansion';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -17,6 +18,8 @@ import { Warehouse } from '../../../../../core/models/warehouse.model';
 import { Supplier } from '../../../../../core/models/supplier.model';
 import { Brand } from '../../../../../core/models/brand.model';
 import { SPBankAccount } from '../../../../../core/services/supabase/sb-bank-account';
+import { SPProduct } from '../../../../../core/services/supabase/sb-product';
+import { SPBrand } from '../../../../../core/services/supabase/sb-brand';
 import { parseLocalDate, toLocalIsoDate } from '../../../../../core/date/date-utils';
 
 export interface BatchFormData {
@@ -39,6 +42,7 @@ export interface BatchFormData {
     MatSelectModule,
     MatSlideToggleModule,
     MatIconModule,
+    MatExpansionModule,
   ],
   templateUrl: './batch-form-modal.html',
   styleUrl: './batch-form-modal.scss',
@@ -47,11 +51,36 @@ export class BatchFormModal implements OnInit {
   private fb = inject(FormBuilder);
   private dialogRef = inject(MatDialogRef<BatchFormModal>);
   private bankAccountService = inject(SPBankAccount);
+  private productService = inject(SPProduct);
+  private brandService = inject(SPBrand);
   private snackBar = inject(MatSnackBar);
   readonly data: BatchFormData = inject(MAT_DIALOG_DATA);
 
   private readonly bankAccounts = toSignal(this.bankAccountService.listen(), { initialValue: [] });
   readonly activeBankAccounts = computed(() => this.bankAccounts().filter((a) => a.state === 'ACTIVE'));
+
+  // Copia local de products/brands: el registro rapido (paneles plegables de
+  // abajo) agrega el item creado aqui al instante para poder seleccionarlo
+  // de inmediato, sin esperar el round-trip del canal realtime de listen()
+  // del dashboard que abrio este modal.
+  readonly products = signal<Product[]>(this.data.products);
+  readonly brands = signal<Brand[]>(this.data.brands);
+
+  readonly creatingProduct = signal(false);
+  readonly creatingBrand = signal(false);
+
+  readonly scoreOptions = ['A+', 'A', 'B+', 'B', 'C'];
+
+  quickProductForm = this.fb.group({
+    name: ['', [Validators.required, Validators.maxLength(200)]],
+    description: ['', [Validators.maxLength(1000)]],
+  });
+
+  quickBrandForm = this.fb.group({
+    name: ['', [Validators.required, Validators.maxLength(100)]],
+    description: ['', [Validators.maxLength(500)]],
+    score: [null as string | null],
+  });
 
   get isEditMode(): boolean {
     return !!this.data?.batch;
@@ -139,6 +168,82 @@ export class BatchFormModal implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close(null);
+  }
+
+  createProduct(panel: MatExpansionPanel): void {
+    if (this.quickProductForm.invalid) {
+      this.quickProductForm.markAllAsTouched();
+      return;
+    }
+    const raw = this.quickProductForm.value;
+    const payload: Product = {
+      id: crypto.randomUUID(),
+      name: raw.name || null,
+      category_id: null,
+      presentation_id: null,
+      description: raw.description || null,
+      photo: null,
+      state: 'ACTIVE',
+    };
+
+    this.creatingProduct.set(true);
+    this.productService.add(payload).subscribe({
+      next: (saved) => {
+        this.creatingProduct.set(false);
+        const created = saved?.[0];
+        if (!created) return;
+        this.products.update((list) => [...list, created]);
+        this.form.patchValue({ product_id: created.id });
+        this.quickProductForm.reset();
+        panel.close();
+        this.snackBar.open('Producto creado y seleccionado', 'Cerrar', { duration: 2500 });
+      },
+      error: () => {
+        this.creatingProduct.set(false);
+        this.snackBar.open('Error al crear el producto', 'Cerrar', { duration: 4000 });
+      },
+    });
+  }
+
+  createBrand(panel: MatExpansionPanel): void {
+    if (this.quickBrandForm.invalid) {
+      this.quickBrandForm.markAllAsTouched();
+      return;
+    }
+    const raw = this.quickBrandForm.value;
+    const payload: Brand = {
+      id: crypto.randomUUID(),
+      name: raw.name || null,
+      description: raw.description || null,
+      score: raw.score || null,
+      state: 'ACTIVE',
+    };
+
+    this.creatingBrand.set(true);
+    this.brandService.add(payload).subscribe({
+      next: (saved) => {
+        this.creatingBrand.set(false);
+        const created = saved?.[0];
+        if (!created) return;
+        this.brands.update((list) => [...list, created]);
+        this.form.patchValue({ brand_id: created.id });
+        this.quickBrandForm.reset();
+        panel.close();
+        this.snackBar.open('Marca creada y seleccionada', 'Cerrar', { duration: 2500 });
+      },
+      error: () => {
+        this.creatingBrand.set(false);
+        this.snackBar.open('Error al crear la marca', 'Cerrar', { duration: 4000 });
+      },
+    });
+  }
+
+  getQuickFieldError(group: FormGroup, field: string): string {
+    const control = group.get(field);
+    if (!control?.errors || !control.touched) return '';
+    if (control.errors['required']) return 'Este campo es obligatorio';
+    if (control.errors['maxlength']) return `Máximo ${control.errors['maxlength'].requiredLength} caracteres`;
+    return 'Campo inválido';
   }
 
   getFieldError(field: string): string {
