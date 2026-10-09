@@ -1,13 +1,16 @@
-import { Injectable } from '@angular/core';
-import { from, Observable, BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { inject, Injectable } from '@angular/core';
+import { from, Observable, BehaviorSubject, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Service } from '../../models/service.model';
+import { Process } from '../../models/process.model';
+import { SPProcess } from './sb-process';
 
 @Injectable({ providedIn: 'root' })
 export class SPService {
   private supabase: SupabaseClient;
+  private processService = inject(SPProcess);
   private data$ = new BehaviorSubject<Service[]>([]);
   private listening = false;
 
@@ -19,49 +22,77 @@ export class SPService {
 
   public get(): Observable<Service[]> {
     return from(this.supabase.from(this.TABLE_NAME).select('*')).pipe(
-      map(({ data, error }) => {
+      switchMap(({ data, error }) => {
         if (error) throw error;
-        return data ?? [];
+        const services: Service[] = data ?? [];
+        if (!services.length) return of([]);
+
+        const ids = services.map((s) => s.id);
+        return from(
+          this.supabase
+            .from('processes')
+            .select('*')
+            .in('reference_id', ids)
+            .order('position', { ascending: true }),
+        ).pipe(
+          map(({ data: processesData }) => {
+            const processes: Process[] = processesData ?? [];
+            return services.map((s) => ({
+              ...s,
+              processes: processes.filter((p) => p.reference_id === s.id),
+            }));
+          }),
+        );
       }),
     );
   }
 
   public add(item: Service): Observable<Service[]> {
-    const { id, created_at, updated_at, ...payload } = item;
+    const { id, created_at, updated_at, processes, ...payload } = item;
     return from(this.supabase.from(this.TABLE_NAME).insert([payload]).select()).pipe(
-      map(({ data, error }) => {
+      switchMap(({ data, error }) => {
         if (error) throw error;
-        return data ?? [];
+        const created: Service = data?.[0];
+        if (!processes?.length) return of([created]);
+
+        return this.processService.upsertForReference(created.id, processes).pipe(
+          map((savedProcesses) => [{ ...created, processes: savedProcesses }]),
+        );
       }),
     );
   }
 
   public update(item: Service): Observable<Service[]> {
-    const { created_at, updated_at, ...payload } = item;
+    const { created_at, updated_at, processes, ...payload } = item;
     return from(
       this.supabase.from(this.TABLE_NAME).update(payload).eq('id', item.id).select(),
     ).pipe(
-      map(({ data, error }) => {
+      switchMap(({ data, error }) => {
         if (error) {
           console.error('Error en Supabase:', error.message);
           throw error;
         }
-        return data ?? [];
+        const updated: Service = data?.[0];
+        return this.processService.upsertForReference(item.id, processes ?? []).pipe(
+          map((savedProcesses) => [{ ...updated, processes: savedProcesses }]),
+        );
       }),
     );
   }
 
   public delete(id: string): Observable<Service[]> {
-    return from(
-      this.supabase.from(this.TABLE_NAME).delete().eq('id', id).select(),
-    ).pipe(
-      map(({ data, error }) => {
-        if (error) {
-          console.error('Error en Supabase:', error.message);
-          throw error;
-        }
-        return data ?? [];
-      }),
+    return this.processService.deleteByReference(id).pipe(
+      switchMap(() =>
+        from(this.supabase.from(this.TABLE_NAME).delete().eq('id', id).select()).pipe(
+          map(({ data, error }) => {
+            if (error) {
+              console.error('Error en Supabase:', error.message);
+              throw error;
+            }
+            return data ?? [];
+          }),
+        ),
+      ),
     );
   }
 

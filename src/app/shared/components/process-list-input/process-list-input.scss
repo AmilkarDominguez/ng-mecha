@@ -1,0 +1,98 @@
+.process-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.process-drop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.process-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 0.5rem;
+  background: var(--mat-sys-surface);
+  box-sizing: border-box;
+}
+
+.process-drag-handle {
+  display: flex;
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant);
+  cursor: grab;
+  touch-action: none;
+}
+
+.process-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--mat-sys-surface-variant);
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.process-text-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  font-size: 0.875rem;
+  padding: 0.25rem 0;
+
+  &::placeholder {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.process-empty {
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--mat-sys-on-surface-variant);
+  border: 1px dashed var(--mat-sys-outline-variant);
+  border-radius: 0.5rem;
+}
+
+.process-add-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.process-add-field {
+  flex: 1;
+}
+
+// ── Feedback visual de arrastre (clases propias del CDK) ────────────
+
+.cdk-drag-preview {
+  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drag-animating {
+  transition: transform 180ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.process-drop-list.cdk-drop-list-dragging .process-row:not(.cdk-drag-placeholder) {
+  transition: transform 180ms cubic-bezier(0, 0, 0.2, 1);
+}

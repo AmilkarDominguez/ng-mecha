@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { Service } from '../../../../../core/models/service.model';
+import { ProcessListInput, ProcessListItem } from '../../../../../shared/components/process-list-input/process-list-input';
 
 export interface ServiceFormData {
   service?: Service;
@@ -23,6 +24,7 @@ export interface ServiceFormData {
     MatButtonModule,
     MatSlideToggleModule,
     MatIconModule,
+    ProcessListInput,
   ],
   templateUrl: './service-form-modal.html',
   styleUrl: './service-form-modal.scss',
@@ -42,6 +44,7 @@ export class ServiceFormModal implements OnInit {
     price: [null as number | null, [Validators.min(0)]],
     description: ['', [Validators.maxLength(500)]],
     active: [true],
+    processes: this.fb.control<ProcessListItem[]>([]),
   });
 
   ngOnInit(): void {
@@ -53,6 +56,7 @@ export class ServiceFormModal implements OnInit {
         price: s.price ?? null,
         description: s.description ?? '',
         active: s.state === 'ACTIVE',
+        processes: (s.processes ?? []).map((p) => ({ description: p.description ?? '' })),
       });
     }
   }
@@ -70,6 +74,9 @@ export class ServiceFormModal implements OnInit {
       price: raw.price ?? null,
       description: raw.description || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
+      processes: (raw.processes ?? [])
+        .filter((p) => p.description?.trim())
+        .map((p, index) => ({ description: p.description, position: index })),
     });
   }
 

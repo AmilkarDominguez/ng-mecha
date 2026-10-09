@@ -41,6 +41,17 @@
       </div>
     }
 
+    @if (service.processes && service.processes.length > 0) {
+      <div class="detail-section">
+        <span class="detail-label">Procesos</span>
+        <ol class="detail-process-list">
+          @for (process of service.processes; track process.id) {
+            <li>{{ process.description }}</li>
+          }
+        </ol>
+      </div>
+    }
+
     <mat-divider />
 
     <div class="detail-dates">

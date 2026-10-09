@@ -2021,3 +2021,180 @@ BEGIN
 END $$;
 
 DROP TABLE IF EXISTS industries CASCADE;
+
+
+-- ============================================================
+-- v31 — Workshop Module: tabla `processes` (checklist ordenable de
+-- services y external_services)
+-- ============================================================
+-- Un service o external_service puede tener 0 o varios "procesos"
+-- (pasos de una lista, ej. "Desarmar", "Limpiar", "Armar") con un orden
+-- definido por el operador arrastrando filas (CDK drag-drop en el
+-- frontend, componente compartido ProcessListInput). Mismo patron de
+-- referencia polimorfica que `contacts` (reference_id SIN FK — el caller
+-- sabe a que tabla apunta; hoy solo services/external_services lo usan).
+-- El orden se persiste en "position"; al guardar el formulario se borra
+-- todo el set de un reference_id y se reinserta completo en el nuevo
+-- orden (mismo patron delete-all+reinsert que SPContact.upsertForReference).
+CREATE TABLE IF NOT EXISTS processes (
+  id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  reference_id UUID,
+  description  TEXT,
+  position     INTEGER     NOT NULL DEFAULT 0,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_processes_reference_id ON processes(reference_id);
+
+DROP TRIGGER IF EXISTS trg_set_updated_at ON processes;
+CREATE TRIGGER trg_set_updated_at
+  BEFORE UPDATE ON processes
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+ALTER TABLE processes ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  CREATE POLICY "auth_select_processes" ON processes FOR SELECT TO authenticated USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "auth_insert_processes" ON processes FOR INSERT TO authenticated WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "auth_update_processes" ON processes FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "auth_delete_processes" ON processes FOR DELETE TO authenticated USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_select_processes" ON processes FOR SELECT TO anon USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_insert_processes" ON processes FOR INSERT TO anon WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_update_processes" ON processes FOR UPDATE TO anon USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_delete_processes" ON processes FOR DELETE TO anon USING (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'processes'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE processes;
+  END IF;
+END $$;
+
+
+-- ============================================================
+-- v32 — Service Orders Module: checklist de procesos por orden
+-- (service_order_process_checks)
+-- ============================================================
+-- Cada servicio y servicio externo agregado a una orden puede tener
+-- procesos (tabla `processes`, v31). Esta migracion agrega el checklist
+-- que un mecanico/operador marca como constancia de haber cumplido cada
+-- paso, por orden.
+--
+-- NO se liga a la linea de la orden (service_order_services.id /
+-- service_order_external_services.id): esas lineas se borran y
+-- reinsertan por completo en cada edicion de la orden (patron
+-- delete-all+reinsert, ver service-order-flow.md), asi que ligar el
+-- check a esa id perderia el progreso marcado cada vez que se guarda la
+-- orden. En su lugar se liga a (service_order_id, source_type,
+-- source_id) donde source_id es el id de CATALOGO (services.id o
+-- external_services.id), estable entre ediciones. Asume que un mismo
+-- servicio no se agrega dos veces como lineas separadas en una orden (se
+-- usa quantity para eso) — ver nota en service-order-flow.md §11.
+DO $$ BEGIN
+  CREATE TYPE process_check_source_enum AS ENUM ('SERVICE', 'EXTERNAL_SERVICE');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS service_order_process_checks (
+  id                UUID                       PRIMARY KEY DEFAULT gen_random_uuid(),
+  service_order_id  UUID                       NOT NULL REFERENCES service_orders(id) ON DELETE CASCADE,
+  source_type       process_check_source_enum  NOT NULL,
+  source_id         UUID                       NOT NULL,
+  process_id        UUID                       NOT NULL REFERENCES processes(id)      ON DELETE CASCADE,
+  checked           BOOLEAN                    NOT NULL DEFAULT false,
+  checked_at        TIMESTAMPTZ,
+  checked_by        UUID                       REFERENCES users(id) ON DELETE SET NULL,
+  created_at        TIMESTAMPTZ                NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ                NOT NULL DEFAULT NOW(),
+  CONSTRAINT service_order_process_checks_unique UNIQUE (service_order_id, source_type, source_id, process_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sopc_service_order_id ON service_order_process_checks(service_order_id);
+
+DROP TRIGGER IF EXISTS trg_set_updated_at ON service_order_process_checks;
+CREATE TRIGGER trg_set_updated_at
+  BEFORE UPDATE ON service_order_process_checks
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+ALTER TABLE service_order_process_checks ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+  CREATE POLICY "auth_all_service_order_process_checks" ON service_order_process_checks FOR ALL TO authenticated USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN
+  CREATE POLICY "anon_all_service_order_process_checks" ON service_order_process_checks FOR ALL TO anon USING (true) WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'service_order_process_checks'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE service_order_process_checks;
+  END IF;
+END $$;
+
+-- Sincroniza el checklist de una orden: agrega filas faltantes para los
+-- servicios/servicios externos ACTUALES de la orden (sin duplicar, via
+-- ON CONFLICT) y elimina las de servicios que ya no estan en la orden.
+-- Se invoca desde el frontend (SPServiceOrderProcessCheck.sync) cada vez
+-- que se abre la vista de checklist.
+CREATE OR REPLACE FUNCTION sync_service_order_process_checks(p_service_order_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO service_order_process_checks (service_order_id, source_type, source_id, process_id)
+  SELECT DISTINCT p_service_order_id, 'SERVICE'::process_check_source_enum, sos.service_id, pr.id
+  FROM service_order_services sos
+  JOIN processes pr ON pr.reference_id = sos.service_id
+  WHERE sos.service_order_id = p_service_order_id AND sos.service_id IS NOT NULL
+  ON CONFLICT (service_order_id, source_type, source_id, process_id) DO NOTHING;
+
+  INSERT INTO service_order_process_checks (service_order_id, source_type, source_id, process_id)
+  SELECT DISTINCT p_service_order_id, 'EXTERNAL_SERVICE'::process_check_source_enum, soe.external_service_id, pr.id
+  FROM service_order_external_services soe
+  JOIN processes pr ON pr.reference_id = soe.external_service_id
+  WHERE soe.service_order_id = p_service_order_id AND soe.external_service_id IS NOT NULL
+  ON CONFLICT (service_order_id, source_type, source_id, process_id) DO NOTHING;
+
+  DELETE FROM service_order_process_checks c
+  WHERE c.service_order_id = p_service_order_id
+    AND c.source_type = 'SERVICE'
+    AND NOT EXISTS (
+      SELECT 1 FROM service_order_services sos
+      WHERE sos.service_order_id = p_service_order_id AND sos.service_id = c.source_id
+    );
+
+  DELETE FROM service_order_process_checks c
+  WHERE c.service_order_id = p_service_order_id
+    AND c.source_type = 'EXTERNAL_SERVICE'
+    AND NOT EXISTS (
+      SELECT 1 FROM service_order_external_services soe
+      WHERE soe.service_order_id = p_service_order_id AND soe.external_service_id = c.source_id
+    );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION sync_service_order_process_checks(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION sync_service_order_process_checks(UUID) TO anon, authenticated;

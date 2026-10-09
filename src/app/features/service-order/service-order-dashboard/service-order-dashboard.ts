@@ -97,6 +97,10 @@ export class ServiceOrderDashboard {
     });
   }
 
+  onChecklist(order: ServiceOrder): void {
+    this.router.navigate(['/dashboard/ordenes/checklist', order.id]);
+  }
+
   customerLabel(o: ServiceOrder): string {
     const c = o.customer;
     if (!c) return '—';

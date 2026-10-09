@@ -126,6 +126,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/service-order/service-order-form/service-order-form').then(m => m.ServiceOrderForm),
       },
       {
+        path: 'ordenes/checklist/:id',
+        loadComponent: () => import('./features/service-order/service-order-checklist/service-order-checklist').then(m => m.ServiceOrderChecklist),
+      },
+      {
         path: 'reportes/utilidades',
         loadComponent: () => import('./features/reports/utility-report/utility-report-dashboard').then(m => m.UtilityReportDashboard),
       },

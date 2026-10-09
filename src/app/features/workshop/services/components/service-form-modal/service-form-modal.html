@@ -1,7 +1,7 @@
 <app-dialog-frame
   [title]="isEditMode ? 'Editar Servicio' : 'Nuevo Servicio'"
   [icon]="isEditMode ? 'edit' : 'build'"
-  initialSize="sm">
+  initialSize="md">
 
   <form [formGroup]="form" class="form-grid">
 
@@ -44,6 +44,13 @@
       <mat-slide-toggle formControlName="active" color="primary">
         {{ form.get('active')?.value ? 'Activo' : 'Inactivo' }}
       </mat-slide-toggle>
+    </div>
+
+    <div class="field-full">
+      <span class="process-section-label">
+        Procesos <span class="process-section-hint">(opcional — pasos del servicio, arrástralos para ordenarlos)</span>
+      </span>
+      <app-process-list-input formControlName="processes" />
     </div>
 
   </form>

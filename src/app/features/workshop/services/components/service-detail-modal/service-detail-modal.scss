@@ -75,6 +75,16 @@
   color: var(--color-text-faint);
 }
 
+.detail-process-list {
+  margin: 0.25rem 0 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--color-text-primary);
+}
+
 .detail-dates {
   display: grid;
   grid-template-columns: 1fr 1fr;

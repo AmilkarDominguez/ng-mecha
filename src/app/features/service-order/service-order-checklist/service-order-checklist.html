@@ -1,0 +1,64 @@
+<div class="checklist-page">
+
+  <div class="page-header">
+    <div class="page-title-group">
+      <button mat-icon-button matTooltip="Volver" (click)="onBack()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="page-title-text">
+        <h1 class="page-title">Checklist de Procesos</h1>
+        <span class="page-subtitle">
+          Orden {{ order()?.number ?? '—' }}
+          @if (!loading() && totalItems() > 0) {
+            · {{ totalChecked() }}/{{ totalItems() }} procesos completados
+          }
+        </span>
+      </div>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-progress-spinner mode="indeterminate" diameter="48" />
+    </div>
+  } @else if (sections().length === 0) {
+    <div class="empty-state">
+      <mat-icon>checklist</mat-icon>
+      <span>Esta orden no tiene procesos definidos en sus servicios.</span>
+    </div>
+  } @else {
+    <div class="sections-list">
+      @for (section of sections(); track section.sourceType + section.sourceId; let si = $index) {
+        <div class="section-card">
+          <div class="section-header">
+            <span class="section-badge" [attr.data-type]="section.sourceType">
+              {{ section.sourceType === 'SERVICE' ? 'Servicio' : 'Servicio Externo' }}
+            </span>
+            <span class="section-title">{{ section.sourceName }}</span>
+          </div>
+
+          <div class="process-items">
+            @for (item of section.items; track item.id; let ii = $index) {
+              <div class="process-item">
+                <mat-checkbox
+                  [checked]="item.checked"
+                  (change)="onToggle(si, ii, $event)">
+                  {{ item.process?.description ?? 'Paso sin descripción' }}
+                </mat-checkbox>
+                @if (item.checked && item.checked_by_user) {
+                  <span class="checked-meta">
+                    Marcado por {{ checkedByLabel(item) }}
+                    @if (item.checked_at) {
+                      · {{ item.checked_at | date: 'dd/MM/yyyy HH:mm' }}
+                    }
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

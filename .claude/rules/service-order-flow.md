@@ -50,6 +50,9 @@ src/app/features/service-order/
     ├── service-order-payments-modal/            ← Modal: lista de pagos + acciones (registrar/editar/eliminar)
     ├── service-order-payment-form-modal/        ← Modal: formulario de un pago (crear/editar)
     └── service-order-payment-delete-confirm-modal/ ← Modal: confirmación antes de eliminar un pago
+
+src/app/features/service-order/service-order-checklist/   ← Vista completa (no modal) de
+                                                               checklist de procesos de una orden
 ```
 
 `tab-quote`, `service-order-quotes-table` y `add-quote-to-order-modal` son del módulo de
@@ -641,3 +644,93 @@ re-insert de líneas, nunca cálculo de balances en el cliente.
 - Diseño original: `.claude/commands/service-order-print.md` y
   `.claude/commands/service-order-print-adjust.md` (ajustes posteriores: una sola copia, modal
   de vista previa).
+
+---
+
+## 11. Checklist de procesos por orden (`ServiceOrderChecklist`) — 2026-10-08
+
+Vista nueva (NO modal — ruta completa `/dashboard/ordenes/checklist/:id`,
+`src/app/features/service-order/service-order-checklist/`) donde un mecánico/operador marca,
+servicio por servicio, los pasos (`Process`, tabla `processes`, documentada en
+`.claude/docs/entities.md` Workshop Module §7) como constancia de que se cumplieron. Se
+accede desde un botón nuevo (ícono `checklist`,
+tooltip "Checklist de procesos") en la columna de acciones de `ServiceOrderDashboard`, junto a
+Editar/Pagos/Imprimir/Ver — **no** es un ítem de `nav-menu.ts` nuevo, sigue el mismo criterio
+que el resto de acciones por fila de este módulo.
+
+### Por qué NO se liga a la línea de la orden (la decisión más importante de este módulo)
+
+`service_order_services`/`service_order_batches`/`service_order_external_services` se
+sincronizan con el patrón **delete-all + reinsert** en cada guardado del formulario de orden
+(`executeUpdate()` → `deleteLinesByOrderId` → `saveLines()`, ver §7 de este documento y
+regla de negocio #7/#12). Si el checklist se hubiera ligado a
+`service_order_services.id`/`service_order_external_services.id`, **cada vez que se edita la
+orden** (aunque sea para cambiar solo el kilometraje, sin tocar las líneas de servicio) esas
+ids se regeneran y el checklist marcado se habría perdido silenciosamente — el mismo tipo de
+bug que ya se documentó para `quote_id` en `[[quotes-service-orders]]` §5, pero aplicado aquí.
+
+En su lugar, `service_order_process_checks` se liga a
+`(service_order_id, source_type, source_id)` donde `source_id` es el **id de catálogo**
+(`services.id` o `external_services.id`, NO el id de la línea pivote) — estable entre
+ediciones de la orden. **Asunción aceptada:** un mismo servicio no se agrega dos veces como
+líneas separadas en una orden (se usa `quantity` para eso, ver tablas editables del
+formulario); si en el futuro se permite duplicar líneas del mismo servicio, esta tabla
+necesitaría repensarse (hoy un `UNIQUE (service_order_id, source_type, source_id,
+process_id)` lo impediría con un error de conflicto en el `sync`).
+
+### Esquema y RPC (`migrate.sql` v32, replicado en `tables.sql`)
+
+Tabla `service_order_process_checks` (`id`, `service_order_id` FK CASCADE, `source_type`
+enum `SERVICE`/`EXTERNAL_SERVICE`, `source_id` UUID sin FK, `process_id` FK → `processes.id`
+CASCADE, `checked` boolean, `checked_at`/`checked_by` nullable). Detalle completo de columnas
+en `.claude/docs/entities.md` Service Orders Module §5.
+
+La población/limpieza de filas la hace la RPC `sync_service_order_process_checks(p_service_order_id)`
+(`SECURITY DEFINER`): inserta (con `ON CONFLICT DO NOTHING`) una fila por cada combinación
+proceso × servicio/servicio-externo **actualmente** en la orden, y elimina las filas cuyo
+`source_id` ya no está en ninguna línea de la orden. Se invoca desde
+`SPServiceOrderProcessCheck.sync()` **cada vez que se abre la vista de checklist** — no desde
+la cascada de guardado de `service-order-form.ts` (ese formulario no conoce este módulo, y no
+hace falta que lo conozca: sincronizar al abrir el checklist es suficiente y evita acoplar un
+módulo más a la cascada ya compleja de §7).
+
+El toggle de un check (`SPServiceOrderProcessCheck.toggle(id, checked, userId)`) es un
+`UPDATE` directo por REST, **no** una RPC — a diferencia de los flujos financieros de §9, no
+hay invariante multi-tabla que proteger aquí, así que no amerita `SECURITY DEFINER`.
+`checked_at`/`checked_by` se setean en el cliente al marcar (`new Date().toISOString()` +
+`AuthService.currentUser()?.id`) y se limpian (`null`) al desmarcar.
+
+### Frontend
+
+- `sb-service-order-process-check.ts` (`SPServiceOrderProcessCheck`): `sync()`, `toggle()`,
+  `getSections()`. `getSections()` trae las filas crudas (joins a `processes` y `users` vía
+  PostgREST) y las agrupa en memoria por `(source_type, source_id)` — el **nombre** de cada
+  sección (nombre del servicio/servicio externo) se resuelve con 2 queries adicionales a
+  `services`/`external_services` por los `source_id` distintos presentes, porque `source_id`
+  es una referencia polimórfica sin FK que PostgREST pueda joinear directo (mismo tipo de
+  limitación que `processes.reference_id`, ver `SPService`/`SPExternalService`).
+- `ServiceOrderChecklist` (`service-order-checklist.ts/.html/.scss`): página completa (no
+  modal, patrón `page-header` + contenido, igual esqueleto que `settings-form.html` pero sin
+  `form-layout` de 2 columnas). `ngOnInit` resuelve `:id` de la ruta, carga la orden
+  (`SPServiceOrder.getById`), llama `sync()` (best-effort: si falla, igual intenta cargar lo
+  que ya exista) y luego `getSections()`. Una `mat-checkbox` por proceso, agrupadas en
+  "section-card" por servicio/servicio externo (badge de color distingue
+  `SERVICE`/`EXTERNAL_SERVICE`, mismo patrón visual que `.state-chip` de
+  `service-order-dashboard.scss`). Header muestra progreso `checked/total` agregado de toda
+  la orden.
+- Si agregas un campo nuevo a `Process` que también deba reflejarse aquí (ej. una categoría
+  de paso), actualízalo en `ServiceOrderProcessCheckLine.process` (modelo) y en el `select()`
+  de `SPServiceOrderProcessCheck` (`SELECT_WITH_JOINS`).
+
+### Checklist antes de tocar este módulo
+
+1. ¿Vas a cambiar el patrón de guardado de líneas de orden (§7, delete-all+reinsert)? →
+   revisa que `source_id` siga siendo el id de catálogo y no termines ligando esto a un id de
+   línea por error — es exactamente el bug que este diseño evita.
+2. ¿Vas a permitir agregar el mismo servicio dos veces como líneas separadas en una orden? →
+   el `UNIQUE` de esta tabla lo bloquearía en el `sync` (conflicto no manejado como error
+   fatal porque usa `ON CONFLICT DO NOTHING` en el INSERT, pero sí sería ambiguo qué línea
+   "posee" el check) — coordina con este documento antes de habilitarlo.
+3. ¿Vas a mostrar el progreso del checklist en otro lugar (ej. `ServiceOrderDetailModal` o el
+   dashboard)? → reusa `SPServiceOrderProcessCheck.getSections()` + `sync()`, no dupliques la
+   lógica de agrupación por `source_type`/`source_id`.

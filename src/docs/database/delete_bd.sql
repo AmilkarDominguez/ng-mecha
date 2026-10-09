@@ -48,6 +48,7 @@ DROP TABLE IF EXISTS batch_reservations              CASCADE;
 DROP TABLE IF EXISTS quote_external_services         CASCADE;
 DROP TABLE IF EXISTS quote_batches                   CASCADE;
 DROP TABLE IF EXISTS quote_services                  CASCADE;
+DROP TABLE IF EXISTS service_order_process_checks    CASCADE;
 DROP TABLE IF EXISTS service_order_external_services CASCADE;
 DROP TABLE IF EXISTS service_order_batches           CASCADE;
 DROP TABLE IF EXISTS service_order_services          CASCADE;
@@ -63,6 +64,7 @@ DROP TABLE IF EXISTS mechanics             CASCADE;
 DROP TABLE IF EXISTS services              CASCADE;
 DROP TABLE IF EXISTS external_services     CASCADE;
 DROP TABLE IF EXISTS contacts              CASCADE;
+DROP TABLE IF EXISTS processes             CASCADE;
 DROP TABLE IF EXISTS batches               CASCADE;
 DROP TABLE IF EXISTS multimedia            CASCADE;
 DROP TABLE IF EXISTS products              CASCADE;
@@ -90,6 +92,7 @@ DROP FUNCTION IF EXISTS reserve_quote_batches(UUID) CASCADE;
 DROP FUNCTION IF EXISTS release_quote_reservations(UUID, TEXT) CASCADE;
 DROP FUNCTION IF EXISTS convert_quote_to_order(UUID, UUID) CASCADE;
 DROP FUNCTION IF EXISTS expire_overdue_quote_reservations() CASCADE;
+DROP FUNCTION IF EXISTS sync_service_order_process_checks(UUID) CASCADE;
 DROP FUNCTION IF EXISTS register_bank_income(UUID, UUID, NUMERIC, TEXT, UUID) CASCADE;
 DROP FUNCTION IF EXISTS edit_bank_income(UUID, UUID, UUID, NUMERIC, TEXT) CASCADE;
 DROP FUNCTION IF EXISTS delete_bank_income(UUID) CASCADE;
@@ -101,6 +104,7 @@ DROP FUNCTION IF EXISTS delete_bank_expense(UUID) CASCADE;
 -- ============================================================
 -- TIPOS (enums)
 -- ============================================================
+DROP TYPE IF EXISTS process_check_source_enum       CASCADE;
 DROP TYPE IF EXISTS user_role_enum                 CASCADE;
 DROP TYPE IF EXISTS bank_transaction_kind          CASCADE;
 DROP TYPE IF EXISTS external_services_rating_enum CASCADE;

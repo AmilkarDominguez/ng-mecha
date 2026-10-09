@@ -1,4 +1,5 @@
 import { EntityState } from './product-category.model';
+import { Process } from './process.model';
 
 export interface Service {
   id: string;
@@ -9,4 +10,5 @@ export interface Service {
   state: EntityState;
   created_at?: string | Date;
   updated_at?: string | Date;
+  processes?: Process[];
 }

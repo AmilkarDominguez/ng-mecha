@@ -1,0 +1,41 @@
+<div class="process-list">
+  <div cdkDropList class="process-drop-list" (cdkDropListDropped)="drop($event)">
+    @for (row of rows(); track row.localId; let i = $index) {
+      <div class="process-row" cdkDrag [cdkDragDisabled]="disabled()">
+        <div class="process-drag-handle" cdkDragHandle matTooltip="Arrastrar para reordenar">
+          <mat-icon>drag_indicator</mat-icon>
+        </div>
+        <span class="process-index">{{ i + 1 }}</span>
+        <input
+          class="process-text-input"
+          type="text"
+          [value]="row.description"
+          (input)="updateItemText(row.localId, $event)"
+          [disabled]="disabled()"
+          placeholder="Descripción del paso" />
+        <button mat-icon-button type="button" color="warn" [disabled]="disabled()"
+          (click)="removeItem(row.localId)" matTooltip="Quitar proceso">
+          <mat-icon>delete</mat-icon>
+        </button>
+        <div class="process-drag-placeholder" *cdkDragPlaceholder></div>
+      </div>
+    }
+    @if (rows().length === 0) {
+      <div class="process-empty">Sin procesos agregados</div>
+    }
+  </div>
+
+  <div class="process-add-row">
+    <mat-form-field appearance="outline" class="process-add-field">
+      <mat-label>Agregar proceso</mat-label>
+      <input matInput [value]="newItemText()" (input)="onNewItemInput($event)"
+        [disabled]="disabled()"
+        placeholder="Ej. Drenar aceite usado"
+        (keydown.enter)="$event.preventDefault(); addItem()" />
+    </mat-form-field>
+    <button mat-stroked-button type="button" color="primary" [disabled]="disabled()" (click)="addItem()">
+      <mat-icon>add</mat-icon>
+      Agregar
+    </button>
+  </div>
+</div>

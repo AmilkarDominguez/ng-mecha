@@ -314,6 +314,21 @@ CREATE TABLE IF NOT EXISTS contacts (
   updated_at   TIMESTAMPTZ        NOT NULL DEFAULT NOW()
 );
 
+-- 10bis. processes
+-- Mismo patron de referencia polimorfica que contacts (reference_id sin FK,
+-- el caller sabe a que tabla pertenece): un servicio o un servicio externo
+-- puede tener 0 o varios procesos, con "position" definiendo el orden en
+-- que el operador los arrastra/visualiza (ver ProcessListInput en el
+-- frontend, componente CDK drag-drop compartido por ambos formularios).
+CREATE TABLE IF NOT EXISTS processes (
+  id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  reference_id UUID,
+  description  TEXT,
+  position     INTEGER     NOT NULL DEFAULT 0,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- 11. customers
 CREATE TABLE IF NOT EXISTS customers (
   id             UUID                  PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -552,6 +567,37 @@ CREATE TABLE IF NOT EXISTS service_order_external_services (
   subtotal             NUMERIC(8,2),
   created_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW(),
   updated_at           TIMESTAMPTZ      NOT NULL DEFAULT NOW()
+);
+
+-- 21bis. service_order_process_checks
+-- Checklist de verificacion por orden: una fila por cada combinacion
+-- (servicio o servicio externo agregado a la orden) x (proceso de ese
+-- catalogo). NO se liga a la linea de la orden
+-- (service_order_services.id / service_order_external_services.id)
+-- porque esas lineas se borran y reinsertan por completo en cada edicion
+-- de la orden (patron delete-all+reinsert, ver service-order-flow.md) —
+-- ligar el check a esa id perderia el progreso marcado en cada guardado.
+-- En su lugar se liga a (service_order_id, source_type, source_id) donde
+-- source_id es el id de CATALOGO (services.id o external_services.id),
+-- estable entre ediciones. Asume que un mismo servicio no se agrega dos
+-- veces como lineas separadas en una orden (se usa quantity para eso).
+DO $$ BEGIN
+  CREATE TYPE process_check_source_enum AS ENUM ('SERVICE', 'EXTERNAL_SERVICE');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS service_order_process_checks (
+  id                UUID                       PRIMARY KEY DEFAULT gen_random_uuid(),
+  service_order_id  UUID                       NOT NULL REFERENCES service_orders(id) ON DELETE CASCADE,
+  source_type       process_check_source_enum  NOT NULL,
+  source_id         UUID                       NOT NULL,
+  process_id        UUID                       NOT NULL REFERENCES processes(id)      ON DELETE CASCADE,
+  checked           BOOLEAN                    NOT NULL DEFAULT false,
+  checked_at        TIMESTAMPTZ,
+  checked_by        UUID                       REFERENCES users(id) ON DELETE SET NULL,
+  created_at        TIMESTAMPTZ                NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ                NOT NULL DEFAULT NOW(),
+  CONSTRAINT service_order_process_checks_unique UNIQUE (service_order_id, source_type, source_id, process_id)
 );
 
 
@@ -1665,6 +1711,56 @@ $$;
 REVOKE ALL ON FUNCTION expire_overdue_quote_reservations() FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION expire_overdue_quote_reservations() TO anon, authenticated;
 
+-- Sincroniza el checklist de procesos de una orden (ver tabla
+-- service_order_process_checks arriba): agrega filas faltantes para los
+-- servicios/servicios externos ACTUALES de la orden (sin duplicar, via
+-- ON CONFLICT) y elimina las de servicios que ya no estan en la orden.
+-- Se invoca desde el frontend (SPServiceOrderProcessCheck.sync) cada vez
+-- que se abre la vista de checklist, para que siempre refleje el estado
+-- real de las lineas de la orden sin depender de la cascada de guardado
+-- del formulario de orden (que no conoce este modulo).
+CREATE OR REPLACE FUNCTION sync_service_order_process_checks(p_service_order_id UUID)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  INSERT INTO service_order_process_checks (service_order_id, source_type, source_id, process_id)
+  SELECT DISTINCT p_service_order_id, 'SERVICE'::process_check_source_enum, sos.service_id, pr.id
+  FROM service_order_services sos
+  JOIN processes pr ON pr.reference_id = sos.service_id
+  WHERE sos.service_order_id = p_service_order_id AND sos.service_id IS NOT NULL
+  ON CONFLICT (service_order_id, source_type, source_id, process_id) DO NOTHING;
+
+  INSERT INTO service_order_process_checks (service_order_id, source_type, source_id, process_id)
+  SELECT DISTINCT p_service_order_id, 'EXTERNAL_SERVICE'::process_check_source_enum, soe.external_service_id, pr.id
+  FROM service_order_external_services soe
+  JOIN processes pr ON pr.reference_id = soe.external_service_id
+  WHERE soe.service_order_id = p_service_order_id AND soe.external_service_id IS NOT NULL
+  ON CONFLICT (service_order_id, source_type, source_id, process_id) DO NOTHING;
+
+  DELETE FROM service_order_process_checks c
+  WHERE c.service_order_id = p_service_order_id
+    AND c.source_type = 'SERVICE'
+    AND NOT EXISTS (
+      SELECT 1 FROM service_order_services sos
+      WHERE sos.service_order_id = p_service_order_id AND sos.service_id = c.source_id
+    );
+
+  DELETE FROM service_order_process_checks c
+  WHERE c.service_order_id = p_service_order_id
+    AND c.source_type = 'EXTERNAL_SERVICE'
+    AND NOT EXISTS (
+      SELECT 1 FROM service_order_external_services soe
+      WHERE soe.service_order_id = p_service_order_id AND soe.external_service_id = c.source_id
+    );
+END;
+$$;
+
+REVOKE ALL ON FUNCTION sync_service_order_process_checks(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION sync_service_order_process_checks(UUID) TO anon, authenticated;
+
 
 -- ============================================================
 -- INDEXES
@@ -1680,6 +1776,7 @@ CREATE INDEX IF NOT EXISTS idx_batches_supplier_id      ON batches(supplier_id);
 CREATE INDEX IF NOT EXISTS idx_batches_brand_id         ON batches(brand_id);
 CREATE INDEX IF NOT EXISTS idx_batches_bank_account_id  ON batches(bank_account_id);
 CREATE INDEX IF NOT EXISTS idx_contacts_reference_id    ON contacts(reference_id);
+CREATE INDEX IF NOT EXISTS idx_processes_reference_id   ON processes(reference_id);
 CREATE INDEX IF NOT EXISTS idx_mechanics_state           ON mechanics(state);
 CREATE INDEX IF NOT EXISTS idx_services_state            ON services(state);
 CREATE INDEX IF NOT EXISTS idx_external_services_state   ON external_services(state);
@@ -1692,6 +1789,7 @@ CREATE INDEX IF NOT EXISTS idx_service_orders_state                 ON service_o
 CREATE INDEX IF NOT EXISTS idx_service_order_services_order_id      ON service_order_services(service_order_id);
 CREATE INDEX IF NOT EXISTS idx_service_order_batches_order_id       ON service_order_batches(service_order_id);
 CREATE INDEX IF NOT EXISTS idx_service_order_external_order_id      ON service_order_external_services(service_order_id);
+CREATE INDEX IF NOT EXISTS idx_sopc_service_order_id                ON service_order_process_checks(service_order_id);
 CREATE INDEX IF NOT EXISTS idx_bah_bank_account_id                  ON bank_account_histories(bank_account_id);
 CREATE INDEX IF NOT EXISTS idx_bah_transaction_reference            ON bank_account_histories(transaction_reference);
 CREATE INDEX IF NOT EXISTS idx_quotes_customer_id                ON quotes(customer_id);
@@ -1736,6 +1834,7 @@ BEGIN
     'warehouses',
     'batches',
     'contacts',
+    'processes',
     'customers',
     'mechanics',
     'services',
@@ -1748,6 +1847,7 @@ BEGIN
     'service_order_services',
     'service_order_batches',
     'service_order_external_services',
+    'service_order_process_checks',
     'quotes',
     'quote_services',
     'quote_batches',
@@ -1779,6 +1879,7 @@ ALTER TABLE brands                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE warehouses            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE batches               ENABLE ROW LEVEL SECURITY;
 ALTER TABLE contacts              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE processes             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE customers             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mechanics             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE services              ENABLE ROW LEVEL SECURITY;
@@ -1791,6 +1892,7 @@ ALTER TABLE service_orders                     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_order_services             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_order_batches              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE service_order_external_services    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE service_order_process_checks       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quotes                             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quote_services                     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE quote_batches                      ENABLE ROW LEVEL SECURITY;
@@ -1903,6 +2005,16 @@ CREATE POLICY "auth_update_contacts"
 CREATE POLICY "auth_delete_contacts"
   ON contacts FOR DELETE TO authenticated USING (true);
 
+-- processes
+CREATE POLICY "auth_select_processes"
+  ON processes FOR SELECT TO authenticated USING (true);
+CREATE POLICY "auth_insert_processes"
+  ON processes FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "auth_update_processes"
+  ON processes FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_delete_processes"
+  ON processes FOR DELETE TO authenticated USING (true);
+
 -- customers
 CREATE POLICY "auth_select_customers"
   ON customers FOR SELECT TO authenticated USING (true);
@@ -1987,6 +2099,7 @@ CREATE POLICY "auth_all_service_orders"                  ON service_orders      
 CREATE POLICY "auth_all_service_order_services"          ON service_order_services          FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "auth_all_service_order_batches"           ON service_order_batches           FOR ALL TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "auth_all_service_order_external_services" ON service_order_external_services FOR ALL TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "auth_all_service_order_process_checks"    ON service_order_process_checks    FOR ALL TO authenticated USING (true) WITH CHECK (true);
 
 -- Quotes Module
 CREATE POLICY "auth_all_quotes"                  ON quotes                  FOR ALL TO authenticated USING (true) WITH CHECK (true);
@@ -2102,6 +2215,16 @@ CREATE POLICY "anon_update_contacts"
 CREATE POLICY "anon_delete_contacts"
   ON contacts FOR DELETE TO anon USING (true);
 
+-- processes
+CREATE POLICY "anon_select_processes"
+  ON processes FOR SELECT TO anon USING (true);
+CREATE POLICY "anon_insert_processes"
+  ON processes FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "anon_update_processes"
+  ON processes FOR UPDATE TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_delete_processes"
+  ON processes FOR DELETE TO anon USING (true);
+
 -- customers
 CREATE POLICY "anon_select_customers"
   ON customers FOR SELECT TO anon USING (true);
@@ -2185,6 +2308,7 @@ CREATE POLICY "anon_all_service_orders"                  ON service_orders      
 CREATE POLICY "anon_all_service_order_services"          ON service_order_services          FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_service_order_batches"           ON service_order_batches           FOR ALL TO anon USING (true) WITH CHECK (true);
 CREATE POLICY "anon_all_service_order_external_services" ON service_order_external_services FOR ALL TO anon USING (true) WITH CHECK (true);
+CREATE POLICY "anon_all_service_order_process_checks"    ON service_order_process_checks    FOR ALL TO anon USING (true) WITH CHECK (true);
 
 -- Quotes Module
 CREATE POLICY "anon_all_quotes"                  ON quotes                  FOR ALL TO anon USING (true) WITH CHECK (true);
@@ -2213,6 +2337,7 @@ BEGIN
     'warehouses',
     'batches',
     'contacts',
+    'processes',
     'customers',
     'mechanics',
     'services',
@@ -2225,6 +2350,7 @@ BEGIN
     'service_order_services',
     'service_order_batches',
     'service_order_external_services',
+    'service_order_process_checks',
     'quotes'
   ] LOOP
     -- Add table to the supabase_realtime publication if not already present

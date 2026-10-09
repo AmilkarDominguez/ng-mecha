@@ -1,0 +1,86 @@
+> Building...
+√ Building...
+Initial chunk files | Names                           |  Raw size
+main.js             | main                            | 164.92 kB | 
+chunk-SWS2PPZF.js   | -                               | 140.73 kB | 
+chunk-EMIDKFA5.js   | -                               |  25.49 kB | 
+chunk-XPZJDB6D.js   | -                               |  25.13 kB | 
+chunk-KM2UYSWA.js   | -                               |  19.50 kB | 
+chunk-JGLJV2AE.js   | -                               |  18.69 kB | 
+styles.css          | styles                          |  15.28 kB | 
+chunk-SP6IX7OL.js   | -                               |   6.74 kB | 
+chunk-QOGDIWIA.js   | -                               |   5.87 kB | 
+chunk-YVUUUTK2.js   | -                               |   4.18 kB | 
+chunk-4L4M5T45.js   | -                               |   3.85 kB | 
+chunk-WTO7TEAX.js   | -                               |   3.79 kB | 
+chunk-3IVEPEKF.js   | -                               |   3.28 kB | 
+chunk-B5TFQWFP.js   | -                               |   2.92 kB | 
+chunk-SPHYUZJZ.js   | -                               |   2.86 kB | 
+chunk-GUMRNRIV.js   | -                               |   2.80 kB | 
+chunk-MS4ZC7MR.js   | -                               |   2.69 kB | 
+chunk-NEQCFWZ7.js   | -                               |   2.66 kB | 
+chunk-XPIBX36G.js   | -                               |   2.64 kB | 
+chunk-ZTEMSQMK.js   | -                               |   2.46 kB | 
+chunk-MPVGULJS.js   | -                               |   1.95 kB | 
+chunk-JAQDGHQT.js   | -                               |   1.78 kB | 
+chunk-TGU2LRLM.js   | -                               |   1.59 kB | 
+
+                    | Initial total                   | 461.82 kB
+
+Lazy chunk files    | Names                           |  Raw size
+chunk-XFVICFSB.js   | service-order-form              | 298.74 kB | 
+chunk-MJWZCN5D.js   | quote-form                      | 215.50 kB | 
+chunk-YYDTAK2C.js   | quote-dashboard                 | 126.77 kB | 
+chunk-7JFD7CQZ.js   | mechanic-dashboard              | 106.66 kB | 
+chunk-BNOFHZXD.js   | supplier-dashboard              |  99.47 kB | 
+chunk-TFOSYXBC.js   | vehicle-dashboard               |  81.53 kB | 
+chunk-TBB5W7QG.js   | service-order-dashboard         |  74.92 kB | 
+chunk-AZ6AOE54.js   | product-dashboard               |  74.47 kB | 
+chunk-ZPWCN4HQ.js   | user-dashboard                  |  72.58 kB | 
+chunk-IEXEL4KV.js   | bank-account-dashboard          |  70.29 kB | 
+chunk-XJSJP3MV.js   | bank-transaction-type-dashboard |  70.20 kB | 
+chunk-2EEHHEZO.js   | product-presentation-dashboard  |  69.83 kB | 
+chunk-QCQ66ZGI.js   | external-service-dashboard      |  69.48 kB | 
+chunk-SP3FCDME.js   | product-category-dashboard      |  68.43 kB | 
+chunk-KLOFSMH2.js   | brand-dashboard                 |  67.12 kB | 
+...and 29 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [7.288 seconds] - 2026-10-09T00:22:53.055Z
+
+▲ [WARNING] NG8102: NG8102: The left side of this nullish coalescing operation does not include 'null' or 'undefined' in its type, therefore the '??' operator can be safely removed. Find more at https://v21.angular.dev/extended-diagnostics/NG8102 [plugin angular-compiler]
+
+    src/app/features/admin/users/components/user-detail-modal/user-detail-modal.html:25:38:
+      25 │ ...class="detail-value">{{ roleLabels[user.rol] ?? user.rol }}</span>
+         ╵                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Warning occurs in the template of component UserDetailModal.
+
+    src/app/features/admin/users/components/user-detail-modal/user-detail-modal.ts:21:15:
+      21 │   templateUrl: './user-detail-modal.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8102: NG8102: The left side of this nullish coalescing operation does not include 'null' or 'undefined' in its type, therefore the '??' operator can be safely removed. Find more at https://v21.angular.dev/extended-diagnostics/NG8102 [plugin angular-compiler]
+
+    src/app/features/admin/users/components/user-table/user-table.html:23:13:
+      23 │           {{ roleLabels[row.rol] ?? row.rol }}
+         ╵              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  Warning occurs in the template of component UserTable.
+
+    src/app/features/admin/users/components/user-table/user-table.ts:22:15:
+      22 │   templateUrl: './user-table.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8113: DatePipe is not used within the template of CustomerTable [plugin angular-compiler]
+
+    src/app/features/workshop/customers/components/customer-table/customer-table.ts:15:4:
+      15 │     DatePipe,
+         ╵     ~~~~~~~~
+
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://localhost:4300/
+  ➜  press h + enter to show help

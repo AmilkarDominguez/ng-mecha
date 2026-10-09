@@ -348,6 +348,7 @@ es la única FK; no existe `industry_id`.
 **Relaciones:**
 
 - One-to-Many → `LabourDetail`
+- One-to-Many → `Process` (0 o varios pasos ordenables, ver abajo)
 
 
 ---
@@ -372,6 +373,34 @@ es la única FK; no existe `industry_id`.
 | updated_at  | LocalDateTime | auto                 | LocalDateTime | auto |
 
 **Enum ExternalServicesRating:** `GOOD` (Bueno) · `REGULAR` (Regular) · `BAD` (Malo)
+
+**Relaciones:**
+
+- One-to-Many → `Process` (0 o varios pasos ordenables, ver abajo)
+
+---
+
+## 7. Process
+
+**Tabla:** `processes`
+
+Checklist ordenable de pasos para un `Service` o un `ExternalService` (ej. "Elevar
+vehículo", "Drenar aceite", "Cambiar filtro..."). Misma referencia polimórfica que
+`Contact` (`reference_id` sin FK — el caller sabe a qué tabla apunta); hoy solo
+`services`/`external_services` la usan. El orden lo define el operador arrastrando filas
+en el formulario (componente CDK drag-drop `ProcessListInput`, compartido por ambos
+formularios) y se persiste en `position`. Al guardar se borra todo el set de un
+`reference_id` y se reinserta completo en el nuevo orden (mismo patrón delete-all +
+reinsert que `SPContact.upsertForReference`, ver `SPProcess`).
+
+| Columna     | Tipo          | Restricciones    |
+|-------------|---------------|------------------|
+| id          | String (UUID) | PK, auto-generated |
+| reference_id| UUID          | nullable — sin FK, apunta a `services.id` o `external_services.id` |
+| description | String        | nullable — texto del paso |
+| position    | Integer       | not null, default 0 — orden de arrastre (0-based) |
+| created_at  | LocalDateTime | auto             |
+| updated_at  | LocalDateTime | auto             |
 
 # Accounting Module
 
@@ -686,5 +715,43 @@ El primer término son cotizaciones aprobadas vigentes (reserva blanda, con venc
 | subtotal                | BigDecimal(8,2) | nullable                           |
 | created_at              | LocalDateTime   | auto                               |
 | updated_at              | LocalDateTime   | auto                               |
+
+---
+
+## 5. ServiceOrderProcessCheck
+
+**Tabla:** `service_order_process_checks`
+
+Checklist de verificación por orden: una fila por cada combinación (servicio o servicio
+externo agregado a la orden) × (proceso de ese catálogo, ver `Process`). Un mecánico/operador
+lo marca como constancia de haber cumplido cada paso. **No** se liga a la línea de la orden
+(`service_order_services.id`/`service_order_external_services.id`) — esas líneas se borran y
+reinsertan completas en cada edición de la orden (patrón delete-all + reinsert, ver
+`service-order-flow.md`), así que ligar el check a esa id perdería el progreso marcado en
+cada guardado. En su lugar se liga a `(service_order_id, source_type, source_id)` donde
+`source_id` es el id de **catálogo** (`services.id` o `external_services.id`), estable entre
+ediciones.
+
+| Columna          | Tipo                      | Restricciones                                |
+|------------------|---------------------------|-----------------------------------------------|
+| id               | UUID                      | PK, auto-generated                           |
+| service_order_id | UUID (FK)                 | not null → service_orders.id, ON DELETE CASCADE |
+| source_type      | ProcessCheckSource (enum) | not null — `SERVICE` o `EXTERNAL_SERVICE`    |
+| source_id        | UUID                      | not null — sin FK, apunta a `services.id` o `external_services.id` |
+| process_id       | UUID (FK)                 | not null → processes.id, ON DELETE CASCADE   |
+| checked          | Boolean                   | default: false                               |
+| checked_at       | LocalDateTime             | nullable — se limpia al desmarcar            |
+| checked_by       | UUID (FK)                 | nullable → users.id, ON DELETE SET NULL      |
+| created_at       | LocalDateTime             | auto                                         |
+| updated_at       | LocalDateTime             | auto                                         |
+
+**Enum ProcessCheckSource:** `SERVICE` · `EXTERNAL_SERVICE`
+
+Constraint único `(service_order_id, source_type, source_id, process_id)` — evita duplicados.
+Las filas se generan/limpian con la RPC `sync_service_order_process_checks(service_order_id)`,
+invocada por el frontend cada vez que se abre la vista `/dashboard/ordenes/checklist/:id`
+(`ServiceOrderChecklist` → `SPServiceOrderProcessCheck.sync()`); el toggle de un check es un
+`UPDATE` directo (no RPC, no es un flujo financiero). Ver `service-order-flow.md` §11 para el
+detalle completo de diseño.
 
 ---

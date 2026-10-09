@@ -30,6 +30,7 @@
 --   0011 vehicles                  0023 service_order_batches
 --   0012 mechanics                 0024 service_order_external_services
 --                                   0025 bank_account_histories
+--                                   0026 processes
 -- Los usuarios (users) y tipos de transaccion (bank_transaction_types)
 -- ya vienen sembrados desde tables.sql/migrate.sql y se referencian
 -- aqui por email / name en vez de id fijo.
@@ -240,6 +241,21 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO external_services (id, name, company_name, description, address, phone, rating, cost, price, state) VALUES
   ('00000000-0000-0000-0014-000000000001', 'Torneado de discos', 'Torneria Central',  'Torneado y rectificado de discos de freno.', 'Av. 6 de Agosto 100, Cochabamba', '77745678', 'GOOD', 40.00, 70.00,  'ACTIVE'),
   ('00000000-0000-0000-0014-000000000002', 'Servicio de grua',   'Grua Express',      'Traslado de vehiculos averiados.',           'Av. Ayacucho 200, Cochabamba',    '77756789', 'GOOD', 80.00, 150.00, 'ACTIVE')
+ON CONFLICT (id) DO NOTHING;
+
+
+-- ============================================================
+-- 15bis. processes (checklist ordenable de un service y un
+-- external_service, a modo de ejemplo del drag-drop del formulario)
+-- ============================================================
+INSERT INTO processes (id, reference_id, description, position) VALUES
+  ('00000000-0000-0000-0026-000000000001', '00000000-0000-0000-0013-000000000001', 'Elevar el vehiculo y retirar el carter', 0),
+  ('00000000-0000-0000-0026-000000000002', '00000000-0000-0000-0013-000000000001', 'Drenar aceite usado',                    1),
+  ('00000000-0000-0000-0026-000000000003', '00000000-0000-0000-0013-000000000001', 'Cambiar filtro de aceite',                2),
+  ('00000000-0000-0000-0026-000000000004', '00000000-0000-0000-0013-000000000001', 'Rellenar con aceite nuevo y verificar nivel', 3),
+  ('00000000-0000-0000-0026-000000000005', '00000000-0000-0000-0014-000000000001', 'Retirar discos del vehiculo',             0),
+  ('00000000-0000-0000-0026-000000000006', '00000000-0000-0000-0014-000000000001', 'Tornear en taller externo',               1),
+  ('00000000-0000-0000-0026-000000000007', '00000000-0000-0000-0014-000000000001', 'Reinstalar y probar frenado',             2)
 ON CONFLICT (id) DO NOTHING;
 
 

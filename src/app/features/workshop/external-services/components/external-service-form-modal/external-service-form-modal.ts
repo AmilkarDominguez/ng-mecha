@@ -9,6 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { ExternalService, ExternalServicesRating } from '../../../../../core/models/external-service.model';
+import { ProcessListInput, ProcessListItem } from '../../../../../shared/components/process-list-input/process-list-input';
 
 export interface ExternalServiceFormData {
   externalService?: ExternalService;
@@ -25,6 +26,7 @@ export interface ExternalServiceFormData {
     MatButtonModule,
     MatSlideToggleModule,
     MatIconModule,
+    ProcessListInput,
   ],
   templateUrl: './external-service-form-modal.html',
   styleUrl: './external-service-form-modal.scss',
@@ -54,6 +56,7 @@ export class ExternalServiceFormModal implements OnInit {
     description: ['', [Validators.maxLength(500)]],
     address: ['', [Validators.maxLength(300)]],
     active: [true],
+    processes: this.fb.control<ProcessListItem[]>([]),
   });
 
   ngOnInit(): void {
@@ -69,6 +72,7 @@ export class ExternalServiceFormModal implements OnInit {
         description: s.description ?? '',
         address: s.address ?? '',
         active: s.state === 'ACTIVE',
+        processes: (s.processes ?? []).map((p) => ({ description: p.description ?? '' })),
       });
     }
   }
@@ -90,6 +94,9 @@ export class ExternalServiceFormModal implements OnInit {
       description: raw.description || null,
       address: raw.address || null,
       state: raw.active ? 'ACTIVE' : 'INACTIVE',
+      processes: (raw.processes ?? [])
+        .filter((p) => p.description?.trim())
+        .map((p, index) => ({ description: p.description, position: index })),
     });
   }
 

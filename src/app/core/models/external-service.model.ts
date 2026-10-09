@@ -1,4 +1,5 @@
 import { EntityState } from './product-category.model';
+import { Process } from './process.model';
 
 export type ExternalServicesRating = 'GOOD' | 'REGULAR' | 'BAD';
 
@@ -15,4 +16,5 @@ export interface ExternalService {
   state: EntityState;
   created_at?: string | Date;
   updated_at?: string | Date;
+  processes?: Process[];
 }
