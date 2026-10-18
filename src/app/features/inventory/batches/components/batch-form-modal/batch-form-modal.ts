@@ -1,5 +1,6 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -40,6 +41,7 @@ export interface BatchFormData {
     MatDatepickerModule,
     MatButtonModule,
     MatSelectModule,
+    MatAutocompleteModule,
     MatSlideToggleModule,
     MatIconModule,
     MatExpansionModule,
@@ -103,6 +105,67 @@ export class BatchFormModal implements OnInit {
     expiration_date: [null as Date | null],
     active: [true],
   });
+
+  // Selects con busqueda (item 6): los 5 campos abajo siguen siendo
+  // `formControlName` normales dentro de `form` (guardan el id, los
+  // Validators.required no cambian, onSave() no cambia) — se les agrega
+  // matAutocomplete + displayWith + una lista filtrada en vivo. Mientras el
+  // operador escribe, valueChanges emite el texto crudo (Material no lo
+  // reemplaza hasta hacer click en una opcion); al seleccionar, el valor
+  // vuelve a ser el id limpio. displayWith solo decide que texto se MUESTRA
+  // cuando el valor ya es un id resuelto (seleccion hecha o precarga en
+  // modo edicion) — no interfiere con el filtrado mientras se escribe.
+  private readonly productIdValue = toSignal(this.form.controls.product_id.valueChanges, {
+    initialValue: this.form.controls.product_id.value,
+  });
+  readonly filteredProducts = computed(() => this.filterByText(this.products(), this.productIdValue(), (p) => p.name));
+  displayProduct = (id: string | null): string => this.products().find((p) => p.id === id)?.name ?? '';
+
+  private readonly warehouseIdValue = toSignal(this.form.controls.warehouse_id.valueChanges, {
+    initialValue: this.form.controls.warehouse_id.value,
+  });
+  readonly filteredWarehouses = computed(() =>
+    this.filterByText(this.data.warehouses, this.warehouseIdValue(), (w) => w.name),
+  );
+  displayWarehouse = (id: string | null): string => this.data.warehouses.find((w) => w.id === id)?.name ?? '';
+
+  private readonly supplierIdValue = toSignal(this.form.controls.supplier_id.valueChanges, {
+    initialValue: this.form.controls.supplier_id.value,
+  });
+  readonly filteredSuppliers = computed(() =>
+    this.filterByText(this.data.suppliers, this.supplierIdValue(), (s) => s.name),
+  );
+  displaySupplier = (id: string | null): string => this.data.suppliers.find((s) => s.id === id)?.name ?? '';
+
+  private readonly brandIdValue = toSignal(this.form.controls.brand_id.valueChanges, {
+    initialValue: this.form.controls.brand_id.value,
+  });
+  readonly filteredBrands = computed(() => this.filterByText(this.brands(), this.brandIdValue(), (b) => b.name));
+  displayBrand = (id: string | null): string => this.brands().find((b) => b.id === id)?.name ?? '';
+
+  private readonly bankAccountIdValue = toSignal(this.form.controls.bank_account_id.valueChanges, {
+    initialValue: this.form.controls.bank_account_id.value,
+  });
+  readonly filteredBankAccounts = computed(() =>
+    this.filterByText(this.activeBankAccounts(), this.bankAccountIdValue(), (a) => a.name),
+  );
+  displayBankAccount = (id: string | null): string => {
+    if (!id) return '';
+    const a = this.activeBankAccounts().find((acc) => acc.id === id);
+    if (!a) return '';
+    return a.number ? `${a.name} (${a.number})` : (a.name ?? '');
+  };
+
+  private filterByText<T extends { id: string }>(
+    list: T[],
+    rawValue: string | null,
+    label: (item: T) => string | null,
+  ): T[] {
+    const match = rawValue ? list.find((item) => item.id === rawValue) : null;
+    if (!rawValue || match) return list;
+    const term = String(rawValue).toLowerCase();
+    return list.filter((item) => (label(item) ?? '').toLowerCase().includes(term));
+  }
 
   ngOnInit(): void {
     if (this.data?.batch) {

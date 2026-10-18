@@ -520,7 +520,7 @@ this.dialog.open(SomeModal, {
 2. **Vehículo opcional:** `vehicle_id` puede ser null.
 3. **Mecánico único por orden:** `mechanic_id` está en `service_orders`, NO en `service_order_services`.
 4. **IVA constante:** `IVA_RATE = 0.13` definida como constante en `service-order-form.ts` (y repetida igual en `quote-form.ts` y `service-order-print-modal.ts` — si cambia la tasa, actualiza los 3).
-5. **Descuento en mano de obra y repuestos:** Se guarda como porcentaje (0-100), NO como valor absoluto.
+5. **Descuento en mano de obra y repuestos:** se guarda como **monto fijo en bolivianos** (no como porcentaje — cambiado 2026-10-18, antes era 0-100%). `subtotal = Math.max(0, price*quantity - discount)`. Mismo cambio aplicado en espejo al módulo de Cotizaciones (`quote_services`/`quote_batches`). Ver `migrate.sql` v34 para la conversión de datos existentes.
 6. **Sin descuento en servicios externos:** El subtotal es siempre `price × quantity`.
 7. **Guardado en dos fases:** Primero `service_orders` (insert u update) → obtener/reusar `id` → luego sincronizar las 3 tablas pivote (en edición: revertir egresos externos → borrar líneas viejas → reinsertar) → luego convertir cotizaciones seleccionadas.
 8. **`must`/`have` al crear:** `must = totalWithIva()` y `have = 0`. Los pagos posteriores los gestionan las RPCs de §9, no este formulario.

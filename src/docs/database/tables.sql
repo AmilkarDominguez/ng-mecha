@@ -528,6 +528,9 @@ CREATE TABLE IF NOT EXISTS service_orders (
   updated_at            TIMESTAMPTZ          NOT NULL DEFAULT NOW()
 );
 
+-- `discount` en service_order_services/service_order_batches/quote_services/
+-- quote_batches (abajo) es un MONTO FIJO en bolivianos (no un porcentaje
+-- 0-100) — subtotal = (price*quantity) - discount. Ver migrate.sql v34.
 -- 19. service_order_services
 CREATE TABLE IF NOT EXISTS service_order_services (
   id                UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1760,6 +1763,33 @@ $$;
 
 REVOKE ALL ON FUNCTION sync_service_order_process_checks(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION sync_service_order_process_checks(UUID) TO anon, authenticated;
+
+-- Consume (lee + incrementa) el correlativo de "Nro. de orden de servicio"
+-- configurado en Admin -> Configuracion (workshop_settings.next_order_number).
+-- Atomica via FOR UPDATE sobre la unica fila de workshop_settings. Se invoca
+-- al abrir el formulario de Nueva Orden (service-order-form.ts), no al
+-- guardar. Retorna NULL si el admin no configuro correlativo (el campo
+-- numero sigue siendo texto manual en ese caso).
+CREATE OR REPLACE FUNCTION consume_next_order_number()
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_number INTEGER;
+BEGIN
+  SELECT next_order_number INTO v_number FROM workshop_settings LIMIT 1 FOR UPDATE;
+  IF v_number IS NULL THEN
+    RETURN NULL;
+  END IF;
+  UPDATE workshop_settings SET next_order_number = next_order_number + 1 WHERE singleton = true;
+  RETURN v_number;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION consume_next_order_number() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION consume_next_order_number() TO anon, authenticated;
 
 
 -- ============================================================

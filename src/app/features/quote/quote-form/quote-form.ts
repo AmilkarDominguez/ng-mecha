@@ -90,17 +90,15 @@ export class QuoteForm implements OnInit {
 
   readonly subtotalServices = computed(() =>
     this.serviceRows().reduce((acc, r) => {
-      const base     = (r.price ?? 0) * (r.quantity ?? 1);
-      const discount = base * ((r.discount ?? 0) / 100);
-      return acc + base - discount;
+      const base = (r.price ?? 0) * (r.quantity ?? 1);
+      return acc + Math.max(0, base - (r.discount ?? 0));
     }, 0),
   );
 
   readonly subtotalBatches = computed(() =>
     this.batchRows().reduce((acc, r) => {
-      const base     = (r.price ?? 0) * (r.quantity ?? 1);
-      const discount = base * ((r.discount ?? 0) / 100);
-      return acc + base - discount;
+      const base = (r.price ?? 0) * (r.quantity ?? 1);
+      return acc + Math.max(0, base - (r.discount ?? 0));
     }, 0),
   );
 

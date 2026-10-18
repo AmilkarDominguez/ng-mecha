@@ -131,7 +131,7 @@
                   </td>
                   <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
                   <td class="cell-num">{{ line.quantity }}</td>
-                  <td class="cell-num">{{ line.discount ?? 0 }}%</td>
+                  <td class="cell-num">Bs. {{ (line.discount ?? 0) | number:'1.2-2' }}</td>
                   <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
                 </tr>
               }
@@ -167,7 +167,7 @@
                   </td>
                   <td class="cell-num">Bs. {{ line.price | number:'1.2-2' }}</td>
                   <td class="cell-num">{{ line.quantity }}</td>
-                  <td class="cell-num">{{ line.discount ?? 0 }}%</td>
+                  <td class="cell-num">Bs. {{ (line.discount ?? 0) | number:'1.2-2' }}</td>
                   <td class="cell-num cell-amount">Bs. {{ line.subtotal | number:'1.2-2' }}</td>
                 </tr>
               }

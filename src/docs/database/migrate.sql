@@ -2198,3 +2198,71 @@ $$;
 
 REVOKE ALL ON FUNCTION sync_service_order_process_checks(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION sync_service_order_process_checks(UUID) TO anon, authenticated;
+
+
+-- ============================================================
+-- v33 — Admin: conectar "Nro. de orden de servicio"
+-- (workshop_settings.next_order_number) al formulario de Nueva Orden
+-- ============================================================
+-- next_order_number se guardaba en Configuracion pero nada lo leia — el
+-- campo "numero" de una orden nueva seguia siendo texto 100% manual. Esta
+-- RPC consume (lee + incrementa) el correlativo de forma atomica (FOR
+-- UPDATE sobre la unica fila de workshop_settings) para que dos
+-- operadores abriendo "Nueva Orden" al mismo tiempo nunca reciban el
+-- mismo numero. Se invoca desde el frontend al ABRIR el formulario de
+-- creacion (service-order-form.ts ngOnInit, modo creacion), no al
+-- guardar — mas simple, al costo aceptado de que un borrador abierto y
+-- nunca guardado deja ese numero saltado (igual que un talonario fisico).
+CREATE OR REPLACE FUNCTION consume_next_order_number()
+RETURNS INTEGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_number INTEGER;
+BEGIN
+  SELECT next_order_number INTO v_number FROM workshop_settings LIMIT 1 FOR UPDATE;
+  IF v_number IS NULL THEN
+    RETURN NULL; -- admin no configuro correlativo: el campo sigue siendo manual
+  END IF;
+  UPDATE workshop_settings SET next_order_number = next_order_number + 1 WHERE singleton = true;
+  RETURN v_number;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION consume_next_order_number() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION consume_next_order_number() TO anon, authenticated;
+
+
+-- ============================================================
+-- v34 — Ordenes/Cotizaciones: `discount` pasa de porcentaje (0-100) a
+-- monto fijo en bolivianos
+-- ============================================================
+-- Afecta service_order_services, service_order_batches, quote_services,
+-- quote_batches (service_order_external_services/quote_external_services
+-- nunca tuvieron columna discount, no aplica). El tipo de columna no
+-- cambia (NUMERIC(8,2) sirve igual para monto que para porcentaje) — solo
+-- cambia la SEMANTICA del valor guardado, asi que hay que convertir los
+-- datos ya existentes para que el subtotal historico siga siendo
+-- correcto: un discount=20 (20%) sobre price*quantity=100 pasa a
+-- discount=20.00 (Bs. 20 planos), preservando el mismo subtotal=80.
+--
+-- NO idempotente a proposito — ejecutar UNA SOLA VEZ. Si se corre dos
+-- veces, el segundo UPDATE reinterpreta un monto ya convertido como si
+-- todavia fuera un porcentaje y lo vuelve a dividir entre 100, corrompiendo
+-- el dato. No reemplaza este bloque por un `IF NOT EXISTS`/guard — no hay
+-- forma confiable de distinguir "ya convertido" de "percentage bajo"
+-- (ambos caen en el mismo rango numerico).
+UPDATE service_order_services
+  SET discount = ROUND(COALESCE(price,0) * COALESCE(quantity,1) * COALESCE(discount,0) / 100, 2)
+  WHERE discount IS NOT NULL AND discount > 0;
+UPDATE service_order_batches
+  SET discount = ROUND(COALESCE(price,0) * COALESCE(quantity,1) * COALESCE(discount,0) / 100, 2)
+  WHERE discount IS NOT NULL AND discount > 0;
+UPDATE quote_services
+  SET discount = ROUND(COALESCE(price,0) * COALESCE(quantity,1) * COALESCE(discount,0) / 100, 2)
+  WHERE discount IS NOT NULL AND discount > 0;
+UPDATE quote_batches
+  SET discount = ROUND(COALESCE(price,0) * COALESCE(quantity,1) * COALESCE(discount,0) / 100, 2)
+  WHERE discount IS NOT NULL AND discount > 0;

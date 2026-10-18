@@ -26,33 +26,36 @@ export class ServiceOrderBatchesTable {
 
   items = input<ServiceOrderBatchRow[]>([]);
   removeItem = output<string>();
+  itemsChange = output<ServiceOrderBatchRow[]>();
 
   readonly columns = ['item', 'description', 'price', 'quantity', 'delivery_time', 'discount', 'subtotal', 'actions'];
 
   getSubtotal(row: ServiceOrderBatchRow): number {
     const base = (row.price ?? 0) * (row.quantity ?? 1);
-    const discountAmt = base * ((row.discount ?? 0) / 100);
-    return base - discountAmt;
+    return Math.max(0, base - (row.discount ?? 0));
   }
 
   onPriceChange(row: ServiceOrderBatchRow, value: string): void {
     row.price = parseFloat(value) || 0;
     row.subtotal = this.getSubtotal(row);
+    this.itemsChange.emit([...this.items()]);
   }
 
   onQuantityChange(row: ServiceOrderBatchRow, value: string): void {
     row.quantity = parseInt(value, 10) || 1;
     row.subtotal = this.getSubtotal(row);
+    this.itemsChange.emit([...this.items()]);
   }
 
   onDiscountChange(row: ServiceOrderBatchRow, value: string): void {
-    const d = parseFloat(value) || 0;
-    row.discount = Math.min(100, Math.max(0, d));
+    row.discount = Math.max(0, parseFloat(value) || 0);
     row.subtotal = this.getSubtotal(row);
+    this.itemsChange.emit([...this.items()]);
   }
 
   onDeliveryTimeChange(row: ServiceOrderBatchRow, value: DeliveryTime): void {
     row.delivery_time = value;
+    this.itemsChange.emit([...this.items()]);
   }
 
   onRemove(id: string): void {

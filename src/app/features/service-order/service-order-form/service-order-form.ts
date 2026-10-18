@@ -37,6 +37,7 @@ import { SPServiceOrder } from '../../../core/services/supabase/sb-service-order
 import { SPServiceOrderExternalExpense } from '../../../core/services/supabase/sb-service-order-external-expense';
 import { SPQuote } from '../../../core/services/supabase/sb-quote';
 import { SPQuoteConversion } from '../../../core/services/supabase/sb-quote-conversion';
+import { SPWorkshopSettings } from '../../../core/services/supabase/sb-workshop-settings';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { parseLocalDate, toLocalIsoDate } from '../../../core/date/date-utils';
 
@@ -73,6 +74,7 @@ export class ServiceOrderForm implements OnInit {
   private externalExpenseService = inject(SPServiceOrderExternalExpense);
   private quoteProvider = inject(SPQuote);
   private quoteConversion = inject(SPQuoteConversion);
+  private workshopSettingsProvider = inject(SPWorkshopSettings);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -102,17 +104,15 @@ export class ServiceOrderForm implements OnInit {
 
   readonly subtotalServices = computed(() =>
     this.serviceRows().reduce((acc, r) => {
-      const base     = (r.price ?? 0) * (r.quantity ?? 1);
-      const discount = base * ((r.discount ?? 0) / 100);
-      return acc + base - discount;
+      const base = (r.price ?? 0) * (r.quantity ?? 1);
+      return acc + Math.max(0, base - (r.discount ?? 0));
     }, 0),
   );
 
   readonly subtotalBatches = computed(() =>
     this.batchRows().reduce((acc, r) => {
-      const base     = (r.price ?? 0) * (r.quantity ?? 1);
-      const discount = base * ((r.discount ?? 0) / 100);
-      return acc + base - discount;
+      const base = (r.price ?? 0) * (r.quantity ?? 1);
+      return acc + Math.max(0, base - (r.discount ?? 0));
     }, 0),
   );
 
@@ -141,6 +141,19 @@ export class ServiceOrderForm implements OnInit {
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
+      // Correlativo configurado en Admin -> Configuracion (ver
+      // consume_next_order_number RPC). Best-effort: si falla o no hay
+      // correlativo configurado, el campo simplemente queda vacio/manual
+      // como antes. Sigue editable por si el operador necesita corregirlo.
+      this.workshopSettingsProvider.consumeNextOrderNumber().subscribe({
+        next: (num) => {
+          if (num !== null) {
+            this.summaryForm.patchValue({ number: String(num) });
+          }
+        },
+        error: () => {},
+      });
+
       const quoteId = this.route.snapshot.queryParamMap.get('quoteId');
       if (quoteId) {
         this.quoteProvider.getById(quoteId).subscribe({

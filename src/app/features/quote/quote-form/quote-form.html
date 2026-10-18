@@ -53,11 +53,13 @@
         <app-quote-services-table
           [items]="serviceRows()"
           (removeItem)="onRemoveService($event)"
+          (itemsChange)="serviceRows.set($event)"
         />
 
         <app-quote-batches-table
           [items]="batchRows()"
           (removeItem)="onRemoveBatch($event)"
+          (itemsChange)="batchRows.set($event)"
         />
 
         <app-quote-external-services-table

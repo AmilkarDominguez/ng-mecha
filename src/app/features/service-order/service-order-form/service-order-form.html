@@ -61,11 +61,13 @@
         <app-service-order-services-table
           [items]="serviceRows()"
           (removeItem)="onRemoveService($event)"
+          (itemsChange)="serviceRows.set($event)"
         />
 
         <app-service-order-batches-table
           [items]="batchRows()"
           (removeItem)="onRemoveBatch($event)"
+          (itemsChange)="batchRows.set($event)"
         />
 
         <app-service-order-external-services-table

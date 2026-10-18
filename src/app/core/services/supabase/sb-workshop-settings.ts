@@ -60,6 +60,18 @@ export class SPWorkshopSettings {
     return this.data$.asObservable();
   }
 
+  // Consume (lee + incrementa atomicamente) el correlativo de "Nro. de
+  // orden de servicio" via RPC. Retorna null si el admin no configuro
+  // next_order_number (el campo numero sigue siendo manual en ese caso).
+  public consumeNextOrderNumber(): Observable<number | null> {
+    return from(this.supabase.rpc('consume_next_order_number')).pipe(
+      map(({ data, error }) => {
+        if (error) throw error;
+        return data as number | null;
+      }),
+    );
+  }
+
   // Sube el logo al bucket de Storage y retorna la URL publica resultante
   // (se guarda en workshop_settings.logo_url mediante update()).
   public uploadLogo(file: File): Observable<string> {
